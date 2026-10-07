@@ -90,9 +90,10 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? $avianUi->errorFor($fieldName, $errorBag);
     $inputId =
-        $id ?? (filled($name) ? 'aui-' . str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+        $id ?? (filled($fieldName) ? 'aui-' . str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')) : null);
 
     $valueAttributes = $attributes->whereStartsWith('wire:model');
     $rootAttributes = $attributes->except(array_keys($valueAttributes->getAttributes()));
@@ -100,9 +101,12 @@
     $wired = $valueAttributes->isNotEmpty();
     $selected = $value;
 
-    if ($selected === null && !$wired) {
-        $selected = $avianUi->oldValue($name);
+    if (!$wired) {
+        $selected = $avianUi->old($name, $selected);
     }
+
+    // An enum cast (`:value="$order->status"`) is looked up by its stored value.
+    $selected = $avianUi->scalar($selected);
 
     // `wire:model.live="filter.status"` → `filter.status`. Writes still go
     // through the hidden input below so every wire:model modifier keeps
@@ -185,7 +189,7 @@
         <template x-teleport="body">
             <div x-ref="dropdown" class="aui-combobox-dropdown" x-show="open" x-cloak
                 :style="{ top: top + 'px', left: left + 'px', width: width + 'px', maxHeight: maxHeight + 'px' }"
-                x-on:keydown.escape.prevent="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
+                x-on:keydown.escape.prevent.stop="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
                 x-on:keydown.up.prevent="move(-1)" x-on:keydown.enter.prevent="chooseHighlighted()" role="listbox">
                 <div class="aui-combobox-search">
                     <i class="fas fa-search" aria-hidden="true"></i>

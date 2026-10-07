@@ -75,11 +75,12 @@
 
     $baseName = filled($name) ? preg_replace('/\[\]$/', '', (string) $name) : null;
     $inputName = $baseName !== null ? $baseName . '[]' : null;
+    $fieldName = $avianUi->fieldName($baseName, $attributes);
 
     $inputError = $error
-        ?? $avianUi->errorFor($baseName, $errorBag)
-        ?? ($baseName !== null ? $avianUi->errorFor($baseName . '.*', $errorBag) : null);
-    $inputId = $id ?? ($baseName !== null ? 'aui-' . str_replace(['[', ']', '.', '_'], '-', $baseName) : null);
+        ?? $avianUi->errorFor($fieldName, $errorBag)
+        ?? ($fieldName !== null ? $avianUi->errorFor($fieldName . '.*', $errorBag) : null);
+    $inputId = $id ?? ($fieldName !== null ? 'aui-' . str_replace(['[', ']', '.', '_'], '-', $fieldName) : null);
 
     $modelAttributes = $attributes->whereStartsWith('wire:model');
     $rootAttributes = $attributes->except(array_keys($modelAttributes->getAttributes()));
@@ -87,11 +88,12 @@
 
     $selected = $value;
 
-    if ($selected === null && ! $wired) {
-        $selected = $avianUi->oldValue($baseName);
+    if (! $wired) {
+        $selected = $avianUi->old($baseName, $selected);
     }
 
     $selected = collect($selected ?? [])
+        ->map(fn ($item) => $avianUi->scalar($item))
         ->filter(fn ($item) => $item !== null && $item !== '')
         ->map(fn ($item) => (string) $item)
         ->unique()
@@ -169,7 +171,7 @@
         <template x-teleport="body">
             <div x-ref="dropdown" class="aui-combobox-dropdown" x-show="open" x-cloak
                 :style="{ top: top + 'px', left: left + 'px', width: width + 'px', maxHeight: maxHeight + 'px' }"
-                x-on:keydown.escape.prevent="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
+                x-on:keydown.escape.prevent.stop="close(); $refs.trigger.focus()" x-on:keydown.down.prevent="move(1)"
                 x-on:keydown.up.prevent="move(-1)" x-on:keydown.enter.prevent="chooseHighlighted()"
                 role="listbox" aria-multiselectable="true">
                 <div class="aui-combobox-search">

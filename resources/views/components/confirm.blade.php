@@ -30,12 +30,23 @@
     `variant` (`data-aui-confirm-variant`; `danger` by default, also
     `primary`, `warning`, `success`, `info`). Without this component on the page, `AvianUI.confirm()` falls
     back to the browser's native `confirm()`.
+
+    Loading — with `loading` (`data-aui-confirm-loading`, or the `loading`
+    prop here to make it the default) a yes keeps the dialog open, with a
+    spinner on the confirm button, until the Livewire requests it triggered
+    finish or the page navigates away. From JavaScript, an `action` that
+    returns a promise is waited on as well:
+
+        <x-avian::button wire:click="delete({{ $id }})" confirm="Delete this order?" data-aui-confirm-loading>Delete</x-avian::button>
+
+        AvianUI.confirm({ message: 'Delete this order?', action: () => $wire.delete(5) });
 --}}
 @props([
     'title' => null,
     'confirmText' => null,
     'cancelText' => null,
     'variant' => 'danger',
+    'loading' => false,
 ])
 
 @php
@@ -44,6 +55,7 @@
         'confirmText' => $confirmText ?? __('avian-ui::messages.confirm'),
         'cancelText' => $cancelText ?? __('avian-ui::messages.cancel'),
         'variant' => $variant,
+        'loading' => (bool) $loading,
     ];
 @endphp
 
@@ -72,8 +84,18 @@
         </div>
 
         <div class="aui-modal-footer">
-            <button type="button" class="aui-btn aui-btn-light" x-ref="cancel" x-on:click="answer(false)" x-text="current.cancelText"></button>
-            <button type="button" class="aui-btn" x-bind:class="'aui-btn-' + current.variant" x-on:click="answer(true)" x-text="current.confirmText"></button>
+            <button type="button" class="aui-btn aui-btn-light" x-ref="cancel" x-bind:disabled="busy" x-on:click="answer(false)" x-text="current.cancelText"></button>
+            <button
+                type="button"
+                class="aui-btn"
+                x-bind:class="['aui-btn-' + current.variant, busy ? 'aui-btn-loading' : '']"
+                x-bind:disabled="busy"
+                x-bind:aria-busy="busy ? 'true' : null"
+                x-on:click="answer(true)"
+            >
+                <span class="aui-spinner aui-spinner-sm" x-show="busy" aria-hidden="true"></span>
+                <span x-text="current.confirmText"></span>
+            </button>
         </div>
     </div>
 </div>

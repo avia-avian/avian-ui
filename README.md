@@ -170,7 +170,11 @@ package does not depend on any particular icon set.
 
 Form controls render a label, the control, a hint and the validation message
 for their `name`, resolved from the standard error bag. They also repopulate
-themselves from old input after a failed validation round trip.
+themselves from old input after a failed validation round trip: the old input
+wins over a `value` you pass, so an edit form keeps the user's changes, and
+checkboxes, radios and switches are re-ticked (or left unticked) to match what
+was submitted. A Livewire control with only `wire:model` and no `name` uses the
+bound property for its id and its error lookup.
 
 ```blade
 <x-avian::form action="{{ route('users.store') }}" method="POST">
@@ -210,7 +214,7 @@ themselves from old input after a failed validation round trip.
 
 | Prop | Applies to | Purpose |
 | --- | --- | --- |
-| `name` | all controls | Drives the id, the error lookup and old input |
+| `name` | all controls | Drives the id, the error lookup and old input (falls back to the `wire:model` property for the id and errors) |
 | `label`, `hint` | all controls | Field chrome around the control |
 | `error` | all controls | Override the resolved validation message |
 | `error-bag` | all controls | Read from a named error bag |
@@ -466,6 +470,34 @@ flatpickr(input, {
 });
 ```
 
+`<x-avian::slider>` is a styled range input. `show-value` prints the current
+value next to the track (with an optional `prefix` / `suffix`), and `range`
+adds a second thumb for a low and a high bound. A range submits `name[min]` and
+`name[max]`, reads its error from `name`, `name.min` or `name.max`, and binds
+to a `['min' => ..., 'max' => ...]` array with `wire:model`:
+
+```blade
+<x-avian::slider name="volume" label="Volume" :value="40" show-value suffix="%" />
+<x-avian::slider name="price" label="Price" :max="1000" :step="10" :value="[100, 500]" range show-value prefix="$" />
+<x-avian::slider wire:model.live.debounce.300ms="price" :max="1000" range />
+```
+
+`<x-avian::filter-chip>` is a toggleable pill for narrowing a list. It is a
+checkbox underneath (`type="radio"` for one pick at a time), so a row of them
+submits and repopulates like checkboxes; `count` adds a number pill. Given an
+`href` it renders a link instead, with `active` marking the current filter.
+Wrap chips in `<x-avian::filter-chip.group>` for a label and the group's
+validation message:
+
+```blade
+<x-avian::filter-chip.group name="status" label="Status">
+    <x-avian::filter-chip name="status[]" value="open" label="Open" :count="24" />
+    <x-avian::filter-chip name="status[]" value="closed" label="Closed" />
+</x-avian::filter-chip.group>
+
+<x-avian::filter-chip :href="request()->fullUrlWithQuery(['status' => 'overdue'])" :active="request('status') === 'overdue'" label="Overdue" />
+```
+
 ### 4. General components
 
 ```blade
@@ -501,12 +533,12 @@ flatpickr(input, {
 Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
 `badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
 `divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
-`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `toasts`, `toolbar`,
+`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `timeline` (+ `timeline.item`), `toasts`, `toolbar`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
 `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`,
-`file`, `datepicker`.
+`slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`.
 
 Pass `collapsible` to let the viewer fold a card into its header. A chevron
 appears in the header, and clicking the header outside its actions toggles it
@@ -614,7 +646,8 @@ links rendered underneath it:
 ```
 
 `$users` can come from `paginate()` (numbered links plus a "Showing X to Y of
-Z results" summary) or `simplePaginate()` (Previous/Next only). The same
+Z results" summary), `simplePaginate()` or `cursorPaginate()` (Previous/Next
+only). The same
 markup is available on its own as `<x-avian::pagination :paginator="$users" />`
 for a paginator you render outside a table.
 
@@ -731,6 +764,22 @@ its items either as a list or as a grid of cards, with a toggle between the two:
   `media`, `meta` and `actions` slots. The same item renders as a row in list
   view and as a card in grid view.
 
+`<x-avian::timeline>` lists events in order — an order's history, an audit
+log. Each `timeline.item` takes a `title`, a `time` (a string, or a date
+printed with `time-format`, or as "3 hours ago" with `relative`), and an
+`icon` or `variant` (`success`, `warning`, `danger`, `info`, `neutral`) for
+its marker; the slot holds the details:
+
+```blade
+<x-avian::timeline>
+    @foreach ($order->events as $event)
+        <x-avian::timeline.item :title="$event->title" :time="$event->created_at" relative icon="fas fa-truck">
+            {{ $event->note }}
+        </x-avian::timeline.item>
+    @endforeach
+</x-avian::timeline>
+```
+
 ### 5. Modals, dropdowns and tabs
 
 ```blade
@@ -819,6 +868,23 @@ $this->dispatch('aui-confirm', message: 'Delete this order?', event: 'order-dele
 window.AvianUI.confirm({ title: 'Discard draft?' }).then((ok) => ok && discard());
 ```
 
+Add `data-aui-confirm-loading` (or `loading` from Livewire and JS) and a yes
+keeps the dialog open, with a spinner on the confirm button, until the
+Livewire requests it triggered finish or the page navigates away.
+`<x-avian::confirm loading />` makes that the default. From JavaScript, an
+`action` that returns a promise is waited on too:
+
+```blade
+<x-avian::button variant="danger" wire:click="delete({{ $order->id }})"
+    confirm="This cannot be undone." data-aui-confirm-loading>
+    Delete
+</x-avian::button>
+```
+
+```js
+window.AvianUI.confirm({ message: 'Delete this order?', action: () => $wire.delete(5) });
+```
+
 For notifications, place `<x-avian::toasts />` once in the layout as well.
 It shows `success`, `error`, `warning` and `info` messages flashed to the
 session on its own, and `toast` accepts a title and other variants. Set
@@ -845,7 +911,7 @@ so HTML in them is escaped.
 
 The Alpine components registered by the package are `auiModal`, `auiConfirm`, `auiToasts`,
 `auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
-`auiDatalist`, `auiSearchableSelect` and `auiMultiSelect`. The modal
+`auiDatalist`, `auiSearchableSelect`, `auiMultiSelect` and `auiSlider`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`
 never strands a locked page.
 

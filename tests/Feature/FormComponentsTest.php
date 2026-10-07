@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AvianUi\AvianUi\Tests\Fixtures\OrderStatus;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\MessageBag;
@@ -594,3 +596,116 @@ it('renders a standalone error component for a field', function () {
 
     expect(Blade::render('<x-avian::error name="name" />'))->toBe('');
 });
+
+it('rechecks a checkbox, radio and switch from old input', function () {
+    session()->flashInput(['terms' => '1', 'plan' => 'pro', 'notify' => '1', 'tags' => ['php', 'go']]);
+
+    expect(Blade::render('<x-avian::checkbox name="terms" label="Terms" />'))->toContain('checked="checked"')
+        ->and(Blade::render('<x-avian::radio name="plan" value="pro" />'))->toContain('checked="checked"')
+        ->and(Blade::render('<x-avian::radio name="plan" value="free" />'))->not->toContain('checked')
+        ->and(Blade::render('<x-avian::switch name="notify" />'))->toContain('checked="checked"')
+        ->and(Blade::render('<x-avian::checkbox name="tags[]" value="go" />'))->toContain('checked="checked"')
+        ->and(Blade::render('<x-avian::checkbox name="tags[]" value="js" />'))->not->toContain('checked');
+});
+
+it('unchecks a default checked checkbox that was left unticked on submit', function () {
+    session()->flashInput(['name' => 'Ada']);
+
+    expect(Blade::render('<x-avian::checkbox name="terms" checked />'))->not->toContain('checked')
+        ->and(Blade::render('<x-avian::switch name="notify" checked />'))->not->toContain('checked');
+});
+
+it('keeps the checked prop when there is no old input or the box is wired', function () {
+    expect(Blade::render('<x-avian::checkbox name="terms" checked />'))->toContain('checked="checked"');
+
+    session()->flashInput(['name' => 'Ada']);
+
+    expect(Blade::render('<x-avian::checkbox name="terms" wire:model="terms" checked />'))->toContain('checked="checked"');
+});
+
+it('links the label and errors of a wire:model field that has no name', function (string $component) {
+    bindErrors(['email' => ['The email field is required.']]);
+
+    $html = Blade::render("<x-avian::{$component} wire:model=\"email\" label=\"Email\" />");
+
+    expect($html)->toContain('for="aui-email')
+        ->toContain('id="aui-email')
+        ->toContain('The email field is required.')
+        ->not->toContain('name=');
+})->with(['input', 'textarea', 'select', 'datepicker', 'searchable-select', 'multi-select']);
+
+it('prefers old input over the saved value after a failed validation', function () {
+    session()->flashInput(['title' => 'Edited', 'body' => 'Edited body', 'status' => 'b', 'owner' => 'b', 'tags' => ['b']]);
+
+    $options = ['a' => 'A', 'b' => 'B'];
+
+    expect(Blade::render('<x-avian::input name="title" value="Saved" />'))->toContain('value="Edited"')
+        ->and(Blade::render('<x-avian::textarea name="body">Saved</x-avian::textarea>'))->toContain('Edited body')
+        ->and(Blade::render('<x-avian::select name="status" value="a" :options="$options" />', ['options' => $options]))
+        ->toContain('<option value="b" selected>')
+        ->and(Blade::render('<x-avian::searchable-select name="owner" value="a" :options="$options" />', ['options' => $options]))
+        ->toContain('data-aui-value="b"')
+        ->and(Blade::render('<x-avian::multi-select name="tags" :value="[\'a\']" :options="$options" />', ['options' => $options]))
+        ->toContain('data-aui-values="[&quot;b&quot;]"');
+});
+
+it('keeps an empty old value instead of falling back to the saved value', function () {
+    session()->flashInput(['title' => null]);
+
+    expect(Blade::render('<x-avian::input name="title" value="Saved" />'))->not->toContain('Saved');
+});
+
+it('keeps the explicit value of a hidden input over old input', function () {
+    session()->flashInput(['id' => '9']);
+
+    expect(Blade::render('<x-avian::input type="hidden" name="id" value="5" />'))->toContain('value="5"');
+});
+
+it('accepts enum values in the selects', function () {
+    $options = ['pending' => 'Pending', 'shipped' => 'Shipped'];
+    $data = ['options' => $options, 'status' => OrderStatus::Shipped];
+
+    expect(Blade::render('<x-avian::searchable-select name="status" :value="$status" :options="$options" />', $data))
+        ->toContain('data-aui-value="shipped"')
+        ->toContain('>Shipped</span>')
+        ->and(Blade::render('<x-avian::multi-select name="statuses" :value="[$status]" :options="$options" />', $data))
+        ->toContain('data-aui-values="[&quot;shipped&quot;]"')
+        ->and(Blade::render('<x-avian::select name="status" :value="$status" :options="$options" />', $data))
+        ->toContain('<option value="shipped" selected>');
+});
+
+it('writes a date value in the datepicker format', function () {
+    $html = Blade::render(
+        '<x-avian::datepicker name="starts_at" :value="$date" :min-date="$date" />',
+        ['date' => Carbon::create(2026, 10, 5, 14, 30)],
+    );
+
+    expect($html)->toContain('value="05/10/2026"')
+        ->toContain('data-fp-min-date="05/10/2026"');
+
+    expect(Blade::render(
+        '<x-avian::datepicker name="at" enable-time date-format="Y-m-d H:i" :value="$date" />',
+        ['date' => Carbon::create(2026, 10, 5, 14, 30)],
+    ))->toContain('value="2026-10-05 14:30"');
+});
+
+it('joins a date range with the flatpickr range separator', function () {
+    $html = Blade::render(
+        '<x-avian::datepicker name="range" mode="range" :value="$range" />',
+        ['range' => [Carbon::create(2026, 10, 1), Carbon::create(2026, 10, 5)]],
+    );
+
+    expect($html)->toContain('value="01/10/2026 to 05/10/2026"');
+});
+
+it('lets an autocomplete attribute replace the datepicker default', function () {
+    $html = Blade::render('<x-avian::datepicker name="dob" autocomplete="bday" />');
+
+    expect($html)->toContain('autocomplete="bday"')
+        ->not->toContain('autocomplete="off"');
+});
+
+it('stops escape inside a combobox list from reaching an enclosing modal', function (string $component) {
+    expect(Blade::render("<x-avian::{$component} name=\"tags\" :options=\"['a' => 'A']\" />"))
+        ->toContain('x-on:keydown.escape.prevent.stop=');
+})->with(['searchable-select', 'multi-select']);

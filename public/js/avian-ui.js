@@ -31,6 +31,7 @@
 
     function releaseScroll() {
         locks = 0;
+        overlays.length = 0;
         document.body.classList.remove('aui-scroll-locked');
     }
 
@@ -55,6 +56,12 @@
 
         return null;
     }
+
+    /* Ids of the open modals and drawers, oldest first, so Esc only closes the
+       top one. Ids rather than the components themselves: Alpine hands each
+       method a different proxy, so `this` never compares equal. */
+    var overlays = [];
+    var overlayIds = 0;
 
     /* The mounted <x-avian::confirm>, if the layout has one. */
     var confirmHost = null;
@@ -92,6 +99,68 @@
         return null;
     }
 
+    /*
+     * Livewire requests in flight, so a busy confirm dialog can wait for the
+     * work its yes started. Livewire is optional: without it nothing counts.
+     */
+    var livewireBusy = 0;
+    var livewireIdle = [];
+    var livewireTracked = false;
+
+    function trackLivewire() {
+        if (livewireTracked || ! window.Livewire || typeof window.Livewire.hook !== 'function') {
+            return;
+        }
+
+        livewireTracked = true;
+
+        window.Livewire.hook('request', function (request) {
+            var settled = false;
+
+            livewireBusy++;
+
+            function done() {
+                if (settled) {
+                    return;
+                }
+
+                settled = true;
+                livewireBusy--;
+
+                if (livewireBusy === 0) {
+                    livewireIdle.splice(0).forEach(function (callback) {
+                        callback();
+                    });
+                }
+            }
+
+            if (request && typeof request.succeed === 'function') {
+                request.succeed(done);
+            }
+
+            if (request && typeof request.fail === 'function') {
+                request.fail(done);
+            }
+        });
+    }
+
+    document.addEventListener('livewire:init', trackLivewire);
+    trackLivewire();
+
+    /* Resolves once no Livewire request is running. The short wait first lets
+       a request the caller just triggered (Livewire batches them) get going. */
+    function livewireSettled() {
+        return new Promise(function (resolve) {
+            setTimeout(function () {
+                if (livewireBusy === 0) {
+                    resolve();
+                } else {
+                    livewireIdle.push(resolve);
+                }
+            }, 50);
+        });
+    }
+
     /* data-aui-confirm-* attributes → confirm() options. */
     function confirmOptions(element) {
         var data = element.dataset;
@@ -102,6 +171,7 @@
             confirmText: data.auiConfirmText,
             cancelText: data.auiCancelText,
             variant: data.auiConfirmVariant,
+            loading: data.auiConfirmLoading === undefined ? undefined : data.auiConfirmLoading !== 'false',
         };
     }
 
@@ -114,7 +184,7 @@
     document.addEventListener('click', function (event) {
         var element = event.target && event.target.closest ? event.target.closest('[data-aui-confirm]') : null;
 
-        if (! element || element.tagName === 'FORM' || element.disabled) {
+        if (! element || element.tagName === 'FORM' || element.disabled || element.getAttribute('aria-disabled') === 'true') {
             return;
         }
 
@@ -236,6 +306,7 @@
                 closeOnEscape: config.closeOnEscape !== false,
                 closeOnOverlay: config.closeOnOverlay !== false,
                 locked: false,
+                overlayId: ++overlayIds,
 
                 init: function () {
                     var self = this;
@@ -276,6 +347,7 @@
                 lock: function () {
                     if (! this.locked) {
                         this.locked = true;
+                        overlays.push(this.overlayId);
                         lockScroll();
                     }
                 },
@@ -283,6 +355,11 @@
                 unlock: function () {
                     if (this.locked) {
                         this.locked = false;
+                        var index = overlays.indexOf(this.overlayId);
+
+                        if (index !== -1) {
+                            overlays.splice(index, 1);
+                        }
                         unlockScroll();
                     }
                 },
@@ -302,6 +379,11 @@
                 escape: function () {
                     /* Esc answers a confirm dialog on top first. */
                     if (confirmHost && confirmHost.open) {
+                        return;
+                    }
+
+                    /* A modal opened from a drawer (or another modal) closes on its own. */
+                    if (overlays.length && overlays[overlays.length - 1] !== this.overlayId) {
                         return;
                     }
 
@@ -327,6 +409,13 @@
          *
          * With `event`, a yes dispatches that browser event (with `params` as
          * its detail), which a Livewire #[On] listener picks up.
+         *
+         * With `loading`, a yes keeps the dialog open with a spinner on the
+         * confirm button until the work it started is done: the Livewire
+         * requests it triggered, or a page navigation (which never returns).
+         * An `action` function implies `loading` and is waited on as well:
+         *
+         *   AvianUI.confirm({ message: 'Delete?', action: () => $wire.delete(5) })
          */
         auiConfirm: function (config) {
             config = config || {};
@@ -341,13 +430,35 @@
 
             return {
                 open: false,
+                busy: false,
+                leaving: false,
                 current: Object.assign({}, defaults),
                 resolve: null,
+                loading: config.loading === true,
+                action: null,
+                turn: 0,
 
                 init: function () {
                     var self = this;
 
                     confirmHost = this;
+
+                    /* A navigation the yes started keeps the dialog busy until
+                       the page goes; coming back from the bfcache lets go. */
+                    this.onLeave = function () {
+                        if (self.busy) {
+                            self.leaving = true;
+                        }
+                    };
+
+                    this.onReturn = function (event) {
+                        if (event.persisted && self.busy) {
+                            self.finish();
+                        }
+                    };
+
+                    window.addEventListener('beforeunload', this.onLeave);
+                    window.addEventListener('pageshow', this.onReturn);
 
                     this.onAsk = function (event) {
                         var detail = event.detail;
@@ -371,12 +482,15 @@
 
                 destroy: function () {
                     window.removeEventListener('aui-confirm', this.onAsk);
+                    window.removeEventListener('beforeunload', this.onLeave);
+                    window.removeEventListener('pageshow', this.onReturn);
 
                     if (confirmHost === this) {
                         confirmHost = null;
                     }
 
                     this.answer(false);
+                    this.finish();
                 },
 
                 get icon() {
@@ -392,8 +506,10 @@
                     var self = this;
                     var picked = {};
 
-                    /* A second question replaces the first, which counts as a no. */
+                    /* A second question replaces the first, which counts as a
+                       no, and takes over from one still busy. */
                     this.answer(false);
+                    this.finish();
 
                     Object.keys(defaults).forEach(function (key) {
                         if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
@@ -402,6 +518,12 @@
                     });
 
                     this.current = Object.assign({}, defaults, picked);
+                    this.action = typeof options.action === 'function' ? options.action : null;
+                    this.loading = this.action !== null || (
+                        options.loading === undefined || options.loading === null
+                            ? config.loading === true
+                            : options.loading !== false && options.loading !== 'false'
+                    );
                     this.open = true;
                     lockScroll();
 
@@ -422,13 +544,52 @@
                         return;
                     }
 
+                    var self = this;
                     var resolve = this.resolve;
 
                     this.resolve = null;
+
+                    if (ok !== true || ! this.loading) {
+                        this.open = false;
+                        unlockScroll();
+                        resolve(ok === true);
+
+                        return;
+                    }
+
+                    var turn = ++this.turn;
+                    var work = this.action ? Promise.resolve().then(this.action) : null;
+
+                    this.busy = true;
+                    this.leaving = false;
+
+                    /* Resolving first lets the caller start its work (replay a
+                       click, dispatch the event) before we wait on it. */
+                    resolve(true);
+
+                    Promise.resolve(work)
+                        .catch(function (error) {
+                            console.error(error);
+                        })
+                        .then(livewireSettled)
+                        .then(function () {
+                            if (turn === self.turn && ! self.leaving) {
+                                self.finish();
+                            }
+                        });
+                },
+
+                /* Closes a busy dialog once its work is done. */
+                finish: function () {
+                    if (! this.busy) {
+                        return;
+                    }
+
+                    this.turn++;
+                    this.busy = false;
+                    this.leaving = false;
                     this.open = false;
                     unlockScroll();
-
-                    resolve(ok === true);
                 },
             };
         },
@@ -787,6 +948,24 @@
 
                 hide: function () {
                     this.open = false;
+                },
+
+                /* Esc from inside an open menu closes only the menu, not a
+                   modal or drawer around it, and hands focus back. */
+                escape: function (event) {
+                    if (! this.open) {
+                        return;
+                    }
+
+                    event.stopPropagation();
+                    this.hide();
+
+                    var trigger = this.$refs.trigger;
+                    var target = trigger && (trigger.matches('button, a') ? trigger : trigger.querySelector('button, a, [tabindex]'));
+
+                    if (target) {
+                        target.focus();
+                    }
                 },
 
                 select: function () {
@@ -1560,6 +1739,114 @@
                     } else if (this.canCreate) {
                         this.create();
                     }
+                },
+            };
+        },
+
+        /**
+         * Range slider, single or two-thumbed. `value` is what x-modelable
+         * hands to Livewire: a number, or { min, max } in range mode.
+         */
+        auiSlider: function (config) {
+            config = config || {};
+
+            var min = Number(config.min) || 0;
+            var max = Number(config.max) > min ? Number(config.max) : min + 100;
+            var step = Number(config.step) > 0 ? Number(config.step) : 1;
+            var decimals = (String(step).split('.')[1] || '').length;
+
+            function snap(number, fallback) {
+                number = parseFloat(number);
+
+                if (isNaN(number)) {
+                    return fallback;
+                }
+
+                number = Math.min(max, Math.max(min, number));
+
+                return Number((Math.round((number - min) / step) * step + min).toFixed(decimals));
+            }
+
+            return {
+                range: config.range === true,
+                value: null,
+                low: min,
+                high: max,
+
+                init: function () {
+                    var self = this;
+
+                    try {
+                        this.value = JSON.parse(this.$el.dataset.auiValue || 'null');
+                    } catch (e) {}
+
+                    this.sync(this.value);
+
+                    /* A server-side change arrives here through x-modelable. */
+                    this.$watch('value', function (value) {
+                        self.sync(value);
+                    });
+                },
+
+                sync: function (value) {
+                    if (! this.range) {
+                        this.high = snap(value, min);
+
+                        return;
+                    }
+
+                    value = value || {};
+
+                    var low = snap(Array.isArray(value) ? value[0] : value.min, min);
+                    var high = snap(Array.isArray(value) ? value[1] : value.max, max);
+
+                    this.low = Math.min(low, high);
+                    this.high = Math.max(low, high);
+                },
+
+                /* The thumbs never cross: a dragged thumb stops at the other. */
+                setLow: function (number) {
+                    this.low = Math.min(snap(number, min), this.high);
+                    this.$el.querySelector('.aui-slider-input-low').value = this.low;
+                    this.value = { min: this.low, max: this.high };
+                },
+
+                setHigh: function (number) {
+                    if (this.range) {
+                        this.high = Math.max(snap(number, max), this.low);
+                        this.$el.querySelector('.aui-slider-input-high').value = this.high;
+                        this.value = { min: this.low, max: this.high };
+
+                        return;
+                    }
+
+                    this.high = snap(number, min);
+                    this.value = this.high;
+                },
+
+                /* Stacked thumbs at the top end could only move left, so the
+                   low thumb goes on top there or it could never be grabbed. */
+                get lowOnTop() {
+                    return this.low === this.high && this.high > (min + max) / 2;
+                },
+
+                get start() {
+                    return this.range ? (this.low - min) / (max - min) * 100 : 0;
+                },
+
+                get end() {
+                    return (this.high - min) / (max - min) * 100;
+                },
+
+                display: function (prefix, suffix) {
+                    prefix = prefix || '';
+                    suffix = suffix || '';
+
+                    if (this.range) {
+                        return prefix + this.low + suffix + ' – ' + prefix + this.high + suffix;
+                    }
+
+                    return prefix + this.high + suffix;
                 },
             };
         },

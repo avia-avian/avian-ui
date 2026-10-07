@@ -14,14 +14,15 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
-    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? $avianUi->errorFor($fieldName, $errorBag);
+    $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')) : null);
 
     $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
     $inputValue = $value;
 
-    if ($inputValue === null && ! $wired) {
-        $inputValue = $avianUi->oldValue($name);
+    if (! $wired) {
+        $inputValue = $avianUi->old($name, $inputValue);
     }
 @endphp
 

@@ -16,17 +16,20 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
-    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? $avianUi->errorFor($fieldName, $errorBag);
+    $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')) : null);
 
     $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
     $selected = $value;
 
-    if ($selected === null && ! $wired) {
-        $selected = $avianUi->oldValue($name);
+    if (! $wired) {
+        $selected = $avianUi->old($name, $selected);
     }
 
-    $selected = is_array($selected) ? array_map('strval', $selected) : $selected;
+    $selected = is_array($selected)
+        ? array_map(fn ($item) => (string) $avianUi->scalar($item), $selected)
+        : $avianUi->scalar($selected);
 
     $isSelected = function ($option) use ($selected): bool {
         if (is_array($selected)) {

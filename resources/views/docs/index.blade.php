@@ -33,10 +33,13 @@
             'forms.checkbox' => ['label' => 'Checkbox', 'icon' => 'fas fa-square-check'],
             'forms.radio' => ['label' => 'Radio', 'icon' => 'fas fa-circle-dot'],
             'forms.switch' => ['label' => 'Switch', 'icon' => 'fas fa-toggle-on'],
+            'forms.slider' => ['label' => 'Slider', 'icon' => 'fas fa-sliders'],
+            'forms.filter-chip' => ['label' => 'Filter chip', 'icon' => 'fas fa-filter'],
         ],
         'Data & navigation' => [
             'components.table' => ['label' => 'Table', 'icon' => 'fas fa-table'],
             'components.datalist' => ['label' => 'Datalist', 'icon' => 'fas fa-grip'],
+            'components.timeline' => ['label' => 'Timeline', 'icon' => 'fas fa-timeline'],
             'components.pagination' => ['label' => 'Pagination', 'icon' => 'fas fa-ellipsis'],
             'components.tabs' => ['label' => 'Tabs', 'icon' => 'fas fa-folder'],
             'components.dropdown' => ['label' => 'Dropdown', 'icon' => 'fas fa-caret-down'],

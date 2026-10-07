@@ -14,8 +14,12 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? ($field ? $avianUi->errorFor($name, $errorBag) : null);
-    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')).'-'.$value : null);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? ($field ? $avianUi->errorFor($fieldName, $errorBag) : null);
+    $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')).'-'.$value : null);
+
+    $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
+    $isChecked = $wired ? (bool) $checked : $avianUi->oldChecked($name, $value, (bool) $checked);
 @endphp
 
 <x-avian-ui::field :bare="! $field" :error="$inputError">
@@ -26,7 +30,7 @@
                 'name' => $name,
                 'id' => $inputId,
                 'value' => $value,
-                'checked' => (bool) $checked,
+                'checked' => $isChecked,
             ]) }}
         >
 

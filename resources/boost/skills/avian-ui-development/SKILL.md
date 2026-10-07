@@ -37,11 +37,13 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `file`, `datepicker`
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`
 
-Form controls render their own label, hint and validation message from `name`,
-and repopulate from old input:
+Form controls render their own label, hint and validation message from `name`
+(or the `wire:model` property when there is no `name`), and repopulate from old
+input, which wins over a passed `value`; enum values are accepted wherever a
+value is:
 
 ```blade
 <x-avian::input name="email" type="email" label="Email" required />
@@ -104,7 +106,10 @@ add `confirm="message"` to the `button` (or `data-aui-confirm` to any element
 or form) — never hand-roll a confirm modal or use `wire:confirm`. From
 Livewire: `$this->dispatch('aui-confirm', message: '...', event: 'x', params: [...])`
 dispatches `x` back on a yes; from JS: `AvianUI.confirm({...})` returns a
-promise of a boolean.
+promise of a boolean. For slow actions add `data-aui-confirm-loading` (or
+`loading: true`, or a promise-returning `action` in JS) so the dialog stays
+open with a spinner until the Livewire request finishes — don't add a
+separate loading modal.
 
 For action feedback, place `<x-avian::toasts />` once in the layout and flash
 `success`, `error`, `warning` or `info` on the redirect
@@ -148,8 +153,8 @@ Previous/Next and numbered page links underneath it, or render
 </x-avian::table>
 ```
 
-Works with both `paginate()` (numbered links plus a result count) and
-`simplePaginate()` (Previous/Next only).
+Works with `paginate()` (numbered links plus a result count),
+`simplePaginate()` and `cursorPaginate()` (Previous/Next only).
 
 With no rows, `table` renders an empty state across every column. Set
 `empty`, `empty-text`, `empty-icon`, pass an `empty` slot, or disable it with
@@ -202,6 +207,9 @@ Read before executing:
 - Swap a long `<x-avian::select>` option list for `<x-avian::searchable-select>` so users can filter it instead of scrolling a native dropdown.
 - Replace a `<select multiple>` with `<x-avian::multi-select>` so users can search the options and see their picks as chips.
 - Pass a `paginate()` result to `<x-avian::table :paginator="$items">` instead of hand-rolling Previous/Next links.
+- Replace hand-styled status toggles above a list with `<x-avian::filter-chip>` checkboxes (or `href` links for query-string filters) inside `<x-avian::filter-chip.group>`.
+- Use `<x-avian::slider range>` for a min/max filter such as a price bracket; it submits `name[min]` and `name[max]`.
+- Render an audit log or order history with `<x-avian::timeline>` and `timeline.item`, passing the model's date as `time` with `relative`.
 - Theme an application by defining `--aui-primary` in the app stylesheet rather than editing the package CSS.
 
 ## Anti-patterns

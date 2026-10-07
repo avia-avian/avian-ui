@@ -7,7 +7,7 @@
     'width' => null,
 ])
 
-<div {{ $attributes->class(['aui-dropdown']) }} x-data="auiDropdown({ align: @js($align) })" x-on:click.outside="hide()" x-on:keydown.escape.window="hide()">
+<div {{ $attributes->class(['aui-dropdown']) }} x-data="auiDropdown({ align: @js($align) })" x-on:click.outside="hide()" x-on:keydown.escape="escape($event)" x-on:keydown.escape.window="hide()">
     @isset($trigger)
         <div x-ref="trigger" x-on:click="toggle()">{{ $trigger }}</div>
     @else

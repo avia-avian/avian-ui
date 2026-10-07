@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace AvianUi\AvianUi;
 
+use BackedEnum;
+use DateTimeInterface;
 use Illuminate\Session\Store;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
+use Illuminate\View\ComponentAttributeBag;
+use UnitEnum;
 
 class AvianUi
 {
@@ -137,6 +142,105 @@ class AvianUi
     }
 
     /**
+     * Get the flashed old input for the given field, or the default when the
+     * field is missing from the old input.
+     *
+     * Unlike oldValue(), a flashed value always wins over the default, so a
+     * user's edit to a field that also has a saved value survives a failed
+     * validation, including a field the user cleared.
+     */
+    public function old(?string $name, mixed $default = null): mixed
+    {
+        $session = $this->session();
+
+        if ($name === null || $name === '' || $session === null) {
+            return $default;
+        }
+
+        $old = $session->get('_old_input', []);
+        $key = $this->fieldKey($name);
+
+        return is_array($old) && Arr::has($old, $key) ? Arr::get($old, $key) : $default;
+    }
+
+    /**
+     * Decide whether a checkbox, radio or switch should render checked.
+     *
+     * After a failed submit an unticked box is simply absent from the old
+     * input, so any old input at all overrides the default.
+     */
+    public function oldChecked(?string $name, mixed $value, bool $default): bool
+    {
+        $session = $this->session();
+
+        if ($name === null || $name === '' || $session === null || ! $session->hasOldInput()) {
+            return $default;
+        }
+
+        $old = $session->getOldInput($this->fieldKey($name));
+        $value = (string) $this->scalar($value);
+
+        if (is_array($old)) {
+            return in_array($value, array_map(fn (mixed $item): string => is_scalar($item) ? (string) $item : '', $old), true);
+        }
+
+        return is_scalar($old) && (string) $old === $value;
+    }
+
+    /**
+     * Get the name a field is known by for ids and validation errors: its
+     * `name`, or the property bound with `wire:model` when it has none.
+     */
+    public function fieldName(?string $name, ComponentAttributeBag $attributes): ?string
+    {
+        if ($name !== null && $name !== '') {
+            return $name;
+        }
+
+        $model = $attributes->whereStartsWith('wire:model')->first();
+
+        return is_string($model) && $model !== '' ? $model : null;
+    }
+
+    /**
+     * Reduce an enum to the value it is stored as, leaving anything else as is.
+     */
+    public function scalar(mixed $value): mixed
+    {
+        return match (true) {
+            $value instanceof BackedEnum => $value->value,
+            $value instanceof UnitEnum => $value->name,
+            default => $value,
+        };
+    }
+
+    /**
+     * Format a date for a flatpickr input written in flatpickr's format tokens.
+     *
+     * Strings pass through untouched; a list of dates (range or multiple
+     * mode) is joined with the given separator.
+     */
+    public function formatDate(mixed $value, string $format, string $separator = ', '): mixed
+    {
+        if (is_array($value)) {
+            $dates = array_map(fn (mixed $date): mixed => $this->formatDate($date, $format), $value);
+
+            return implode($separator, array_filter($dates, fn (mixed $date): bool => is_string($date) && $date !== ''));
+        }
+
+        if (! $value instanceof DateTimeInterface) {
+            return $value;
+        }
+
+        return $value->format(strtr($format, [
+            'D' => 'D', 'l' => 'l', 'd' => 'd', 'j' => 'j', 'J' => 'jS', 'w' => 'w',
+            'F' => 'F', 'm' => 'm', 'n' => 'n', 'M' => 'M',
+            'U' => 'U', 'y' => 'y', 'Y' => 'Y', 'Z' => 'c',
+            'H' => 'H', 'h' => 'g', 'G' => 'h', 'i' => 'i', 'S' => 's', 's' => 's', 'K' => 'A',
+        ]));
+    }
+
+    /**
      * Get the first validation message for the given field name.
      */
     public function errorFor(?string $name, ?string $bag = null): ?string
@@ -209,6 +313,16 @@ class AvianUi
         }
 
         return $toasts;
+    }
+
+    /**
+     * Get the session store, when the application has one.
+     */
+    protected function session(): ?Store
+    {
+        $session = app()->bound('session.store') ? app('session.store') : null;
+
+        return $session instanceof Store ? $session : null;
     }
 
     /**

@@ -324,6 +324,12 @@
     transform: none;
 }
 
+/* A disabled link has no native disabled state: block clicks (wire:click,
+   x-on:click) and the hover styles that would otherwise still apply. */
+.aui-btn[aria-disabled="true"] {
+    pointer-events: none;
+}
+
 .aui-btn-primary {
     background: var(--aui-primary);
     color: #fff;
@@ -1011,6 +1017,137 @@
     background: var(--aui-pink-soft);
     border-color: var(--aui-pink-border);
     color: var(--aui-pink-strong);
+}
+
+/* ==========================================================================
+   Filter chip
+   ========================================================================== */
+
+.aui-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.aui-filter-chip {
+    position: relative;
+    display: inline-flex;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.aui-filter-chip-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.aui-filter-chip-body {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-full);
+    background: var(--aui-surface);
+    color: var(--aui-slate-600);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    transition: background var(--aui-transition-fast), border-color var(--aui-transition-fast),
+        color var(--aui-transition-fast), box-shadow var(--aui-transition-fast);
+}
+
+.aui-filter-chip:hover .aui-filter-chip-body {
+    border-color: var(--aui-slate-300);
+    background: var(--aui-slate-50);
+    color: var(--aui-slate-700);
+}
+
+.aui-filter-chip-check {
+    display: none;
+    font-size: 11px;
+}
+
+.aui-filter-chip-icon {
+    font-size: 12px;
+    color: var(--aui-slate-400);
+}
+
+.aui-filter-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin-right: -6px;
+    padding: 0 6px;
+    border-radius: var(--aui-radius-full);
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-600);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.aui-filter-chip-input:checked + .aui-filter-chip-body,
+.aui-filter-chip.is-active .aui-filter-chip-body {
+    border-color: var(--aui-primary);
+    background: var(--aui-primary-light);
+    color: var(--aui-primary-darker);
+}
+
+.aui-filter-chip-input:checked + .aui-filter-chip-body .aui-filter-chip-check,
+.aui-filter-chip.is-active .aui-filter-chip-check {
+    display: inline-block;
+}
+
+.aui-filter-chip-input:checked + .aui-filter-chip-body .aui-filter-chip-icon,
+.aui-filter-chip.is-active .aui-filter-chip-icon {
+    color: inherit;
+}
+
+.aui-filter-chip-input:checked + .aui-filter-chip-body .aui-filter-chip-count,
+.aui-filter-chip.is-active .aui-filter-chip-count {
+    background: var(--aui-primary);
+    color: #fff;
+}
+
+.aui-filter-chip-input:focus-visible + .aui-filter-chip-body,
+.aui-filter-chip:focus-visible .aui-filter-chip-body {
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+.aui-filter-chip:focus-visible {
+    outline: none;
+}
+
+.aui-filter-chip:has(.aui-filter-chip-input:disabled) {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.aui-filter-chip:has(.aui-filter-chip-input:disabled) .aui-filter-chip-body {
+    pointer-events: none;
+}
+
+.aui-filter-chip-sm .aui-filter-chip-body {
+    gap: 5px;
+    height: 28px;
+    padding: 0 11px;
+    font-size: 12px;
+}
+
+.aui-filter-chip-sm .aui-filter-chip-count {
+    min-width: 18px;
+    height: 18px;
+    margin-right: -4px;
+    font-size: 10px;
 }
 
 /* ==========================================================================
@@ -1780,6 +1917,163 @@
     font-size: 13px;
     font-weight: 500;
     color: var(--aui-slate-700);
+}
+
+/* Slider */
+
+.aui-slider {
+    --aui-slider-thumb: 18px;
+    --aui-slider-fill: var(--aui-primary);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.aui-slider-control {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+}
+
+/* Inset by half a thumb on each side, so the fill ends under the thumb's
+   centre at both ends of the scale. */
+.aui-slider-track {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--aui-slider-thumb) / 2);
+    right: calc(var(--aui-slider-thumb) / 2);
+    height: 6px;
+    transform: translateY(-50%);
+    border-radius: var(--aui-radius-full);
+    background: linear-gradient(
+        to right,
+        var(--aui-slate-200) var(--aui-slider-start, 0%),
+        var(--aui-slider-fill) var(--aui-slider-start, 0%),
+        var(--aui-slider-fill) var(--aui-slider-end, 0%),
+        var(--aui-slate-200) var(--aui-slider-end, 0%)
+    );
+}
+
+.aui-slider-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.aui-slider-input:focus {
+    outline: none;
+}
+
+.aui-slider-input::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+}
+
+.aui-slider-input::-moz-range-track {
+    height: 100%;
+    background: transparent;
+}
+
+.aui-slider-input::-webkit-slider-thumb {
+    width: var(--aui-slider-thumb);
+    height: var(--aui-slider-thumb);
+    margin-top: calc((24px - var(--aui-slider-thumb)) / 2);
+    background: #fff;
+    border: 2px solid var(--aui-slider-fill);
+    border-radius: 50%;
+    box-shadow: var(--aui-shadow-sm);
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: grab;
+    pointer-events: auto;
+    transition: box-shadow var(--aui-transition-fast), transform var(--aui-transition-fast);
+}
+
+.aui-slider-input::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--aui-slider-thumb);
+    height: var(--aui-slider-thumb);
+    background: #fff;
+    border: 2px solid var(--aui-slider-fill);
+    border-radius: 50%;
+    box-shadow: var(--aui-shadow-sm);
+    cursor: grab;
+    pointer-events: auto;
+    transition: box-shadow var(--aui-transition-fast), transform var(--aui-transition-fast);
+}
+
+.aui-slider-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+
+.aui-slider-input:active::-moz-range-thumb {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+
+.aui-slider-input:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px var(--aui-ring);
+}
+
+.aui-slider-input:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 4px var(--aui-ring);
+}
+
+/* Two inputs share one track: only their thumbs take the pointer. */
+.aui-slider-range .aui-slider-input {
+    pointer-events: none;
+}
+
+.aui-slider-input-low {
+    z-index: 1;
+}
+
+.aui-slider-input-high {
+    z-index: 2;
+}
+
+.aui-slider-input-low.is-top {
+    z-index: 3;
+}
+
+.aui-slider-value {
+    flex-shrink: 0;
+    min-width: 3ch;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--aui-heading);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.aui-slider-invalid {
+    --aui-slider-fill: var(--aui-danger);
+}
+
+.aui-slider.is-disabled {
+    --aui-slider-fill: var(--aui-slate-400);
+    opacity: 0.6;
+}
+
+.aui-slider.is-disabled .aui-slider-input {
+    cursor: not-allowed;
+}
+
+.aui-slider.is-disabled .aui-slider-input::-webkit-slider-thumb {
+    cursor: not-allowed;
+}
+
+.aui-slider.is-disabled .aui-slider-input::-moz-range-thumb {
+    cursor: not-allowed;
 }
 
 /* File */
@@ -3476,6 +3770,173 @@ body.aui-scroll-locked {
     min-height: 1em;
     margin: 0 4px;
     background: var(--aui-border);
+}
+
+/* ==========================================================================
+   Timeline
+   ========================================================================== */
+
+/* The gutter is the marker column; it widens when any item has an icon so
+   dots and icons share one centre line. */
+.aui-timeline {
+    --aui-timeline-gutter: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.aui-timeline:has(.aui-timeline-marker-icon) {
+    --aui-timeline-gutter: 28px;
+}
+
+.aui-timeline-item {
+    --aui-timeline-color: var(--aui-primary);
+    --aui-timeline-soft: var(--aui-primary-light);
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-bottom: 22px;
+}
+
+.aui-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+/* The connecting line runs behind the markers: the first item's starts at
+   its marker and the last item's stops there. */
+.aui-timeline-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--aui-timeline-gutter) / 2 - 1px);
+    width: 2px;
+    background: var(--aui-border);
+}
+
+.aui-timeline-item:first-child::before {
+    top: 10px;
+}
+
+.aui-timeline-item:last-child::before {
+    bottom: auto;
+    height: 10px;
+}
+
+.aui-timeline-item:only-child::before {
+    display: none;
+}
+
+.aui-timeline-marker {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    width: var(--aui-timeline-gutter);
+    padding-top: 4px;
+}
+
+.aui-timeline-marker::before {
+    content: "";
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border: 3px solid var(--aui-timeline-color);
+    border-radius: 50%;
+    background: var(--aui-surface);
+}
+
+.aui-timeline-marker-icon {
+    align-items: center;
+    height: 28px;
+    margin-top: -4px;
+    padding-top: 0;
+    border-radius: 50%;
+    background: var(--aui-timeline-soft);
+    box-shadow: 0 0 0 3px var(--aui-surface);
+    color: var(--aui-timeline-color);
+    font-size: 12px;
+}
+
+.aui-timeline-marker-icon::before {
+    content: none;
+}
+
+.aui-timeline-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.aui-timeline-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 12px;
+    line-height: 20px;
+}
+
+.aui-timeline-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--aui-heading);
+}
+
+.aui-timeline-time {
+    font-size: 12px;
+    color: var(--aui-text-muted);
+    white-space: nowrap;
+}
+
+.aui-timeline-body {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--aui-text);
+}
+
+.aui-timeline-item-neutral {
+    --aui-timeline-color: var(--aui-slate-400);
+    --aui-timeline-soft: var(--aui-slate-100);
+}
+
+.aui-timeline-item-success {
+    --aui-timeline-color: var(--aui-success);
+    --aui-timeline-soft: var(--aui-success-soft);
+}
+
+.aui-timeline-item-warning {
+    --aui-timeline-color: var(--aui-warning);
+    --aui-timeline-soft: var(--aui-warning-soft);
+}
+
+.aui-timeline-item-danger {
+    --aui-timeline-color: var(--aui-danger);
+    --aui-timeline-soft: var(--aui-danger-soft);
+}
+
+.aui-timeline-item-info {
+    --aui-timeline-color: var(--aui-info);
+    --aui-timeline-soft: var(--aui-info-soft);
+}
+
+.aui-timeline-sm .aui-timeline-item {
+    gap: 10px;
+    padding-bottom: 14px;
+}
+
+.aui-timeline-sm .aui-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.aui-timeline-sm .aui-timeline-title {
+    font-size: 13px;
+}
+
+.aui-timeline-sm .aui-timeline-body {
+    margin-top: 2px;
+    font-size: 12.5px;
 }
 
 /* ==========================================================================

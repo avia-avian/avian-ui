@@ -7,7 +7,8 @@
     Pass any `Illuminate\Contracts\Pagination\Paginator`. A length-aware
     paginator (the default from `paginate()`) also gets numbered page links
     and a "Showing X to Y of Z results" summary; a simple paginator
-    (`simplePaginate()`) only gets Previous/Next.
+    (`simplePaginate()`) and a cursor paginator (`cursorPaginate()`) only get
+    Previous/Next.
 
     Inside a Livewire component the links become buttons that call
     `gotoPage()` from Livewire's `WithPagination`, so paging never leaves the
@@ -23,6 +24,7 @@
 @php
     $hasPages = $paginator !== null && $paginator->hasPages();
     $isLengthAware = $paginator instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+    $isCursor = $paginator instanceof \Illuminate\Contracts\Pagination\CursorPaginator;
 
     $livewire ??= class_exists(\Livewire\Livewire::class) && \Livewire\Livewire::current() !== null;
 @endphp
@@ -46,6 +48,10 @@
                 <span class="aui-pagination-link aui-pagination-link-disabled" aria-disabled="true">
                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
                 </span>
+            @elseif ($isCursor)
+                <x-avian-ui::pagination.link :$paginator :cursor="$paginator->previousCursor()" :$livewire rel="prev" aria-label="Previous page">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </x-avian-ui::pagination.link>
             @else
                 <x-avian-ui::pagination.link :$paginator :page="$paginator->currentPage() - 1" :$livewire rel="prev" aria-label="Previous page">
                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
@@ -85,7 +91,11 @@
                 @endif
             @endif
 
-            @if ($paginator->hasMorePages())
+            @if ($paginator->hasMorePages() && $isCursor)
+                <x-avian-ui::pagination.link :$paginator :cursor="$paginator->nextCursor()" :$livewire rel="next" aria-label="Next page">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </x-avian-ui::pagination.link>
+            @elseif ($paginator->hasMorePages())
                 <x-avian-ui::pagination.link :$paginator :page="$paginator->currentPage() + 1" :$livewire rel="next" aria-label="Next page">
                     <i class="fas fa-chevron-right" aria-hidden="true"></i>
                 </x-avian-ui::pagination.link>

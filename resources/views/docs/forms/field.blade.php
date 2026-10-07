@@ -25,10 +25,10 @@
     $examples = [
         [
             'title' => 'Wrap a custom control',
-            'text' => 'Use <x-avian::field> for anything that is not an Avian control — a native range slider, a third-party widget, a group of buttons — so it still gets the same label, hint and error spacing.',
+            'text' => 'Use <x-avian::field> for anything that is not an Avian control — a native colour picker, a third-party widget, a group of buttons — so it still gets the same label, hint and error spacing.',
             'code' => <<<'BLADE'
-                <x-avian::field label="Volume" for="volume" hint="0 to 100" :error="$errors->first('volume')">
-                    <input type="range" id="volume" name="volume" min="0" max="100">
+                <x-avian::field label="Brand colour" for="brand_color" hint="Used for buttons and links." :error="$errors->first('brand_color')">
+                    <input type="color" id="brand_color" name="brand_color" value="#008d4c">
                 </x-avian::field>
                 BLADE,
         ],

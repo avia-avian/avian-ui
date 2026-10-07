@@ -30,6 +30,14 @@
     'selected' => null,
 ])
 
+@php
+    $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
+
+    // Enums (`:value="$status"`, `:selected="$order->status"`) compare by value.
+    $value = $avianUi->scalar($value);
+    $selected = $avianUi->scalar($selected);
+@endphp
+
 <button
     type="button"
     wire:key="aui-combobox-option-{{ $value }}"

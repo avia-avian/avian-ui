@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Pagination\Cursor;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Blade;
 
@@ -623,6 +625,18 @@ it('renders the shared confirm dialog with translated defaults', function () {
         ->toContain('warning');
 });
 
+it('renders the confirm dialog with a loading state on the confirm button', function () {
+    $html = Blade::render('<x-avian::confirm />');
+
+    expect($html)->toContain('x-bind:disabled="busy"')
+        ->toContain("busy ? 'aui-btn-loading' : ''")
+        ->toContain('<span class="aui-spinner aui-spinner-sm" x-show="busy" aria-hidden="true"></span>')
+        ->toContain('loading\u0022:false');
+
+    expect(Blade::render('<x-avian::confirm loading />'))
+        ->toContain('loading\u0022:true');
+});
+
 it('renders breadcrumbs from label and url pairs with the last one current', function () {
     $html = Blade::render('<x-avian::breadcrumbs :items="$items" navigate />', [
         'items' => ['Dashboard' => '/dashboard', 'Orders' => '/orders', 'ORD-1' => null],
@@ -765,4 +779,51 @@ it('leaves flashed messages alone when the toast stack is told to', function () 
     session()->flash('success', 'Order saved.');
 
     expect(Blade::render('<x-avian::toasts :flash="false" />'))->not->toContain('Order saved.');
+});
+
+it('takes a disabled or loading link button out of navigation and the tab order', function (string $state) {
+    $html = Blade::render("<x-avian::button href=\"/export\" navigate {$state} confirm=\"Sure?\">Export</x-avian::button>");
+
+    expect($html)->toContain('<a')
+        ->toContain('aria-disabled="true"')
+        ->toContain('tabindex="-1"')
+        ->not->toContain('href=')
+        ->not->toContain('wire:navigate');
+})->with(['disabled', 'loading']);
+
+it('renders previous and next links for a cursor paginator', function () {
+    $paginator = new CursorPaginator(
+        items: [['id' => 5], ['id' => 6], ['id' => 7]],
+        perPage: 2,
+        cursor: new Cursor(['id' => 4]),
+        options: ['path' => '/orders', 'cursorName' => 'cursor', 'parameters' => ['id']],
+    );
+
+    $html = Blade::render('<x-avian::pagination :paginator="$paginator" />', ['paginator' => $paginator]);
+
+    expect($html)->toContain('rel="prev"')
+        ->toContain('rel="next"')
+        ->toContain('href="/orders?cursor=')
+        ->not->toContain('Showing')
+        ->not->toContain('aria-current');
+});
+
+it('renders livewire setPage buttons for a cursor paginator', function () {
+    $paginator = new CursorPaginator(
+        items: [['id' => 5], ['id' => 6], ['id' => 7]],
+        perPage: 2,
+        cursor: null,
+        options: ['path' => '/orders', 'cursorName' => 'ordersCursor', 'parameters' => ['id']],
+    );
+
+    $html = Blade::render('<x-avian::pagination :paginator="$paginator" :livewire="true" />', ['paginator' => $paginator]);
+
+    expect($html)->toContain('wire:click="setPage(&#039;'.$paginator->nextCursor()->encode().'&#039;, &#039;ordersCursor&#039;)"')
+        ->not->toContain('rel="prev"')
+        ->not->toContain('href=');
+});
+
+it('lets escape inside a dropdown close only the dropdown', function () {
+    expect(Blade::render('<x-avian::dropdown label="Actions"><x-avian::dropdown.item>Edit</x-avian::dropdown.item></x-avian::dropdown>'))
+        ->toContain('x-on:keydown.escape="escape($event)"');
 });

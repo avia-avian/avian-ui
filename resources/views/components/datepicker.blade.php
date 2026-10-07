@@ -61,20 +61,28 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
-    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? $avianUi->errorFor($fieldName, $errorBag);
+    $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')) : null);
 
     $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
     $inputValue = $value;
 
-    if ($inputValue === null && ! $wired) {
-        $inputValue = $avianUi->oldValue($name);
+    if (! $wired) {
+        $inputValue = $avianUi->old($name, $inputValue);
     }
 
     // `time` is not a flatpickr mode: it is a single picker without the calendar.
     $timeOnly = $mode === 'time';
     $withTime = $timeOnly || $enableTime;
     $format = $dateFormat ?? ($timeOnly ? 'H:i' : 'd/m/Y');
+
+    // A Carbon value (an Eloquent date cast, say) is written in the picker's
+    // own format so flatpickr can parse it back; a range joins its two dates
+    // with flatpickr's " to " separator.
+    $inputValue = $avianUi->formatDate($inputValue, $format, $mode === 'range' ? ' to ' : ', ');
+    $minDate = $avianUi->formatDate($minDate, $format);
+    $maxDate = $avianUi->formatDate($maxDate, $format);
 @endphp
 
 <x-avian-ui::field
@@ -86,8 +94,6 @@
     :required="$required"
 >
     <input
-        type="text"
-        autocomplete="off"
         data-fp-mode="{{ $timeOnly ? 'single' : $mode }}"
         data-fp-date-format="{{ $format }}"
         @if ($withTime) data-fp-enable-time="true" @endif
@@ -104,6 +110,8 @@
             'flatpickr-input',
             'aui-timepicker' => $timeOnly,
         ])->merge([
+            'type' => 'text',
+            'autocomplete' => 'off',
             'name' => $name,
             'id' => $inputId,
             'value' => $inputValue,

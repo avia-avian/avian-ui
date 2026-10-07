@@ -4,6 +4,7 @@
         ['confirm-text', 'string|null', "'Confirm'", 'Default label of the yes button.'],
         ['cancel-text', 'string|null', "'Cancel'", 'Default label of the no button.'],
         ['variant', "'danger'|'primary'|'warning'|'success'|'info'", "'danger'", 'Default color of the icon and the yes button.'],
+        ['loading', 'bool', 'false', 'Keep the dialog open with a spinner after a yes, until the work it started is done. Per request: data-aui-confirm-loading, or `loading` / `action` from JS and Livewire.'],
         ['confirm (button prop)', 'string|null', 'null', 'On <x-avian::button>: the message. The click only goes through after a yes.'],
         ['data-aui-confirm', 'attribute', '—', 'On any element or <form>: the message. Tune it with data-aui-confirm-title, data-aui-confirm-text, data-aui-cancel-text and data-aui-confirm-variant.'],
     ];
@@ -28,6 +29,20 @@
                     data-aui-confirm-text="Yes, delete">
                     Delete
                 </x-avian::button>
+                BLADE,
+        ],
+        [
+            'title' => 'Loading state',
+            'text' => 'With data-aui-confirm-loading the dialog stays open after a yes, spinner on the confirm button, until the Livewire request finishes (or the page navigates away).',
+            'code' => <<<'BLADE'
+                <x-avian::button variant="danger" wire:click="delete({{ $order->id }})"
+                    confirm="Order {{ $order->number }} will be removed for good."
+                    data-aui-confirm-loading>
+                    Delete
+                </x-avian::button>
+
+                // Or from JavaScript: the dialog waits for the promise
+                AvianUI.confirm({ message: 'Delete this order?', action: () => $wire.delete(5) });
                 BLADE,
         ],
         [
@@ -88,6 +103,11 @@
             <x-avian::button variant="light" icon="fas fa-lock"
                 x-on:click="AvianUI.confirm({ title: 'Close period?', message: 'Journals in March will be locked.', variant: 'warning', confirmText: 'Close period' }).then(ok => result = ok ? 'Period closed.' : 'Period kept open.')">
                 Close period
+            </x-avian::button>
+
+            <x-avian::button variant="light" icon="fas fa-paper-plane"
+                x-on:click="AvianUI.confirm({ title: 'Send invoice?', message: 'The customer gets an email right away.', variant: 'primary', confirmText: 'Send', action: () => new Promise(done => setTimeout(done, 1500)) }).then(ok => result = ok ? 'Invoice sent.' : 'Invoice not sent.')">
+                Send invoice
             </x-avian::button>
 
             <span x-text="result" style="font-size: 13px; color: var(--aui-text-muted)"></span>

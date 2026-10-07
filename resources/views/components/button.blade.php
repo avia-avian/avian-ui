@@ -61,6 +61,10 @@
 @php
     $tag = filled($href) ? 'a' : 'button';
 
+    // A link cannot be disabled natively, so a disabled one drops its href and
+    // leaves the tab order instead.
+    $inert = $tag === 'a' && ($disabled || $loading);
+
     /*
      * Alpine only initialises trees rooted at x-data, so a trigger that lives
      * outside every component needs its own empty scope before $dispatch works.
@@ -90,10 +94,11 @@
 <{{ $tag }}
     {{ $attributes->class($classes)->merge([
         'type' => $tag === 'button' ? $type : null,
-        'href' => $href,
-        'wire:navigate' => $tag === 'a' && $navigate,
+        'href' => $inert ? null : $href,
+        'wire:navigate' => $tag === 'a' && ! $inert && $navigate,
         'disabled' => $tag === 'button' && ($disabled || $loading),
-        'aria-disabled' => $tag === 'a' && ($disabled || $loading) ? 'true' : null,
+        'aria-disabled' => $inert ? 'true' : null,
+        'tabindex' => $inert ? '-1' : null,
         'aria-label' => $iconOnly ? $label : null,
         'title' => $iconOnly ? $label : null,
         'x-data' => $opens === null ? null : '{}',

@@ -48,6 +48,9 @@ it('serves the documentation with every component on it', function () {
         ->toContain('aui-breadcrumbs')
         ->toContain('aui-stat-change-good')
         ->toContain('aui-divider-labelled')
+        ->toContain('auiSlider(')
+        ->toContain('aui-filter-chips')
+        ->toContain('aui-timeline-marker-icon')
         ->toContain('avian-ui/css/avian-ui.css')
         ->toContain('avian-ui/js/avian-ui.js');
 });

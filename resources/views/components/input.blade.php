@@ -32,14 +32,19 @@
 @php
     $avianUi = app(\AvianUi\AvianUi\AvianUi::class);
 
-    $inputError = $error ?? $avianUi->errorFor($name, $errorBag);
-    $inputId = $id ?? (filled($name) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $name, '[]')) : null);
+    $fieldName = $avianUi->fieldName($name, $attributes);
+    $inputError = $error ?? $avianUi->errorFor($fieldName, $errorBag);
+    $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')) : null);
 
     $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
     $inputValue = $value;
 
-    if ($inputValue === null && ! $wired && ! in_array($type, ['password', 'file'], true)) {
-        $inputValue = $avianUi->oldValue($name);
+    // Old input beats `value` so an edit survives a failed validation; a
+    // hidden field keeps its own value, since the user never edits it.
+    if (! $wired && $type === 'hidden') {
+        $inputValue ??= $avianUi->oldValue($name);
+    } elseif (! $wired && ! in_array($type, ['password', 'file'], true)) {
+        $inputValue = $avianUi->old($name, $inputValue);
     }
 
     // The money mask formats as the user types (thousands separators, a

@@ -45,39 +45,38 @@
     ];
 @endphp
 
-<x-avian::card title="Spinner" subtitle="Indeterminate loading indicator">
-    <p class="aui-showcase-lead">
-        A small rotating ring for when something is loading and you can't tell how long it will take. When
-        you do know the progress, use the progress bar instead.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Spinner', 'subtitle' => 'Indeterminate loading indicator'])
+<p class="aui-showcase-lead">
+    A small rotating ring for when something is loading and you can't tell how long it will take. When
+    you do know the progress, use the progress bar instead.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap; gap: 24px">
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap; gap: 24px">
+        <x-avian::spinner size="sm" />
+        <x-avian::spinner />
+        <x-avian::spinner size="lg" />
+        <div class="aui-row">
             <x-avian::spinner size="sm" />
-            <x-avian::spinner />
-            <x-avian::spinner size="lg" />
-            <div class="aui-row">
-                <x-avian::spinner size="sm" />
-                <span>Loading records…</span>
-            </div>
+            <span>Loading records…</span>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Pure CSS animation — no JavaScript involved.</li>
-            <li>It is decorative (<code>aria-hidden</code>), so always pair it with visible text such as "Loading…" when the wait matters.</li>
-            <li>It is drawn in <code>currentColor</code>, so it takes the text colour of whatever it sits in — set <code>style="color: …"</code> on it or its parent to recolour it.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Pure CSS animation — no JavaScript involved.</li>
+        <li>It is decorative (<code>aria-hidden</code>), so always pair it with visible text such as "Loading…" when the wait matters.</li>
+        <li>It is drawn in <code>currentColor</code>, so it takes the text colour of whatever it sits in — set <code>style="color: …"</code> on it or its parent to recolour it.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

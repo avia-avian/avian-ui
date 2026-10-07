@@ -2199,8 +2199,22 @@
     background: var(--aui-slate-50);
 }
 
-.aui-table-striped tbody tr:nth-child(even) {
+/* An expandable row and its detail row highlight together. */
+.aui-table-hover tbody tr:hover + .aui-table-details,
+.aui-table-hover tbody tr:has(+ .aui-table-details:hover) {
     background: var(--aui-slate-50);
+}
+
+/* Detail rows don't count towards the stripes: they take their row's. */
+.aui-table-striped tbody tr:nth-child(even of :not(.aui-table-details)),
+.aui-table-striped tbody tr:nth-child(even of :not(.aui-table-details)) + .aui-table-details {
+    background: var(--aui-slate-50);
+}
+
+@supports not selector(:nth-child(1 of a)) {
+    .aui-table-striped tbody tr:nth-child(even) {
+        background: var(--aui-slate-50);
+    }
 }
 
 .aui-table-sm th,
@@ -2255,6 +2269,96 @@
 
 .aui-table-sorted .aui-table-sort-icon {
     color: var(--aui-primary);
+}
+
+/* Expandable rows */
+
+.aui-table .aui-table-toggle-cell {
+    width: 1%;
+    padding-right: 0;
+    white-space: nowrap;
+}
+
+.aui-table .aui-table-toggle-cell.aui-table-align-right {
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+.aui-table-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    background: none;
+    color: var(--aui-slate-400);
+    cursor: pointer;
+    transition: background var(--aui-transition-fast), color var(--aui-transition-fast);
+}
+
+.aui-table-toggle:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-700);
+}
+
+.aui-table-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+.aui-table-toggle i {
+    font-size: 11px;
+    transition: transform var(--aui-transition);
+}
+
+.aui-table-row-expandable.is-expanded .aui-table-toggle {
+    color: var(--aui-primary);
+}
+
+.aui-table-row-expandable.is-expanded .aui-table-toggle i {
+    transform: rotate(90deg);
+}
+
+.aui-table-row-clickable {
+    cursor: pointer;
+}
+
+/* A closed last row is the visual end of the table, though its hidden
+   detail row comes after it. */
+.aui-table tbody tr:has(+ .aui-table-details[hidden]:last-child) td {
+    border-bottom: 0;
+}
+
+/* An open row runs straight into its details, with no rule between them. */
+.aui-table tbody .aui-table-row-expandable.is-expanded td {
+    border-bottom-color: transparent;
+}
+
+.aui-table .aui-table-details td {
+    padding-top: 0;
+    padding-bottom: 18px;
+}
+
+.aui-table-sm .aui-table-details td {
+    padding-bottom: 12px;
+}
+
+/* Line the details up with the first data column, past the toggle cell. */
+.aui-table .aui-table-details-indented td {
+    padding-left: 68px;
+}
+
+.aui-table-sm .aui-table-details-indented td {
+    padding-left: 56px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aui-table-toggle i {
+        transition: none;
+    }
 }
 
 .aui-table-empty td {

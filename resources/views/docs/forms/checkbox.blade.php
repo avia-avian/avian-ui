@@ -71,46 +71,45 @@
     ];
 @endphp
 
-<x-avian::card title="Checkbox" subtitle="On/off choices and multi-choice groups">
-    <p class="aui-showcase-lead">
-        A checkbox with its label and an optional hint line. Use a single checkbox for a yes/no answer
-        (terms, newsletter), or a group sharing one <code>name[]</code> to pick several options from a short list.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Checkbox', 'subtitle' => 'On/off choices and multi-choice groups'])
+<p class="aui-showcase-lead">
+    A checkbox with its label and an optional hint line. Use a single checkbox for a yes/no answer
+    (terms, newsletter), or a group sharing one <code>name[]</code> to pick several options from a short list.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <div class="aui-stack">
-                <x-avian::checkbox name="checkbox_terms" label="I accept the terms" hint="You can revoke this at any time." />
-                <x-avian::checkbox name="checkbox_newsletter" label="Send me the newsletter" checked />
-                <x-avian::checkbox name="checkbox_disabled" label="Disabled option" disabled />
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <div class="aui-stack">
+            <x-avian::checkbox name="checkbox_terms" label="I accept the terms" hint="You can revoke this at any time." />
+            <x-avian::checkbox name="checkbox_newsletter" label="Send me the newsletter" checked />
+            <x-avian::checkbox name="checkbox_disabled" label="Disabled option" disabled />
+        </div>
 
-            <div>
-                <x-avian::label>Permissions</x-avian::label>
-                @foreach (['view' => 'View', 'edit' => 'Edit', 'delete' => 'Delete'] as $value => $text)
-                    <x-avian::checkbox name="checkbox_permissions[]" :value="$value" :label="$text" :checked="$value === 'view'" :field="false" inline />
-                @endforeach
-                <x-avian::error>Choose at least one permission.</x-avian::error>
-            </div>
+        <div>
+            <x-avian::label>Permissions</x-avian::label>
+            @foreach (['view' => 'View', 'edit' => 'Edit', 'delete' => 'Delete'] as $value => $text)
+                <x-avian::checkbox name="checkbox_permissions[]" :value="$value" :label="$text" :checked="$value === 'view'" :field="false" inline />
+            @endforeach
+            <x-avian::error>Choose at least one permission.</x-avian::error>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>The whole row (box + text) is the label, so clicking the text toggles the box.</li>
-            <li>Unchecked boxes are not submitted. Use <code>$request-&gt;boolean('name')</code> for a single box and <code>$request-&gt;input('name', [])</code> for a group.</li>
-            <li><code>checked</code> is <strong>not</strong> restored from old input automatically — bind it with <code>:checked="old('name', $default)"</code>.</li>
-            <li>The generated id includes the value (<code>aui-permissions-edit</code>), so boxes in a group never clash.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>The whole row (box + text) is the label, so clicking the text toggles the box.</li>
+        <li>Unchecked boxes are not submitted. Use <code>$request-&gt;boolean('name')</code> for a single box and <code>$request-&gt;input('name', [])</code> for a group.</li>
+        <li><code>checked</code> is <strong>not</strong> restored from old input automatically — bind it with <code>:checked="old('name', $default)"</code>.</li>
+        <li>The generated id includes the value (<code>aui-permissions-edit</code>), so boxes in a group never clash.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

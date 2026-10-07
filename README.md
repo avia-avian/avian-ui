@@ -533,7 +533,7 @@ validation message:
 Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
 `badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
 `divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
-`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table`, `timeline` (+ `timeline.item`), `toasts`, `toolbar`,
+`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
@@ -719,6 +719,30 @@ public function sortBy(string $column): void
 
 ```blade
 <x-avian::table :headers="$headers" :sort-by="$sort" :sort-direction="$direction" :paginator="$users">
+```
+
+Swap a `<tr>` for `<x-avian::table.row>` to make it expandable: the
+`details` slot renders in a hidden row underneath that spans every column, and
+a chevron button toggles it. The row adds its own toggle cell, so give the
+table an empty heading for it (first by default, last with `toggle="end"`).
+`expanded` starts it open and `clickable` lets a click anywhere on the row
+toggle it. Stripes and hover treat the row and its details as one row, and the
+open state survives Livewire re-renders (give the row a `wire:key`):
+
+```blade
+<x-avian::table :headers="['', 'Invoice', 'Customer', 'Total']" striped>
+    @foreach ($invoices as $invoice)
+        <x-avian::table.row wire:key="invoice-{{ $invoice->id }}" clickable>
+            <td>{{ $invoice->number }}</td>
+            <td>{{ $invoice->customer->name }}</td>
+            <td>{{ $invoice->total }}</td>
+
+            <x-slot:details>
+                @include('invoices.partials.lines', ['invoice' => $invoice])
+            </x-slot:details>
+        </x-avian::table.row>
+    @endforeach
+</x-avian::table>
 ```
 
 For records that read better as cards than as rows (products, files, people),
@@ -911,7 +935,7 @@ so HTML in them is escaped.
 
 The Alpine components registered by the package are `auiModal`, `auiConfirm`, `auiToasts`,
 `auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
-`auiDatalist`, `auiSearchableSelect`, `auiMultiSelect` and `auiSlider`. The modal
+`auiDatalist`, `auiSearchableSelect`, `auiMultiSelect`, `auiSlider` and `auiTableRow`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`
 never strands a locked page.
 

@@ -48,43 +48,42 @@
     ];
 @endphp
 
-<x-avian::card title="Switch" subtitle="Toggle a setting on or off">
-    <p class="aui-showcase-lead">
-        A toggle for settings that take effect as a state — "active", "published", "notifications". It is a
-        checkbox underneath (with <code>role="switch"</code> for screen readers), so it submits and validates
-        exactly like one. Prefer a checkbox for agreements such as "I accept the terms".
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Switch', 'subtitle' => 'Toggle a setting on or off'])
+<p class="aui-showcase-lead">
+    A toggle for settings that take effect as a state — "active", "published", "notifications". It is a
+    checkbox underneath (with <code>role="switch"</code> for screen readers), so it submits and validates
+    exactly like one. Prefer a checkbox for agreements such as "I accept the terms".
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <div class="aui-stack">
-                <x-avian::switch name="switch_active" label="Active" checked />
-                <x-avian::switch name="switch_published" label="Published" />
-                <x-avian::switch name="switch_locked" label="Locked (disabled)" checked disabled />
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <div class="aui-stack">
+            <x-avian::switch name="switch_active" label="Active" checked />
+            <x-avian::switch name="switch_published" label="Published" />
+            <x-avian::switch name="switch_locked" label="Locked (disabled)" checked disabled />
+        </div>
 
-            <div class="aui-stack">
-                <x-avian::switch name="switch_notify" label="Email notifications" hint="We only email about your own records." checked />
-                <x-avian::switch name="switch_public" label="Public profile" error="Verify your email before going public." />
-            </div>
+        <div class="aui-stack">
+            <x-avian::switch name="switch_notify" label="Email notifications" hint="We only email about your own records." checked />
+            <x-avian::switch name="switch_public" label="Public profile" error="Verify your email before going public." />
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Clicking the track or the label text toggles it; Space toggles it from the keyboard.</li>
-            <li>When off, nothing is submitted — use <code>$request-&gt;boolean('name')</code> to get a clean <code>true</code>/<code>false</code>.</li>
-            <li><code>checked</code> is not restored from old input automatically — bind it with <code>:checked="old('name', $model-&gt;name)"</code>.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Clicking the track or the label text toggles it; Space toggles it from the keyboard.</li>
+        <li>When off, nothing is submitted — use <code>$request-&gt;boolean('name')</code> to get a clean <code>true</code>/<code>false</code>.</li>
+        <li><code>checked</code> is not restored from old input automatically — bind it with <code>:checked="old('name', $model-&gt;name)"</code>.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

@@ -63,38 +63,37 @@
     ];
 @endphp
 
-<x-avian::card title="Toast" subtitle="Short notifications that close themselves">
-    <p class="aui-showcase-lead">
-        A small notification in the corner of the screen for the result of an action — saved, deleted, failed.
-        It picks up flashed session messages automatically and can be raised from Livewire or JavaScript.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Toast', 'subtitle' => 'Short notifications that close themselves'])
+<p class="aui-showcase-lead">
+    A small notification in the corner of the screen for the result of an action — saved, deleted, failed.
+    It picks up flashed session messages automatically and can be raised from Livewire or JavaScript.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap">
-            <x-avian::button variant="success" icon="fas fa-check" x-data x-on:click="AvianUI.toast('Order ORD-2026-0042 saved.', 'success')">Success</x-avian::button>
-            <x-avian::button variant="danger" icon="fas fa-xmark" x-data x-on:click="AvianUI.toast({ title: 'Payment failed', message: 'The card was declined.', variant: 'danger' })">Error</x-avian::button>
-            <x-avian::button variant="warning" icon="fas fa-triangle-exclamation" x-data x-on:click="AvianUI.toast({ title: 'Low stock', message: 'Only 3 items left.', variant: 'warning' })">Warning</x-avian::button>
-            <x-avian::button variant="info" icon="fas fa-circle-info" x-data x-on:click="$dispatch('aui-toast', { message: 'A new version is available.', variant: 'info' })">Info (event)</x-avian::button>
-            <x-avian::button variant="light" icon="fas fa-thumbtack" x-data x-on:click="AvianUI.toast({ title: 'Export ready', message: 'Stays until you close it.', variant: 'neutral', duration: 0 })">Sticky</x-avian::button>
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap">
+        <x-avian::button variant="success" icon="fas fa-check" x-data x-on:click="AvianUI.toast('Order ORD-2026-0042 saved.', 'success')">Success</x-avian::button>
+        <x-avian::button variant="danger" icon="fas fa-xmark" x-data x-on:click="AvianUI.toast({ title: 'Payment failed', message: 'The card was declined.', variant: 'danger' })">Error</x-avian::button>
+        <x-avian::button variant="warning" icon="fas fa-triangle-exclamation" x-data x-on:click="AvianUI.toast({ title: 'Low stock', message: 'Only 3 items left.', variant: 'warning' })">Warning</x-avian::button>
+        <x-avian::button variant="info" icon="fas fa-circle-info" x-data x-on:click="$dispatch('aui-toast', { message: 'A new version is available.', variant: 'info' })">Info (event)</x-avian::button>
+        <x-avian::button variant="light" icon="fas fa-thumbtack" x-data x-on:click="AvianUI.toast({ title: 'Export ready', message: 'Stays until you close it.', variant: 'neutral', duration: 0 })">Sticky</x-avian::button>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Each toast closes after <code>duration</code> ms. Hovering or focusing it pauses the timer, and the bar along the bottom shows the time left.</li>
-            <li>Error toasts use <code>role="alert"</code> so screen readers announce them straight away; the rest use <code>role="status"</code>.</li>
-            <li>Messages are set with <code>x-text</code>, so they are always escaped — never pass HTML.</li>
-            <li>Toasts raised before Alpine starts are queued and shown as soon as the stack is ready.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Each toast closes after <code>duration</code> ms. Hovering or focusing it pauses the timer, and the bar along the bottom shows the time left.</li>
+        <li>Error toasts use <code>role="alert"</code> so screen readers announce them straight away; the rest use <code>role="status"</code>.</li>
+        <li>Messages are set with <code>x-text</code>, so they are always escaped — never pass HTML.</li>
+        <li>Toasts raised before Alpine starts are queued and shown as soon as the stack is ready.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

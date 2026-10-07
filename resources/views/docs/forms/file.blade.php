@@ -63,37 +63,36 @@
     ];
 @endphp
 
-<x-avian::card title="File" subtitle="Styled file upload">
-    <p class="aui-showcase-lead">
-        A file input with a proper button and the chosen file name next to it, instead of the browser's
-        default control. The real <code>&lt;input type="file"&gt;</code> is still there (visually hidden), so
-        uploads, <code>accept</code>, <code>multiple</code> and validation work as usual.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'File', 'subtitle' => 'Styled file upload'])
+<p class="aui-showcase-lead">
+    A file input with a proper button and the chosen file name next to it, instead of the browser's
+    default control. The real <code>&lt;input type="file"&gt;</code> is still there (visually hidden), so
+    uploads, <code>accept</code>, <code>multiple</code> and validation work as usual.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::file name="file_attachment" label="Attachment" hint="PDF, max 2 MB." accept=".pdf" />
-            <x-avian::file name="file_avatar" label="Profile photo" accept="image/*" trigger="Upload photo" placeholder="No photo yet" icon="fas fa-image" />
-            <x-avian::file name="file_photos[]" label="Photos (multiple)" multiple accept="image/*" />
-            <x-avian::file name="file_contract" label="Contract" required error="The contract must be a PDF." />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::file name="file_attachment" label="Attachment" hint="PDF, max 2 MB." accept=".pdf" />
+        <x-avian::file name="file_avatar" label="Profile photo" accept="image/*" trigger="Upload photo" placeholder="No photo yet" icon="fas fa-image" />
+        <x-avian::file name="file_photos[]" label="Photos (multiple)" multiple accept="image/*" />
+        <x-avian::file name="file_contract" label="Contract" required error="The contract must be a PDF." />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Clicking the button opens the native file dialog; the label then shows the file name, or "N files selected".</li>
-            <li>Browsers never re-fill a file input, so after a failed validation the user has to pick the file again. Keep file rules strict and clear in the hint.</li>
-            <li>Uses a small Alpine component (<code>auiFile</code>) from <code>&lt;x-avian::scripts /&gt;</code> for the file name.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Clicking the button opens the native file dialog; the label then shows the file name, or "N files selected".</li>
+        <li>Browsers never re-fill a file input, so after a failed validation the user has to pick the file again. Keep file rules strict and clear in the hint.</li>
+        <li>Uses a small Alpine component (<code>auiFile</code>) from <code>&lt;x-avian::scripts /&gt;</code> for the file name.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

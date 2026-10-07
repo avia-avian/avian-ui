@@ -93,66 +93,65 @@
     ];
 @endphp
 
-<x-avian::card title="Modal" subtitle="Dialog over the page">
-    <p class="aui-showcase-lead">
-        A dialog that opens on top of the page and dims everything behind it. Use it for short, focused
-        tasks — a quick create form, a confirmation — that shouldn't need a page of their own.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Modal', 'subtitle' => 'Dialog over the page'])
+<p class="aui-showcase-lead">
+    A dialog that opens on top of the page and dims everything behind it. Use it for short, focused
+    tasks — a quick create form, a confirmation — that shouldn't need a page of their own.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap">
-            <x-avian::button icon="fas fa-plus" modal="doc-default">Default modal</x-avian::button>
-            <x-avian::button variant="light" modal="doc-large">Large modal</x-avian::button>
-            <x-avian::button variant="danger" icon="fas fa-trash" modal="doc-confirm">Confirm dialog</x-avian::button>
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap">
+        <x-avian::button icon="fas fa-plus" modal="doc-default">Default modal</x-avian::button>
+        <x-avian::button variant="light" modal="doc-large">Large modal</x-avian::button>
+        <x-avian::button variant="danger" icon="fas fa-trash" modal="doc-confirm">Confirm dialog</x-avian::button>
+    </div>
+</div>
+
+<x-avian::modal name="doc-default" title="New record">
+    <x-avian::input name="modal_title" label="Title" />
+
+    <x-slot:footer>
+        <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
+        <x-avian::button icon="fas fa-check" x-on:click="hide()">Create</x-avian::button>
+    </x-slot:footer>
+</x-avian::modal>
+
+<x-avian::modal name="doc-large" title="Large modal" size="lg">
+    <div class="aui-form-grid">
+        <x-avian::input name="modal_first_name" label="First name" />
+        <x-avian::input name="modal_last_name" label="Last name" />
+        <x-avian::textarea class="aui-form-full" name="modal_notes" label="Notes" rows="3" />
     </div>
 
-    <x-avian::modal name="doc-default" title="New record">
-        <x-avian::input name="modal_title" label="Title" />
+    <x-slot:footer>
+        <x-avian::button variant="light" x-on:click="hide()">Close</x-avian::button>
+    </x-slot:footer>
+</x-avian::modal>
 
-        <x-slot:footer>
-            <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
-            <x-avian::button icon="fas fa-check" x-on:click="hide()">Create</x-avian::button>
-        </x-slot:footer>
-    </x-avian::modal>
+<x-avian::modal name="doc-confirm" title="Delete record?" size="sm" :close-on-overlay="false">
+    This cannot be undone. Clicking the backdrop won't close this one.
 
-    <x-avian::modal name="doc-large" title="Large modal" size="lg">
-        <div class="aui-form-grid">
-            <x-avian::input name="modal_first_name" label="First name" />
-            <x-avian::input name="modal_last_name" label="Last name" />
-            <x-avian::textarea class="aui-form-full" name="modal_notes" label="Notes" rows="3" />
-        </div>
+    <x-slot:footer>
+        <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
+        <x-avian::button variant="danger" x-on:click="hide()">Delete</x-avian::button>
+    </x-slot:footer>
+</x-avian::modal>
 
-        <x-slot:footer>
-            <x-avian::button variant="light" x-on:click="hide()">Close</x-avian::button>
-        </x-slot:footer>
-    </x-avian::modal>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Each modal listens for the <code>aui-modal-open</code> / <code>aui-modal-close</code> browser events with its <code>name</code>. That is how buttons, Alpine, plain JS and Livewire can all control it.</li>
+        <li>While a modal is open the page behind it can't scroll.</li>
+        <li>Inside the modal you are in its Alpine scope: <code>hide()</code>, <code>show()</code> and <code>toggle()</code> are available on any element.</li>
+        <li>The modal markup can live anywhere in the page — at the bottom of the layout is a good spot. Names must be unique per page.</li>
+    </ul>
+</div>
 
-    <x-avian::modal name="doc-confirm" title="Delete record?" size="sm" :close-on-overlay="false">
-        This cannot be undone. Clicking the backdrop won't close this one.
+@include('avian-ui::docs.partials.props')
 
-        <x-slot:footer>
-            <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
-            <x-avian::button variant="danger" x-on:click="hide()">Delete</x-avian::button>
-        </x-slot:footer>
-    </x-avian::modal>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Each modal listens for the <code>aui-modal-open</code> / <code>aui-modal-close</code> browser events with its <code>name</code>. That is how buttons, Alpine, plain JS and Livewire can all control it.</li>
-            <li>While a modal is open the page behind it can't scroll.</li>
-            <li>Inside the modal you are in its Alpine scope: <code>hide()</code>, <code>show()</code> and <code>toggle()</code> are available on any element.</li>
-            <li>The modal markup can live anywhere in the page — at the bottom of the layout is a good spot. Names must be unique per page.</li>
-        </ul>
-    </div>
-
-    @include('avian-ui::docs.partials.props')
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

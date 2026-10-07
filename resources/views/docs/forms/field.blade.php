@@ -69,51 +69,50 @@
     ];
 @endphp
 
-<x-avian::card title="Field, label, hint & error" subtitle="The wrapper every form control is built on">
-    <p class="aui-showcase-lead">
-        Every Avian form control is rendered inside <code>&lt;x-avian::field&gt;</code>, which stacks a label,
-        the control, a hint and an error message with consistent spacing. You rarely use it directly —
-        but it is there for custom controls, and <code>&lt;x-avian::label&gt;</code>,
-        <code>&lt;x-avian::hint&gt;</code> and <code>&lt;x-avian::error&gt;</code> can be used on their own.
+@include('avian-ui::docs.partials.header', ['title' => 'Field, label, hint & error', 'subtitle' => 'The wrapper every form control is built on'])
+<p class="aui-showcase-lead">
+    Every Avian form control is rendered inside <code>&lt;x-avian::field&gt;</code>, which stacks a label,
+    the control, a hint and an error message with consistent spacing. You rarely use it directly —
+    but it is there for custom controls, and <code>&lt;x-avian::label&gt;</code>,
+    <code>&lt;x-avian::hint&gt;</code> and <code>&lt;x-avian::error&gt;</code> can be used on their own.
+</p>
+
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::field label="Volume" for="field_volume" hint="Wraps a native range input.">
+            <input type="range" id="field_volume" name="field_volume" min="0" max="100" value="40" style="width: 100%">
+        </x-avian::field>
+
+        <x-avian::field label="Voucher code" for="field_code" required error="This voucher has expired.">
+            <input id="field_code" name="field_code" class="aui-input aui-input-invalid" value="SUMMER-22">
+        </x-avian::field>
+    </div>
+</div>
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Props shared by every control</h2>
+    <p class="aui-showcase-text">
+        Input, textarea, select, searchable select, multi select, datepicker, file, checkbox, radio and switch
+        all accept these, and they behave the same way everywhere:
     </p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::field label="Volume" for="field_volume" hint="Wraps a native range input.">
-                <input type="range" id="field_volume" name="field_volume" min="0" max="100" value="40" style="width: 100%">
-            </x-avian::field>
-
-            <x-avian::field label="Voucher code" for="field_code" required error="This voucher has expired.">
-                <input id="field_code" name="field_code" class="aui-input aui-input-invalid" value="SUMMER-22">
-            </x-avian::field>
-        </div>
+    <div class="aui-showcase-props">
+        <x-avian::table :headers="['Prop', 'What it does']" :hover="false">
+            @foreach ($sharedProps as [$prop, $description])
+                <tr>
+                    <td><code>{{ $prop }}</code></td>
+                    <td>{{ $description }}</td>
+                </tr>
+            @endforeach
+        </x-avian::table>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Props shared by every control</h4>
-        <p class="aui-showcase-text">
-            Input, textarea, select, searchable select, multi select, datepicker, file, checkbox, radio and switch
-            all accept these, and they behave the same way everywhere:
-        </p>
+@include('avian-ui::docs.partials.props')
 
-        <div class="aui-showcase-props">
-            <x-avian::table :headers="['Prop', 'What it does']" :hover="false">
-                @foreach ($sharedProps as [$prop, $description])
-                    <tr>
-                        <td><code>{{ $prop }}</code></td>
-                        <td>{{ $description }}</td>
-                    </tr>
-                @endforeach
-            </x-avian::table>
-        </div>
-    </div>
-
-    @include('avian-ui::docs.partials.props')
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

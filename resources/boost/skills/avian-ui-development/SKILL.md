@@ -37,7 +37,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table`, `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`
 
 Form controls render their own label, hint and validation message from `name`
@@ -159,6 +159,11 @@ Works with `paginate()` (numbered links plus a result count),
 With no rows, `table` renders an empty state across every column. Set
 `empty`, `empty-text`, `empty-icon`, pass an `empty` slot, or disable it with
 `:empty="false"`; pass `:columns` when the header comes from a `head` slot.
+
+For rows that reveal more on demand, use `<x-avian::table.row>` instead of
+`<tr>` and put the hidden content in its `details` slot; it adds a toggle
+cell (give the table an empty heading for it), `expanded` starts it open and
+`clickable` toggles on a row click. Give it a `wire:key` under Livewire.
 
 **Paginated lists and grids.** For records that read better as cards
 (products, files, people), use `datalist`: same `paginator` and empty-state

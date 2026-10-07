@@ -65,50 +65,49 @@
     ];
 @endphp
 
-<x-avian::card title="Tabs" subtitle="Switch between panels without leaving the page">
-    <p class="aui-showcase-lead">
-        Split related content into panels and show one at a time: profile sections, settings groups,
-        a long form. Switching happens in the browser with Alpine — no page reload and no request.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Tabs', 'subtitle' => 'Switch between panels without leaving the page'])
+<p class="aui-showcase-lead">
+    Split related content into panels and show one at a time: profile sections, settings groups,
+    a long form. Switching happens in the browser with Alpine — no page reload and no request.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack" style="gap: 28px">
-            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity', 'settings' => 'Settings']">
-                <x-avian::tabs.panel name="overview">Line tabs (the default). The first panel is shown on load.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="activity">
-                    <x-avian::empty title="No activity yet" text="Actions will show up here." />
-                </x-avian::tabs.panel>
-                <x-avian::tabs.panel name="settings">Settings panel.</x-avian::tabs.panel>
-            </x-avian::tabs>
+<div class="aui-showcase-demo">
+    <div class="aui-stack" style="gap: 28px">
+        <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity', 'settings' => 'Settings']">
+            <x-avian::tabs.panel name="overview">Line tabs (the default). The first panel is shown on load.</x-avian::tabs.panel>
+            <x-avian::tabs.panel name="activity">
+                <x-avian::empty title="No activity yet" text="Actions will show up here." />
+            </x-avian::tabs.panel>
+            <x-avian::tabs.panel name="settings">Settings panel.</x-avian::tabs.panel>
+        </x-avian::tabs>
 
-            <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="pill">
-                <x-avian::tabs.panel name="overview">Pill tabs stand alone, with no shared underline.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
-            </x-avian::tabs>
+        <x-avian::tabs :tabs="['overview' => 'Overview', 'activity' => 'Activity']" variant="pill">
+            <x-avian::tabs.panel name="overview">Pill tabs stand alone, with no shared underline.</x-avian::tabs.panel>
+            <x-avian::tabs.panel name="activity">Same state, different look.</x-avian::tabs.panel>
+        </x-avian::tabs>
 
-            <x-avian::tabs :tabs="['day' => 'Day', 'week' => 'Week', 'month' => 'Month']" variant="segmented" active="week">
-                <x-avian::tabs.panel name="day">Daily figures.</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="week">Segmented tabs, opened on "Week" with active="week".</x-avian::tabs.panel>
-                <x-avian::tabs.panel name="month">Monthly figures.</x-avian::tabs.panel>
-            </x-avian::tabs>
-        </div>
+        <x-avian::tabs :tabs="['day' => 'Day', 'week' => 'Week', 'month' => 'Month']" variant="segmented" active="week">
+            <x-avian::tabs.panel name="day">Daily figures.</x-avian::tabs.panel>
+            <x-avian::tabs.panel name="week">Segmented tabs, opened on "Week" with active="week".</x-avian::tabs.panel>
+            <x-avian::tabs.panel name="month">Monthly figures.</x-avian::tabs.panel>
+        </x-avian::tabs>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>All panels are rendered up front and hidden with <code>x-show</code>; the tab key links a button to its panel.</li>
-            <li>The tab list uses <code>role="tablist"</code> / <code>role="tab"</code> and <code>aria-selected</code>; panels use <code>role="tabpanel"</code>.</li>
-            <li>The selected tab isn't remembered across page loads — use <code>active</code> with a query string for that.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>All panels are rendered up front and hidden with <code>x-show</code>; the tab key links a button to its panel.</li>
+        <li>The tab list uses <code>role="tablist"</code> / <code>role="tab"</code> and <code>aria-selected</code>; panels use <code>role="tabpanel"</code>.</li>
+        <li>The selected tab isn't remembered across page loads — use <code>active</code> with a query string for that.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

@@ -42,43 +42,42 @@
     ];
 @endphp
 
-<x-avian::card title="Breadcrumbs" subtitle="Where this page sits">
-    <p class="aui-showcase-lead">
-        A trail of links back up the page hierarchy, placed above the page header on detail and
-        nested pages.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Breadcrumbs', 'subtitle' => 'Where this page sits'])
+<p class="aui-showcase-lead">
+    A trail of links back up the page hierarchy, placed above the page header on detail and
+    nested pages.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack" style="gap: 24px">
-            <x-avian::breadcrumbs :items="['Dashboard' => '#', 'Sales' => '#', 'Orders' => '#', 'ORD-2026-0042' => null]" />
+<div class="aui-showcase-demo">
+    <div class="aui-stack" style="gap: 24px">
+        <x-avian::breadcrumbs :items="['Dashboard' => '#', 'Sales' => '#', 'Orders' => '#', 'ORD-2026-0042' => null]" />
 
-            <x-avian::breadcrumbs :items="[
-                ['label' => 'Home', 'href' => '#', 'icon' => 'fas fa-house'],
-                ['label' => 'Settings', 'href' => '#', 'icon' => 'fas fa-gear'],
-                ['label' => 'Users'],
-            ]" />
+        <x-avian::breadcrumbs :items="[
+            ['label' => 'Home', 'href' => '#', 'icon' => 'fas fa-house'],
+            ['label' => 'Settings', 'href' => '#', 'icon' => 'fas fa-gear'],
+            ['label' => 'Users'],
+        ]" />
 
-            <div>
-                <x-avian::breadcrumbs :items="['Inventory' => '#', 'Warehouses' => '#', 'Surabaya DC' => null]" />
-                <x-avian::page-header title="Surabaya DC" subtitle="Distribution centre · 12 racks" />
-            </div>
+        <div>
+            <x-avian::breadcrumbs :items="['Inventory' => '#', 'Warehouses' => '#', 'Surabaya DC' => null]" />
+            <x-avian::page-header title="Surabaya DC" subtitle="Distribution centre · 12 racks" />
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Rendered as <code>&lt;nav aria-label="Breadcrumb"&gt;</code> with an ordered list; the last item carries <code>aria-current="page"</code> and is never a link.</li>
-            <li>Long trails wrap onto a second line instead of overflowing.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Rendered as <code>&lt;nav aria-label="Breadcrumb"&gt;</code> with an ordered list; the last item carries <code>aria-current="page"</code> and is never a link.</li>
+        <li>Long trails wrap onto a second line instead of overflowing.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

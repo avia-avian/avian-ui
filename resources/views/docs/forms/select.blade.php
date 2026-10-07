@@ -78,55 +78,54 @@
     ];
 @endphp
 
-<x-avian::card title="Select" subtitle="Native dropdown">
-    <p class="aui-showcase-lead">
-        A styled native <code>&lt;select&gt;</code>. Use it for short lists (up to ~10 options) where the
-        browser's own dropdown is good enough — it is the lightest option and needs no JavaScript. For long
-        lists use the <strong>searchable select</strong>; to pick several values use the <strong>multi select</strong>.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Select', 'subtitle' => 'Native dropdown'])
+<p class="aui-showcase-lead">
+    A styled native <code>&lt;select&gt;</code>. Use it for short lists (up to ~10 options) where the
+    browser's own dropdown is good enough — it is the lightest option and needs no JavaScript. For long
+    lists use the <strong>searchable select</strong>; to pick several values use the <strong>multi select</strong>.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::select
-                name="select_role"
-                label="Role"
-                placeholder="Choose a role"
-                :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
-            />
-            <x-avian::select
-                name="select_status"
-                label="Status"
-                value="active"
-                hint="Pre-selected through the value prop."
-                :options="['active' => 'Active', 'inactive' => 'Inactive']"
-            />
-            <x-avian::select
-                name="select_team"
-                label="Team"
-                required
-                placeholder="Choose a team"
-                error="The team field is required."
-                :options="['a' => 'Team A', 'b' => 'Team B']"
-            />
-            <x-avian::select name="select_small" label="Small" size="sm" :options="['1' => 'Option one', '2' => 'Option two']" />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::select
+            name="select_role"
+            label="Role"
+            placeholder="Choose a role"
+            :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
+        />
+        <x-avian::select
+            name="select_status"
+            label="Status"
+            value="active"
+            hint="Pre-selected through the value prop."
+            :options="['active' => 'Active', 'inactive' => 'Inactive']"
+        />
+        <x-avian::select
+            name="select_team"
+            label="Team"
+            required
+            placeholder="Choose a team"
+            error="The team field is required."
+            :options="['a' => 'Team A', 'b' => 'Team B']"
+        />
+        <x-avian::select name="select_small" label="Small" size="sm" :options="['1' => 'Option one', '2' => 'Option two']" />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Values are compared as strings, so <code>:value="1"</code> selects the option with key <code>'1'</code> — ids from the database just work.</li>
-            <li>The placeholder option has an empty value, so a <code>required</code> validation rule rejects it.</li>
-            <li>After a failed validation the previously chosen option is selected again.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Values are compared as strings, so <code>:value="1"</code> selects the option with key <code>'1'</code> — ids from the database just work.</li>
+        <li>The placeholder option has an empty value, so a <code>required</code> validation rule rejects it.</li>
+        <li>After a failed validation the previously chosen option is selected again.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

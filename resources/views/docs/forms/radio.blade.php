@@ -55,52 +55,51 @@
     ];
 @endphp
 
-<x-avian::card title="Radio" subtitle="Pick exactly one option">
-    <p class="aui-showcase-lead">
-        Radio buttons for choosing one option out of a few (2–5) that should all be visible at once. For
-        longer lists a select is more compact.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Radio', 'subtitle' => 'Pick exactly one option'])
+<p class="aui-showcase-lead">
+    Radio buttons for choosing one option out of a few (2–5) that should all be visible at once. For
+    longer lists a select is more compact.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <div>
-                <x-avian::label required>Plan</x-avian::label>
-                <x-avian::radio name="radio_plan" value="basic" label="Basic" inline checked />
-                <x-avian::radio name="radio_plan" value="pro" label="Pro" inline />
-                <x-avian::radio name="radio_plan" value="team" label="Team" inline />
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <div>
+            <x-avian::label required>Plan</x-avian::label>
+            <x-avian::radio name="radio_plan" value="basic" label="Basic" inline checked />
+            <x-avian::radio name="radio_plan" value="pro" label="Pro" inline />
+            <x-avian::radio name="radio_plan" value="team" label="Team" inline />
+        </div>
 
-            <div class="aui-stack">
-                <x-avian::radio name="radio_shipping" value="standard" label="Standard" hint="3–5 working days, free" checked />
-                <x-avian::radio name="radio_shipping" value="express" label="Express" hint="Next day, Rp 25.000" />
-                <x-avian::radio name="radio_shipping" value="pickup" label="Pickup" hint="Currently unavailable" disabled />
-            </div>
+        <div class="aui-stack">
+            <x-avian::radio name="radio_shipping" value="standard" label="Standard" hint="3–5 working days, free" checked />
+            <x-avian::radio name="radio_shipping" value="express" label="Express" hint="Next day, Rp 25.000" />
+            <x-avian::radio name="radio_shipping" value="pickup" label="Pickup" hint="Currently unavailable" disabled />
+        </div>
 
-            <div>
-                <x-avian::label>Payment</x-avian::label>
-                <x-avian::radio name="radio_payment" value="card" label="Card" inline />
-                <x-avian::radio name="radio_payment" value="transfer" label="Bank transfer" inline />
-                <x-avian::error>Please choose a payment method.</x-avian::error>
-            </div>
+        <div>
+            <x-avian::label>Payment</x-avian::label>
+            <x-avian::radio name="radio_payment" value="card" label="Card" inline />
+            <x-avian::radio name="radio_payment" value="transfer" label="Bank transfer" inline />
+            <x-avian::error>Please choose a payment method.</x-avian::error>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Radios with the same <code>name</code> form a group; the browser only allows one of them to be checked.</li>
-            <li>Unlike other controls, <code>field</code> defaults to <code>false</code>: put one <code>&lt;x-avian::error name="…" /&gt;</code> under the group.</li>
-            <li><code>checked</code> is not restored from old input automatically — compare values with <code>old()</code>.</li>
-            <li>Arrow keys move between radios of a group, as in any native radio group.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Radios with the same <code>name</code> form a group; the browser only allows one of them to be checked.</li>
+        <li>Unlike other controls, <code>field</code> defaults to <code>false</code>: put one <code>&lt;x-avian::error name="…" /&gt;</code> under the group.</li>
+        <li><code>checked</code> is not restored from old input automatically — compare values with <code>old()</code>.</li>
+        <li>Arrow keys move between radios of a group, as in any native radio group.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

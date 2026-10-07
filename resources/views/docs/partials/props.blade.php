@@ -1,6 +1,6 @@
 {{-- Props reference table. Expects `$props`: a list of [name, type, default, description]. --}}
 <div class="aui-showcase-block">
-    <h4 class="aui-showcase-heading">Props</h4>
+    <h2 class="aui-showcase-heading">Props</h2>
 
     <div class="aui-showcase-props">
         <x-avian::table :headers="['Prop', 'Type', 'Default', 'Description']" :hover="false">

@@ -52,34 +52,33 @@
     ];
 @endphp
 
-<x-avian::card title="Textarea" subtitle="Multi-line text">
-    <p class="aui-showcase-lead">
-        A multi-line text field for notes, descriptions and messages. It shares the input's label, hint,
-        validation and old-input behaviour.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Textarea', 'subtitle' => 'Multi-line text'])
+<p class="aui-showcase-lead">
+    A multi-line text field for notes, descriptions and messages. It shares the input's label, hint,
+    validation and old-input behaviour.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::textarea name="textarea_notes" label="Notes" rows="3" placeholder="Anything we should know?" hint="Optional." />
-            <x-avian::textarea name="textarea_reason" label="Reason" rows="3" required error="Please tell us why.">Too short</x-avian::textarea>
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::textarea name="textarea_notes" label="Notes" rows="3" placeholder="Anything we should know?" hint="Optional." />
+        <x-avian::textarea name="textarea_reason" label="Reason" rows="3" required error="Please tell us why.">Too short</x-avian::textarea>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li><code>rows</code> sets the starting height; the textarea can be resized vertically by the user.</li>
-            <li>Content is escaped, so user input with HTML is safe to re-display.</li>
-            <li>With <code>wire:model</code> the component does not read old input.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li><code>rows</code> sets the starting height; the textarea can be resized vertically by the user.</li>
+        <li>Content is escaped, so user input with HTML is safe to re-display.</li>
+        <li>With <code>wire:model</code> the component does not read old input.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

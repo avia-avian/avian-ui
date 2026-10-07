@@ -49,6 +49,7 @@ it('serves the documentation with every component on it', function () {
         ->toContain('aui-stat-change-good')
         ->toContain('aui-divider-labelled')
         ->toContain('auiSlider(')
+        ->toContain('auiTableRow(')
         ->toContain('aui-filter-chips')
         ->toContain('aui-timeline-marker-icon')
         ->toContain('avian-ui/css/avian-ui.css')

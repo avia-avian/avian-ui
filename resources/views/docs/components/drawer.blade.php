@@ -39,54 +39,53 @@
     ];
 @endphp
 
-<x-avian::card title="Drawer" subtitle="Side panel over the page">
-    <p class="aui-showcase-lead">
-        A panel that slides in from the edge of the screen: filters, a quick-edit form or a record's
-        details, while the list stays visible behind it.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Drawer', 'subtitle' => 'Side panel over the page'])
+<p class="aui-showcase-lead">
+    A panel that slides in from the edge of the screen: filters, a quick-edit form or a record's
+    details, while the list stays visible behind it.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap">
-            <x-avian::button variant="light" icon="fas fa-filter" modal="doc-drawer-filters">Filters (right)</x-avian::button>
-            <x-avian::button variant="light" icon="fas fa-bars" modal="doc-drawer-left">Menu (left, sm)</x-avian::button>
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap">
+        <x-avian::button variant="light" icon="fas fa-filter" modal="doc-drawer-filters">Filters (right)</x-avian::button>
+        <x-avian::button variant="light" icon="fas fa-bars" modal="doc-drawer-left">Menu (left, sm)</x-avian::button>
+    </div>
+</div>
+
+<x-avian::drawer name="doc-drawer-filters" title="Filters" subtitle="Narrow down the order list">
+    <div class="aui-stack">
+        <x-avian::select name="drawer_status" label="Status" placeholder="Any status" :options="['open' => 'Open', 'paid' => 'Paid', 'shipped' => 'Shipped']" />
+        <x-avian::datepicker name="drawer_period" label="Period" mode="range" placeholder="Pick a range" />
+        <x-avian::multi-select name="drawer_regions" label="Regions" :options="['jatim' => 'Jawa Timur', 'jateng' => 'Jawa Tengah', 'jabar' => 'Jawa Barat']" />
     </div>
 
-    <x-avian::drawer name="doc-drawer-filters" title="Filters" subtitle="Narrow down the order list">
-        <div class="aui-stack">
-            <x-avian::select name="drawer_status" label="Status" placeholder="Any status" :options="['open' => 'Open', 'paid' => 'Paid', 'shipped' => 'Shipped']" />
-            <x-avian::datepicker name="drawer_period" label="Period" mode="range" placeholder="Pick a range" />
-            <x-avian::multi-select name="drawer_regions" label="Regions" :options="['jatim' => 'Jawa Timur', 'jateng' => 'Jawa Tengah', 'jabar' => 'Jawa Barat']" />
-        </div>
+    <x-slot:footer>
+        <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
+        <x-avian::button icon="fas fa-check" x-on:click="hide()">Apply</x-avian::button>
+    </x-slot:footer>
+</x-avian::drawer>
 
-        <x-slot:footer>
-            <x-avian::button variant="light" x-on:click="hide()">Cancel</x-avian::button>
-            <x-avian::button icon="fas fa-check" x-on:click="hide()">Apply</x-avian::button>
-        </x-slot:footer>
-    </x-avian::drawer>
-
-    <x-avian::drawer name="doc-drawer-left" title="Menu" position="left" size="sm">
-        <div class="aui-stack" style="gap: 6px">
-            <a href="#">Dashboard</a>
-            <a href="#">Orders</a>
-            <a href="#">Customers</a>
-        </div>
-    </x-avian::drawer>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Same Alpine component as <code>&lt;x-avian::modal&gt;</code>: <code>modal="name"</code> on a button, <code>aui-modal-open</code> / <code>aui-modal-close</code> events, and <code>hide()</code> inside.</li>
-            <li>The body scrolls on its own; header and footer stay put. Page scroll is locked while it is open.</li>
-        </ul>
+<x-avian::drawer name="doc-drawer-left" title="Menu" position="left" size="sm">
+    <div class="aui-stack" style="gap: 6px">
+        <a href="#">Dashboard</a>
+        <a href="#">Orders</a>
+        <a href="#">Customers</a>
     </div>
+</x-avian::drawer>
 
-    @include('avian-ui::docs.partials.props')
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Same Alpine component as <code>&lt;x-avian::modal&gt;</code>: <code>modal="name"</code> on a button, <code>aui-modal-open</code> / <code>aui-modal-close</code> events, and <code>hide()</code> inside.</li>
+        <li>The body scrolls on its own; header and footer stay put. Page scroll is locked while it is open.</li>
+    </ul>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+@include('avian-ui::docs.partials.props')
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

@@ -72,44 +72,43 @@
     ];
 @endphp
 
-<x-avian::card title="Pagination" subtitle="Page links for a Laravel paginator">
-    <p class="aui-showcase-lead">
-        Renders the page links of a Laravel paginator in Avian's style. Tables do this for you via
-        <code>:paginator</code>; use this component directly for any other paginated list.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Pagination', 'subtitle' => 'Page links for a Laravel paginator'])
+<p class="aui-showcase-lead">
+    Renders the page links of a Laravel paginator in Avian's style. Tables do this for you via
+    <code>:paginator</code>; use this component directly for any other paginated list.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack">
-            <div>
-                <x-avian::label>Length-aware — paginate()</x-avian::label>
-                <x-avian::pagination :paginator="$pageDemo" />
-            </div>
-            <div>
-                <x-avian::label>Two numbers each side — :on-each-side="2"</x-avian::label>
-                <x-avian::pagination :paginator="$pageDemo" :on-each-side="2" />
-            </div>
-            <div>
-                <x-avian::label>Simple — simplePaginate()</x-avian::label>
-                <x-avian::pagination :paginator="$simpleDemo" />
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-stack">
+        <div>
+            <x-avian::label>Length-aware — paginate()</x-avian::label>
+            <x-avian::pagination :paginator="$pageDemo" />
+        </div>
+        <div>
+            <x-avian::label>Two numbers each side — :on-each-side="2"</x-avian::label>
+            <x-avian::pagination :paginator="$pageDemo" :on-each-side="2" />
+        </div>
+        <div>
+            <x-avian::label>Simple — simplePaginate()</x-avian::label>
+            <x-avian::pagination :paginator="$simpleDemo" />
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li><code>paginate()</code> results get a "Showing X to Y of Z results" summary, the first and last page, the pages around the current one and <code>…</code> for the gaps.</li>
-            <li><code>simplePaginate()</code> results only get Previous / Next arrows.</li>
-            <li>When everything fits on one page, the component renders nothing at all.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li><code>paginate()</code> results get a "Showing X to Y of Z results" summary, the first and last page, the pages around the current one and <code>…</code> for the gaps.</li>
+        <li><code>simplePaginate()</code> results only get Previous / Next arrows.</li>
+        <li>When everything fits on one page, the component renders nothing at all.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

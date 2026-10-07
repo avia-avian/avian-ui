@@ -1,5 +1,5 @@
 @php
-    // Each sidebar entry is a page under resources/views/showcase/, keyed by its view name.
+    // Each sidebar entry is a page under resources/views/docs/, keyed by its view name.
     $nav = [
         'General' => [
             'getting-started' => ['label' => 'Getting started', 'icon' => 'fas fa-house'],
@@ -53,6 +53,15 @@
             'components.empty' => ['label' => 'Empty state', 'icon' => 'fas fa-inbox'],
         ],
     ];
+
+    // The same pages as one flat list, for the previous / next links.
+    $pages = [];
+
+    foreach ($nav as $group => $items) {
+        foreach ($items as $key => $item) {
+            $pages[] = [$group, $key, $item];
+        }
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="en" data-theme="emerald-green">
@@ -139,9 +148,11 @@
             // search hit inside it.
             Alpine.data('showcase', () => ({
                 section: 'getting-started',
+                menu: false,
 
                 go(detail) {
                     this.section = detail.key;
+                    this.menu = false;
 
                     // Wait for x-show to reveal the section before measuring it.
                     this.$nextTick(() => requestAnimationFrame(() => {
@@ -286,113 +297,221 @@
     </script>
 
     <style>
-        body { margin: 0; padding: 0; background: #f5f7fa; font-family: var(--aui-font-sans); }
+        body { margin: 0; padding: 0; background: #ffffff; color: #1f2937; font-family: var(--aui-font-sans); -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
 
         .aui-showcase { display: flex; align-items: flex-start; min-height: 100vh; }
 
+        /* Sidebar */
         .aui-showcase-sidebar {
             position: sticky;
             top: 0;
-            flex: 0 0 250px;
+            flex: 0 0 264px;
             box-sizing: border-box;
-            height: 100vh;
-            overflow-y: auto;
-            padding: 24px 14px;
-            background: #ffffff;
-            border-right: 1px solid #e5e9f0;
-        }
-        .aui-showcase-brand { padding: 0 10px 18px; }
-        .aui-showcase-brand strong { display: block; font-family: var(--aui-font-display); font-size: 18px; }
-        .aui-showcase-brand span { color: #6b7280; font-size: 13px; }
-
-        .aui-showcase-nav { display: flex; flex-direction: column; gap: 2px; }
-        .aui-showcase-nav-group {
-            padding: 16px 10px 6px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: #9ca3af;
-        }
-        .aui-showcase-nav-group:first-child { padding-top: 0; }
-        .aui-showcase-nav button {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            border: 0;
-            background: transparent;
-            text-align: left;
-            padding: 9px 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            color: #374151;
-            cursor: pointer;
+            flex-direction: column;
+            height: 100vh;
+            background: #fafbfc;
+            border-right: 1px solid #eceff3;
         }
-        .aui-showcase-nav button i { width: 16px; text-align: center; color: #9ca3af; }
-        .aui-showcase-nav button:hover { background: #f3f4f6; }
-        .aui-showcase-nav button.is-active { background: var(--aui-primary, #16a34a); color: #fff; }
-        .aui-showcase-nav button.is-active i { color: #fff; }
-
-        .aui-showcase-content { flex: 1 1 auto; min-width: 0; padding: 30px; max-width: 1080px; margin: 0 auto; }
-        .aui-showcase-content > * + * { margin-top: 24px; }
-        .aui-showcase-section > * + * { margin-top: 24px; }
-
-        .aui-showcase-code {
-            margin: 0;
-            padding: 14px 16px;
-            background: #0f172a;
-            color: #e2e8f0;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-size: 12.5px;
-            line-height: 1.6;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        .aui-showcase-brand { display: flex; align-items: center; gap: 10px; padding: 22px 20px 18px; }
+        .aui-showcase-logo {
+            display: grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: var(--aui-primary, #16a34a);
+            color: #fff;
+            font-family: var(--aui-font-display);
+            font-size: 15px;
+            font-weight: 800;
         }
-
-        .aui-showcase-code-wrap { position: relative; }
-        /* Room for the copy button, so a long first line never runs under it. */
-        .aui-showcase-code-wrap .aui-showcase-code { padding-right: 96px; }
-        .aui-showcase-copy {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 9px;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            background: #1e293b;
-            color: #cbd5e1;
-            font-family: inherit;
-            font-size: 12px;
-            line-height: 1;
-            cursor: pointer;
-        }
-        .aui-showcase-copy:hover { background: #334155; color: #fff; }
-        .aui-showcase-copy:focus-visible { outline: 2px solid var(--aui-primary, #16a34a); outline-offset: 2px; }
-        .aui-showcase-copy.is-copied { border-color: var(--aui-primary, #16a34a); color: #fff; }
+        .aui-showcase-brand div strong { display: block; font-family: var(--aui-font-display); font-size: 16px; line-height: 1.2; color: #111827; }
+        .aui-showcase-brand div span { font-size: 12px; color: #6b7280; }
 
         .aui-showcase-search-trigger {
             display: flex;
             align-items: center;
             gap: 8px;
-            width: calc(100% - 20px);
-            margin: 0 10px 18px;
+            margin: 0 16px 8px;
             padding: 8px 10px;
             border: 1px solid #e5e9f0;
             border-radius: 8px;
-            background: #f8fafc;
+            background: #fff;
             color: #6b7280;
             font-family: inherit;
             font-size: 13px;
             cursor: pointer;
+            transition: border-color .15s, color .15s;
         }
         .aui-showcase-search-trigger:hover { border-color: #cbd5e1; color: #374151; }
         .aui-showcase-search-trigger span { flex: 1 1 auto; text-align: left; }
+
+        .aui-showcase-nav { flex: 1 1 auto; overflow-y: auto; padding: 8px 12px 28px; }
+        .aui-showcase-nav-group {
+            display: block;
+            padding: 18px 10px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: #9ca3af;
+        }
+        .aui-showcase-nav button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 1px;
+            padding: 7px 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 13.5px;
+            text-align: left;
+            color: #4b5563;
+            cursor: pointer;
+        }
+        .aui-showcase-nav button i { width: 16px; font-size: 13px; text-align: center; color: #9ca3af; }
+        .aui-showcase-nav button:hover { background: #f1f3f6; color: #111827; }
+        .aui-showcase-nav button.is-active {
+            background: var(--aui-primary-light, #dcfce7);
+            color: var(--aui-primary-darker, #166534);
+            font-weight: 600;
+        }
+        .aui-showcase-nav button.is-active i { color: var(--aui-primary, #16a34a); }
+
+        /* Mobile top bar (hidden on desktop) */
+        .aui-showcase-topbar { display: none; }
+        .aui-showcase-backdrop { display: none; }
+
+        /* Content */
+        .aui-showcase-content { flex: 1 1 auto; min-width: 0; }
+        .aui-showcase-section { box-sizing: border-box; max-width: 920px; margin: 0 auto; padding: 48px 56px 64px; }
+
+        .aui-showcase-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #eef1f5; }
+        .aui-showcase-eyebrow {
+            margin: 0 0 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--aui-primary, #16a34a);
+        }
+        .aui-showcase-title { margin: 0; font-family: var(--aui-font-display); font-size: 32px; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; color: #111827; }
+        .aui-showcase-subtitle { margin: 8px 0 0; font-size: 16px; line-height: 1.5; color: #6b7280; }
+
+        .aui-showcase-lead { margin: 0 0 24px; font-size: 15px; line-height: 1.7; color: #374151; }
+        .aui-showcase-text { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: #4b5563; }
+        .aui-showcase-note { margin: 12px 0 0; font-size: 13px; color: #6b7280; }
+        .aui-showcase-lead code, .aui-showcase-text code, .aui-showcase-list code, .aui-showcase-note code, .aui-showcase-props code, .aui-showcase-demo .aui-label code {
+            padding: 1px 6px;
+            background: #f1f5f9;
+            border: 1px solid #e8edf3;
+            border-radius: 5px;
+            font-size: .88em;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #0f172a;
+        }
+        .aui-showcase-props code.aui-showcase-type { background: transparent; border: 0; padding: 0; color: #64748b; }
+        .aui-showcase-props td { vertical-align: top; font-size: 13.5px; line-height: 1.55; }
+        .aui-showcase-props td:nth-child(-n+3) { white-space: nowrap; }
+
+        .aui-showcase-theme.is-active,
+        .aui-showcase-theme.is-active:hover { background: var(--aui-primary); border-color: var(--aui-primary); color: #fff; }
+
+        /* Live demo surface */
+        .aui-showcase-demo {
+            padding: 28px;
+            background-color: #fbfcfd;
+            background-image: radial-gradient(#e6eaf0 1px, transparent 1px);
+            background-size: 18px 18px;
+            border: 1px solid #e5e9f0;
+            border-radius: 12px;
+        }
+
+        /* Sections: How it works, Props, Examples… */
+        .aui-showcase-block { margin-top: 48px; }
+        .aui-showcase-heading {
+            margin: 0 0 16px;
+            font-family: var(--aui-font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .aui-showcase-list { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.7; color: #4b5563; }
+        .aui-showcase-list li + li { margin-top: 6px; }
+        .aui-showcase-list li::marker { color: #9ca3af; }
+
+        .aui-showcase-example + .aui-showcase-example { margin-top: 32px; }
+        .aui-showcase-example-title { margin: 0 0 6px; font-size: 15px; font-weight: 600; color: #111827; }
+        .aui-showcase-example-title + .aui-showcase-code-wrap { margin-top: 10px; }
+
+        /* Code blocks */
+        .aui-showcase-code-wrap { overflow: hidden; border: 1px solid #1e293b; border-radius: 10px; background: #0f172a; }
+        .aui-showcase-code-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px 6px 14px;
+            background: #1e293b;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        .aui-showcase-code {
+            margin: 0;
+            padding: 16px 18px;
+            color: #e2e8f0;
+            overflow-x: auto;
+            font-size: 12.5px;
+            line-height: 1.65;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        .aui-showcase-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 9px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0;
+            text-transform: none;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .aui-showcase-copy:hover { background: #334155; color: #fff; }
+        .aui-showcase-copy:focus-visible { outline: 2px solid var(--aui-primary, #16a34a); outline-offset: 2px; }
+        .aui-showcase-copy.is-copied { color: #86efac; }
+
+        /* Previous / next page */
+        .aui-showcase-pager { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 64px; padding-top: 24px; border-top: 1px solid #eef1f5; }
+        .aui-showcase-pager button {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 14px 16px;
+            border: 1px solid #e5e9f0;
+            border-radius: 10px;
+            background: #fff;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color .15s;
+        }
+        .aui-showcase-pager button:hover { border-color: var(--aui-primary, #16a34a); }
+        .aui-showcase-pager button.is-next { grid-column: 2; text-align: right; }
+        .aui-showcase-pager small { font-size: 12px; color: #6b7280; }
+        .aui-showcase-pager strong { font-size: 14.5px; color: #111827; }
 
         .aui-showcase kbd, .aui-showcase-search kbd {
             padding: 1px 5px;
@@ -405,6 +524,7 @@
             color: #64748b;
         }
 
+        /* Search palette */
         .aui-showcase-search-overlay {
             position: fixed;
             inset: 0;
@@ -477,66 +597,98 @@
             animation: aui-showcase-hit-block 1.6s ease-out;
         }
 
-        .aui-showcase-lead { margin: 0 0 20px; font-size: 14px; line-height: 1.65; color: #4b5563; }
-        .aui-showcase-text { margin: 0 0 10px; font-size: 13.5px; line-height: 1.6; color: #4b5563; }
-        .aui-showcase-note { margin: 10px 0 0; font-size: 12.5px; color: #6b7280; }
-        .aui-showcase-lead code, .aui-showcase-text code, .aui-showcase-list code, .aui-showcase-note code, .aui-showcase-props code {
-            padding: 1px 5px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            font-size: .92em;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            color: #0f172a;
+        @media (max-width: 1100px) {
+            .aui-showcase-section { padding: 40px 36px 56px; }
         }
-        .aui-showcase-props code.aui-showcase-type { background: transparent; padding: 0; color: #64748b; }
-        .aui-showcase-props td { vertical-align: top; }
-        .aui-showcase-props td:nth-child(-n+3) { white-space: nowrap; }
-
-        .aui-showcase-theme.is-active,
-        .aui-showcase-theme.is-active:hover { background: var(--aui-primary); border-color: var(--aui-primary); color: #fff; }
-
-        .aui-showcase-demo {
-            padding: 22px;
-            background: #f8fafc;
-            border: 1px dashed #dbe1ea;
-            border-radius: 12px;
-        }
-
-        .aui-showcase-block { margin-top: 30px; }
-        .aui-showcase-heading {
-            margin: 0 0 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #eef1f5;
-            font-family: var(--aui-font-display);
-            font-size: 15px;
-            color: #111827;
-        }
-        .aui-showcase-list { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.7; color: #4b5563; }
-        .aui-showcase-list li + li { margin-top: 4px; }
-
-        .aui-showcase-example + .aui-showcase-example { margin-top: 22px; }
-        .aui-showcase-example-title { margin: 0 0 6px; font-size: 13.5px; font-weight: 600; color: #111827; }
-        .aui-showcase-example .aui-showcase-code { margin-top: 0; }
 
         @media (max-width: 860px) {
             .aui-showcase { display: block; }
-            .aui-showcase-sidebar { position: static; height: auto; width: auto; border-right: 0; border-bottom: 1px solid #e5e9f0; }
-            .aui-showcase-content { max-width: none; padding: 16px; }
+
+            .aui-showcase-topbar {
+                position: sticky;
+                top: 0;
+                z-index: 40;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 16px;
+                background: rgba(255, 255, 255, .92);
+                backdrop-filter: blur(8px);
+                border-bottom: 1px solid #eceff3;
+            }
+            .aui-showcase-topbar strong { flex: 1 1 auto; font-family: var(--aui-font-display); font-size: 15px; }
+            .aui-showcase-topbar button {
+                display: grid;
+                place-items: center;
+                width: 36px;
+                height: 36px;
+                border: 1px solid #e5e9f0;
+                border-radius: 8px;
+                background: #fff;
+                color: #374151;
+                cursor: pointer;
+            }
+
+            .aui-showcase-sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 60;
+                width: 280px;
+                max-width: 85vw;
+                visibility: hidden;
+                transform: translateX(-100%);
+                transition: transform .2s ease, visibility .2s;
+            }
+            .aui-showcase.is-menu-open .aui-showcase-sidebar { visibility: visible; transform: none; box-shadow: 0 20px 50px rgba(15, 23, 42, .25); }
+            .aui-showcase.is-menu-open .aui-showcase-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 50;
+                display: block;
+                background: rgba(15, 23, 42, .4);
+            }
+
+            .aui-showcase-section { padding: 28px 16px 48px; }
+            .aui-showcase-title { font-size: 26px; }
+            .aui-showcase-demo { padding: 18px; }
             .aui-showcase-content .aui-form-grid { grid-template-columns: minmax(0, 1fr); }
+            .aui-showcase-pager { grid-template-columns: 1fr; }
+            .aui-showcase-pager button.is-next { grid-column: auto; }
         }
     </style>
 </head>
 <body>
-    <div class="aui-showcase" x-data="showcase" x-on:showcase-go.window="go($event.detail)">
+    <div
+        class="aui-showcase"
+        x-data="showcase"
+        x-bind:class="{ 'is-menu-open': menu }"
+        x-on:showcase-go.window="go($event.detail)"
+        x-on:keydown.escape.window="menu = false"
+    >
+        <div class="aui-showcase-topbar">
+            <button type="button" x-on:click="menu = true" aria-label="Open navigation">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+            <strong>Avian UI</strong>
+            <button type="button" x-on:click="$dispatch('showcase-search-open')" aria-label="Search">
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="aui-showcase-backdrop" x-on:click="menu = false"></div>
+
         <aside class="aui-showcase-sidebar">
             <div class="aui-showcase-brand">
-                <strong>Avian UI</strong>
-                <span>Component showcase</span>
+                <span class="aui-showcase-logo" aria-hidden="true">A</span>
+                <div>
+                    <strong>Avian UI</strong>
+                    <span>Blade component library</span>
+                </div>
             </div>
 
             <button type="button" class="aui-showcase-search-trigger" x-on:click="$dispatch('showcase-search-open')">
                 <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                <span>Search</span>
+                <span>Search docs</span>
                 <kbd>Ctrl</kbd><kbd>Space</kbd>
             </button>
 
@@ -547,8 +699,9 @@
                     @foreach ($items as $key => $item)
                         <button
                             type="button"
-                            x-on:click="section = '{{ $key }}'; window.scrollTo(0, 0)"
+                            x-on:click="go({ key: '{{ $key }}' })"
                             x-bind:class="section === '{{ $key }}' ? 'is-active' : ''"
+                            x-bind:aria-current="section === '{{ $key }}' ? 'page' : null"
                         >
                             <i class="{{ $item['icon'] }}" aria-hidden="true"></i>
                             {{ $item['label'] }}
@@ -559,19 +712,33 @@
         </aside>
 
         <main class="aui-showcase-content">
-            @foreach ($nav as $group => $items)
-                @foreach ($items as $key => $item)
-                    <section
-                        class="aui-showcase-section"
-                        x-show="section === '{{ $key }}'"
-                        x-cloak
-                        data-search-key="{{ $key }}"
-                        data-search-page="{{ $item['label'] }}"
-                        data-search-group="{{ $group }}"
-                    >
-                        @include('avian-ui::docs.'.$key)
-                    </section>
-                @endforeach
+            @foreach ($pages as $index => [$group, $key, $item])
+                <section
+                    class="aui-showcase-section"
+                    x-show="section === '{{ $key }}'"
+                    x-cloak
+                    data-search-key="{{ $key }}"
+                    data-search-page="{{ $item['label'] }}"
+                    data-search-group="{{ $group }}"
+                >
+                    @include('avian-ui::docs.'.$key)
+
+                    <nav class="aui-showcase-pager" aria-label="Pages">
+                        @if ($previous = $pages[$index - 1] ?? null)
+                            <button type="button" x-on:click="go({ key: '{{ $previous[1] }}' })">
+                                <small><i class="fas fa-arrow-left" aria-hidden="true"></i> Previous</small>
+                                <strong>{{ $previous[2]['label'] }}</strong>
+                            </button>
+                        @endif
+
+                        @if ($next = $pages[$index + 1] ?? null)
+                            <button type="button" class="is-next" x-on:click="go({ key: '{{ $next[1] }}' })">
+                                <small>Next <i class="fas fa-arrow-right" aria-hidden="true"></i></small>
+                                <strong>{{ $next[2]['label'] }}</strong>
+                            </button>
+                        @endif
+                    </nav>
+                </section>
             @endforeach
         </main>
     </div>

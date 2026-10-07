@@ -162,71 +162,70 @@
     ];
 @endphp
 
-<x-avian::card title="Multi select" subtitle="Pick several values as chips">
-    <p class="aui-showcase-lead">
-        A searchable dropdown for choosing more than one value — tags, skills, team members. Picked values
-        appear as removable chips inside the field and are submitted as an array.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Multi select', 'subtitle' => 'Pick several values as chips'])
+<p class="aui-showcase-lead">
+    A searchable dropdown for choosing more than one value — tags, skills, team members. Picked values
+    appear as removable chips inside the field and are submitted as an array.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::multi-select
-                name="multi_skills"
-                label="Skills"
-                placeholder="Pick a few skills"
-                :options="['php' => 'PHP', 'laravel' => 'Laravel', 'js' => 'JavaScript', 'css' => 'CSS', 'sql' => 'SQL', 'go' => 'Go']"
-                :value="['php', 'laravel']"
-            />
-            <x-avian::multi-select
-                name="multi_reviewers"
-                label="Reviewers"
-                max="2"
-                hint="Up to two reviewers (max=2)."
-                :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper', 'alan' => 'Alan Turing', 'linus' => 'Linus Torvalds']"
-            />
-            <x-avian::multi-select
-                name="multi_keywords"
-                label="Keywords (clearable, taggable)"
-                hint="Type a keyword that is not listed and press Enter to add it."
-                clearable
-                taggable
-                :options="['laravel' => 'Laravel', 'livewire' => 'Livewire', 'alpine' => 'Alpine.js']"
-                :value="['laravel', 'ui kit']"
-            />
-            <x-avian::multi-select
-                name="multi_tags"
-                label="Tags"
-                required
-                error="Choose at least one tag."
-                :options="['news' => 'News', 'guide' => 'Guide', 'release' => 'Release']"
-            />
-            <x-avian::multi-select
-                name="multi_locked"
-                label="Locked"
-                disabled
-                :options="['a' => 'Alpha', 'b' => 'Beta']"
-                :value="['a']"
-            />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::multi-select
+            name="multi_skills"
+            label="Skills"
+            placeholder="Pick a few skills"
+            :options="['php' => 'PHP', 'laravel' => 'Laravel', 'js' => 'JavaScript', 'css' => 'CSS', 'sql' => 'SQL', 'go' => 'Go']"
+            :value="['php', 'laravel']"
+        />
+        <x-avian::multi-select
+            name="multi_reviewers"
+            label="Reviewers"
+            max="2"
+            hint="Up to two reviewers (max=2)."
+            :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper', 'alan' => 'Alan Turing', 'linus' => 'Linus Torvalds']"
+        />
+        <x-avian::multi-select
+            name="multi_keywords"
+            label="Keywords (clearable, taggable)"
+            hint="Type a keyword that is not listed and press Enter to add it."
+            clearable
+            taggable
+            :options="['laravel' => 'Laravel', 'livewire' => 'Livewire', 'alpine' => 'Alpine.js']"
+            :value="['laravel', 'ui kit']"
+        />
+        <x-avian::multi-select
+            name="multi_tags"
+            label="Tags"
+            required
+            error="Choose at least one tag."
+            :options="['news' => 'News', 'guide' => 'Guide', 'release' => 'Release']"
+        />
+        <x-avian::multi-select
+            name="multi_locked"
+            label="Locked"
+            disabled
+            :options="['a' => 'Alpha', 'b' => 'Beta']"
+            :value="['a']"
+        />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Click an option to toggle it; the dropdown stays open so you can keep picking. Click outside or press Esc to close.</li>
-            <li>Remove a value with the × on its chip, with Backspace in an empty search box, or with <em>Clear</em> in the dropdown.</li>
-            <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row; Enter adds it too. Backspace in an empty search box takes a typed tag back for editing.</li>
-            <li>One hidden <code>&lt;input name="skills[]"&gt;</code> is rendered per value. When nothing is picked, nothing is sent — use <code>$request-&gt;input('skills', [])</code>.</li>
-            <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Click an option to toggle it; the dropdown stays open so you can keep picking. Click outside or press Esc to close.</li>
+        <li>Remove a value with the × on its chip, with Backspace in an empty search box, or with <em>Clear</em> in the dropdown.</li>
+        <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row; Enter adds it too. Backspace in an empty search box takes a typed tag back for editing.</li>
+        <li>One hidden <code>&lt;input name="skills[]"&gt;</code> is rendered per value. When nothing is picked, nothing is sent — use <code>$request-&gt;input('skills', [])</code>.</li>
+        <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

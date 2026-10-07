@@ -55,45 +55,44 @@
     ];
 @endphp
 
-<x-avian::card title="Badge" subtitle="Small coloured labels for status and counts">
-    <p class="aui-showcase-lead">
-        A pill-shaped label for statuses (paid, pending), categories and counters. Badges are only for
-        display — use a button when it should be clickable.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Badge', 'subtitle' => 'Small coloured labels for status and counts'])
+<p class="aui-showcase-lead">
+    A pill-shaped label for statuses (paid, pending), categories and counters. Badges are only for
+    display — use a button when it should be clickable.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack">
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['neutral', 'primary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
-                    <x-avian::badge :variant="$variant">{{ ucfirst($variant) }}</x-avian::badge>
-                @endforeach
-            </div>
-            <div class="aui-row" style="flex-wrap: wrap">
-                <x-avian::badge variant="success" dot>Complete</x-avian::badge>
-                <x-avian::badge variant="warning" dot>Ongoing</x-avian::badge>
-                <x-avian::badge variant="danger" dot>Not started</x-avian::badge>
-                <x-avian::badge variant="info" icon="fas fa-bolt">New</x-avian::badge>
-                <x-avian::badge variant="primary" size="sm">Small</x-avian::badge>
-                <x-avian::badge variant="info" uppercase>Uppercase</x-avian::badge>
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-stack">
+        <div class="aui-row" style="flex-wrap: wrap">
+            @foreach (['neutral', 'primary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
+                <x-avian::badge :variant="$variant">{{ ucfirst($variant) }}</x-avian::badge>
+            @endforeach
+        </div>
+        <div class="aui-row" style="flex-wrap: wrap">
+            <x-avian::badge variant="success" dot>Complete</x-avian::badge>
+            <x-avian::badge variant="warning" dot>Ongoing</x-avian::badge>
+            <x-avian::badge variant="danger" dot>Not started</x-avian::badge>
+            <x-avian::badge variant="info" icon="fas fa-bolt">New</x-avian::badge>
+            <x-avian::badge variant="primary" size="sm">Small</x-avian::badge>
+            <x-avian::badge variant="info" uppercase>Uppercase</x-avian::badge>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>The slot is the badge text; it is escaped like any Blade output.</li>
-            <li>Colours come from the active theme, so badges follow <code>data-theme</code> like everything else.</li>
-            <li>Use <code>dot</code> for states and plain badges for categories, so the two read differently in the same table.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>The slot is the badge text; it is escaped like any Blade output.</li>
+        <li>Colours come from the active theme, so badges follow <code>data-theme</code> like everything else.</li>
+        <li>Use <code>dot</code> for states and plain badges for categories, so the two read differently in the same table.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

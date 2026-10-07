@@ -86,49 +86,48 @@
     ];
 @endphp
 
-<x-avian::card title="Confirm dialog" subtitle="Ask before a destructive action">
-    <p class="aui-showcase-lead">
-        One shared "Are you sure?" dialog. Add <code>confirm="…"</code> to a button (or
-        <code>data-aui-confirm</code> to any element or form) and the action only runs after the user agrees.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Confirm dialog', 'subtitle' => 'Ask before a destructive action'])
+<p class="aui-showcase-lead">
+    One shared "Are you sure?" dialog. Add <code>confirm="…"</code> to a button (or
+    <code>data-aui-confirm</code> to any element or form) and the action only runs after the user agrees.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap" x-data="{ result: 'Nothing done yet.' }">
-            <x-avian::button variant="danger" icon="fas fa-trash"
-                x-on:click="result = 'Deleted at ' + new Date().toLocaleTimeString()"
-                confirm="Order ORD-2026-0042 will be removed for good."
-                data-aui-confirm-title="Delete order?"
-                data-aui-confirm-text="Yes, delete">Delete order</x-avian::button>
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap" x-data="{ result: 'Nothing done yet.' }">
+        <x-avian::button variant="danger" icon="fas fa-trash"
+            x-on:click="result = 'Deleted at ' + new Date().toLocaleTimeString()"
+            confirm="Order ORD-2026-0042 will be removed for good."
+            data-aui-confirm-title="Delete order?"
+            data-aui-confirm-text="Yes, delete">Delete order</x-avian::button>
 
-            <x-avian::button variant="light" icon="fas fa-lock"
-                x-on:click="AvianUI.confirm({ title: 'Close period?', message: 'Journals in March will be locked.', variant: 'warning', confirmText: 'Close period' }).then(ok => result = ok ? 'Period closed.' : 'Period kept open.')">
-                Close period
-            </x-avian::button>
+        <x-avian::button variant="light" icon="fas fa-lock"
+            x-on:click="AvianUI.confirm({ title: 'Close period?', message: 'Journals in March will be locked.', variant: 'warning', confirmText: 'Close period' }).then(ok => result = ok ? 'Period closed.' : 'Period kept open.')">
+            Close period
+        </x-avian::button>
 
-            <x-avian::button variant="light" icon="fas fa-paper-plane"
-                x-on:click="AvianUI.confirm({ title: 'Send invoice?', message: 'The customer gets an email right away.', variant: 'primary', confirmText: 'Send', action: () => new Promise(done => setTimeout(done, 1500)) }).then(ok => result = ok ? 'Invoice sent.' : 'Invoice not sent.')">
-                Send invoice
-            </x-avian::button>
+        <x-avian::button variant="light" icon="fas fa-paper-plane"
+            x-on:click="AvianUI.confirm({ title: 'Send invoice?', message: 'The customer gets an email right away.', variant: 'primary', confirmText: 'Send', action: () => new Promise(done => setTimeout(done, 1500)) }).then(ok => result = ok ? 'Invoice sent.' : 'Invoice not sent.')">
+            Send invoice
+        </x-avian::button>
 
-            <span x-text="result" style="font-size: 13px; color: var(--aui-text-muted)"></span>
-        </div>
+        <span x-text="result" style="font-size: 13px; color: var(--aui-text-muted)"></span>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Clicks on <code>[data-aui-confirm]</code> and submits of <code>form[data-aui-confirm]</code> are caught before any other handler, then replayed after a yes.</li>
-            <li>The Cancel button gets focus, so a stray Enter never confirms. Esc and a click on the backdrop mean no.</li>
-            <li>It sits above modals and drawers, so it can confirm an action inside one without closing it.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Clicks on <code>[data-aui-confirm]</code> and submits of <code>form[data-aui-confirm]</code> are caught before any other handler, then replayed after a yes.</li>
+        <li>The Cancel button gets focus, so a stray Enter never confirms. Esc and a click on the backdrop mean no.</li>
+        <li>It sits above modals and drawers, so it can confirm an action inside one without closing it.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

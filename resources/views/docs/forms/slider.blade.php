@@ -67,45 +67,44 @@
     ];
 @endphp
 
-<x-avian::card title="Slider" subtitle="Pick a number by dragging">
-    <p class="aui-showcase-lead">
-        A styled range input for values where the rough position matters more than the exact digit: a volume, a
-        discount, a price bracket. Add <code>range</code> for a two-thumb slider that picks a low and a high bound.
-        Use a number input instead when people already know the exact value they want to type.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Slider', 'subtitle' => 'Pick a number by dragging'])
+<p class="aui-showcase-lead">
+    A styled range input for values where the rough position matters more than the exact digit: a volume, a
+    discount, a price bracket. Add <code>range</code> for a two-thumb slider that picks a low and a high bound.
+    Use a number input instead when people already know the exact value they want to type.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <div class="aui-stack">
-                <x-avian::slider name="slider_volume" label="Volume" :value="40" show-value suffix="%" />
-                <x-avian::slider name="slider_rating" label="Minimum rating" :min="0" :max="5" :step="0.5" :value="3.5" show-value />
-                <x-avian::slider name="slider_locked" label="Locked (disabled)" :value="70" show-value suffix="%" disabled />
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <div class="aui-stack">
+            <x-avian::slider name="slider_volume" label="Volume" :value="40" show-value suffix="%" />
+            <x-avian::slider name="slider_rating" label="Minimum rating" :min="0" :max="5" :step="0.5" :value="3.5" show-value />
+            <x-avian::slider name="slider_locked" label="Locked (disabled)" :value="70" show-value suffix="%" disabled />
+        </div>
 
-            <div class="aui-stack">
-                <x-avian::slider name="slider_price" label="Price" :min="0" :max="1000" :step="10" :value="[100, 500]" range show-value prefix="$" />
-                <x-avian::slider name="slider_age" label="Age" :min="18" :max="99" :value="[25, 40]" range show-value hint="Both ends are inclusive." />
-                <x-avian::slider name="slider_discount" label="Discount" :value="85" show-value suffix="%" error="Discounts above 50% need approval." />
-            </div>
+        <div class="aui-stack">
+            <x-avian::slider name="slider_price" label="Price" :min="0" :max="1000" :step="10" :value="[100, 500]" range show-value prefix="$" />
+            <x-avian::slider name="slider_age" label="Age" :min="18" :max="99" :value="[25, 40]" range show-value hint="Both ends are inclusive." />
+            <x-avian::slider name="slider_discount" label="Discount" :value="85" show-value suffix="%" error="Discounts above 50% need approval." />
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>It is a native <code>&lt;input type="range"&gt;</code>, so arrow keys, Page Up/Down, Home and End all work from the keyboard.</li>
-            <li>Values are clamped to <code>min</code>–<code>max</code> and snapped to <code>step</code>; in range mode the thumbs can meet but never cross.</li>
-            <li>A range submits <code>name[min]</code> and <code>name[max]</code>, and its error is read from <code>name</code>, <code>name.min</code> or <code>name.max</code>.</li>
-            <li>Old input is restored automatically after a failed validation.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>It is a native <code>&lt;input type="range"&gt;</code>, so arrow keys, Page Up/Down, Home and End all work from the keyboard.</li>
+        <li>Values are clamped to <code>min</code>–<code>max</code> and snapped to <code>step</code>; in range mode the thumbs can meet but never cross.</li>
+        <li>A range submits <code>name[min]</code> and <code>name[max]</code>, and its error is read from <code>name</code>, <code>name.min</code> or <code>name.max</code>.</li>
+        <li>Old input is restored automatically after a failed validation.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

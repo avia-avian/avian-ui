@@ -36,43 +36,42 @@
     ];
 @endphp
 
-<x-avian::card title="Stat" subtitle="KPI tile for dashboards">
-    <p class="aui-showcase-lead">
-        One headline number with a label, an optional icon and how it moved since last period.
-        Put several in <code>aui-grid aui-grid-4</code> for a dashboard row.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Stat', 'subtitle' => 'KPI tile for dashboards'])
+<p class="aui-showcase-lead">
+    One headline number with a label, an optional icon and how it moved since last period.
+    Put several in <code>aui-grid aui-grid-4</code> for a dashboard row.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-grid aui-grid-4">
-            <x-avian::stat label="Revenue" value="Rp 1,28 M" change="+12.5%" description="vs last month" icon="fas fa-wallet" />
-            <x-avian::stat label="Orders" value="1,284" change="-3.1%" description="vs last month" icon="fas fa-cart-shopping" color="info" />
-            <x-avian::stat label="Returns" value="18" change="-22%" invert description="fewer is better" icon="fas fa-rotate-left" color="warning" />
-            <x-avian::stat label="Overdue invoices" value="7" href="#" icon="fas fa-file-invoice" color="danger" description="Click to review" />
-        </div>
-
-        <div class="aui-grid" style="margin-top: 20px">
-            <x-avian::stat label="Monthly target" value="72%" description="Rp 720 jt of Rp 1 M" icon="fas fa-bullseye" color="success">
-                <x-avian::progress :value="72" />
-            </x-avian::stat>
-            <x-avian::stat label="Active stores" value="342" change="0%" description="no change" />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-grid aui-grid-4">
+        <x-avian::stat label="Revenue" value="Rp 1,28 M" change="+12.5%" description="vs last month" icon="fas fa-wallet" />
+        <x-avian::stat label="Orders" value="1,284" change="-3.1%" description="vs last month" icon="fas fa-cart-shopping" color="info" />
+        <x-avian::stat label="Returns" value="18" change="-22%" invert description="fewer is better" icon="fas fa-rotate-left" color="warning" />
+        <x-avian::stat label="Overdue invoices" value="7" href="#" icon="fas fa-file-invoice" color="danger" description="Click to review" />
     </div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>A change starting with <code>-</code> shows a down arrow, one with any non-zero digit an up arrow, and <code>0%</code> is flat.</li>
-            <li>Up is green and down is red; <code>invert</code> swaps the colors for numbers where less is better.</li>
-            <li>Pass <code>value</code> already formatted — the component never formats numbers itself.</li>
-        </ul>
+    <div class="aui-grid" style="margin-top: 20px">
+        <x-avian::stat label="Monthly target" value="72%" description="Rp 720 jt of Rp 1 M" icon="fas fa-bullseye" color="success">
+            <x-avian::progress :value="72" />
+        </x-avian::stat>
+        <x-avian::stat label="Active stores" value="342" change="0%" description="no change" />
     </div>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>A change starting with <code>-</code> shows a down arrow, one with any non-zero digit an up arrow, and <code>0%</code> is flat.</li>
+        <li>Up is green and down is red; <code>invert</code> swaps the colors for numbers where less is better.</li>
+        <li>Pass <code>value</code> already formatted — the component never formats numbers itself.</li>
+    </ul>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+@include('avian-ui::docs.partials.props')
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

@@ -59,56 +59,51 @@
     ];
 @endphp
 
-<x-avian::page-header title="Avian UI" subtitle="Blade components for Laravel, built on Alpine. Works with and without Livewire.">
-    <x-slot:actions>
-        <x-avian::button icon="fas fa-plus" modal="demo">New record</x-avian::button>
-    </x-slot:actions>
-</x-avian::page-header>
+@include('avian-ui::docs.partials.header', ['title' => 'Getting started', 'subtitle' => 'Blade components for Laravel, built on Alpine. Works with and without Livewire.'])
 
-<x-avian::card title="Getting started" subtitle="Install, include the assets and pick a theme">
-    <p class="aui-showcase-lead">
-        Avian UI is a set of anonymous Blade components (<code>&lt;x-avian::button&gt;</code>,
-        <code>&lt;x-avian::input&gt;</code>, …) plus one stylesheet and one small script. Pick a component
-        in the sidebar to see a live demo, what each prop does and copy-ready examples.
-    </p>
+<p class="aui-showcase-lead">
+    Avian UI is a set of anonymous Blade components (<code>&lt;x-avian::button&gt;</code>,
+    <code>&lt;x-avian::input&gt;</code>, …) plus one stylesheet and one small script. Pick a component
+    in the sidebar to see a live demo, what each prop does and copy-ready examples.
+</p>
 
-    <div class="aui-showcase-demo">
-        <x-avian::label>Try a theme — this changes <code>data-theme</code> on <code>&lt;html&gt;</code></x-avian::label>
-        <div class="aui-row" style="flex-wrap: wrap" x-data="{ theme: document.documentElement.dataset.theme }">
-            @foreach ($themes as $theme)
-                <x-avian::button
-                    size="sm"
-                    variant="outline"
-                    x-on:click="theme = '{{ $theme }}'; document.documentElement.dataset.theme = theme"
-                    class="aui-showcase-theme"
-                    x-bind:class="theme === '{{ $theme }}' ? 'is-active' : ''"
-                >{{ $theme }}</x-avian::button>
-            @endforeach
-        </div>
-
-        <div class="aui-row" style="flex-wrap: wrap; margin-top: 18px">
-            <x-avian::button icon="fas fa-check">Primary</x-avian::button>
-            <x-avian::badge variant="primary">Badge</x-avian::badge>
-            <x-avian::badge variant="success" dot>Active</x-avian::badge>
-            <div style="flex: 1 1 200px"><x-avian::progress :value="64" /></div>
-        </div>
-    </div>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Things to know</h4>
-        <ul class="aui-showcase-list">
-            <li><strong>Form controls</strong> read validation errors and old input by <code>name</code> automatically — see <em>Form &amp; layout</em>.</li>
-            <li><strong>Interactive components</strong> (modal, dropdown, tabs, searchable/multi select, file, dismissible alert) need Alpine and <code>&lt;x-avian::scripts /&gt;</code>.</li>
-            <li><strong>Livewire</strong>: <code>wire:model</code>, <code>wire:click</code> and friends can be put on any component; they are forwarded to the right element.</li>
-            <li><strong>Extra attributes</strong> such as <code>class</code>, <code>id</code> or <code>data-*</code> are always passed through, so you can style or hook into any component.</li>
-            <li><strong>No remote requests</strong>: the package serves its own CSS and JS and never loads anything from a CDN; fonts, icons and Alpine are yours to choose.</li>
-        </ul>
-    </div>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Setup</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
+<div class="aui-showcase-demo">
+    <x-avian::label>Try a theme — this changes <code>data-theme</code> on <code>&lt;html&gt;</code></x-avian::label>
+    <div class="aui-row" style="flex-wrap: wrap" x-data="{ theme: document.documentElement.dataset.theme }">
+        @foreach ($themes as $theme)
+            <x-avian::button
+                size="sm"
+                variant="outline"
+                x-on:click="theme = '{{ $theme }}'; document.documentElement.dataset.theme = theme"
+                class="aui-showcase-theme"
+                x-bind:class="theme === '{{ $theme }}' ? 'is-active' : ''"
+            >{{ $theme }}</x-avian::button>
         @endforeach
     </div>
-</x-avian::card>
+
+    <div class="aui-row" style="flex-wrap: wrap; margin-top: 18px">
+        <x-avian::button icon="fas fa-check">Primary</x-avian::button>
+        <x-avian::badge variant="primary">Badge</x-avian::badge>
+        <x-avian::badge variant="success" dot>Active</x-avian::badge>
+        <div style="flex: 1 1 200px"><x-avian::progress :value="64" /></div>
+        <x-avian::button variant="light" icon="fas fa-window-restore" modal="demo">Open a modal</x-avian::button>
+    </div>
+</div>
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Things to know</h2>
+    <ul class="aui-showcase-list">
+        <li><strong>Form controls</strong> read validation errors and old input by <code>name</code> automatically — see <em>Form &amp; layout</em>.</li>
+        <li><strong>Interactive components</strong> (modal, dropdown, tabs, searchable/multi select, file, dismissible alert) need Alpine and <code>&lt;x-avian::scripts /&gt;</code>.</li>
+        <li><strong>Livewire</strong>: <code>wire:model</code>, <code>wire:click</code> and friends can be put on any component; they are forwarded to the right element.</li>
+        <li><strong>Extra attributes</strong> such as <code>class</code>, <code>id</code> or <code>data-*</code> are always passed through, so you can style or hook into any component.</li>
+        <li><strong>No remote requests</strong>: the package serves its own CSS and JS and never loads anything from a CDN; fonts, icons and Alpine are yours to choose.</li>
+    </ul>
+</div>
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Setup</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

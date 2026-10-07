@@ -115,82 +115,81 @@
     ];
 @endphp
 
-<x-avian::card title="Button" subtitle="Actions, links and modal triggers">
-    <p class="aui-showcase-lead">
-        The button for every action on a page. It renders a <code>&lt;button&gt;</code>, or an
-        <code>&lt;a&gt;</code> when you pass <code>href</code>, and supports colours, outline/ghost shapes,
-        sizes, icons, a loading state and opening a modal.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Button', 'subtitle' => 'Actions, links and modal triggers'])
+<p class="aui-showcase-lead">
+    The button for every action on a page. It renders a <code>&lt;button&gt;</code>, or an
+    <code>&lt;a&gt;</code> when you pass <code>href</code>, and supports colours, outline/ghost shapes,
+    sizes, icons, a loading state and opening a modal.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack">
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'light', 'link'] as $variant)
-                    <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
-                @endforeach
-            </div>
-
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
-                    <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
-                @endforeach
-            </div>
-
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
-                    <x-avian::button variant="outline" :color="$color">{{ ucfirst($color) }}</x-avian::button>
-                @endforeach
-            </div>
-
-            <div class="aui-row" style="flex-wrap: wrap">
-                @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
-                    <x-avian::button variant="ghost" :color="$color">{{ ucfirst($color) }}</x-avian::button>
-                @endforeach
-            </div>
-
-            <div class="aui-row" style="flex-wrap: wrap">
-                <x-avian::button size="xs">Extra small</x-avian::button>
-                <x-avian::button size="sm">Small</x-avian::button>
-                <x-avian::button>Default</x-avian::button>
-                <x-avian::button size="lg">Large</x-avian::button>
-                <x-avian::button icon="fas fa-plus">Icon</x-avian::button>
-                <x-avian::button icon-right="fas fa-arrow-right" variant="light">Next</x-avian::button>
-                <x-avian::button loading>Saving</x-avian::button>
-                <x-avian::button disabled>Disabled</x-avian::button>
-            </div>
-
-            <div class="aui-row" style="flex-wrap: wrap">
-                <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" />
-                <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="ghost" color="danger" />
-                <x-avian::button icon="fas fa-plus" icon-only label="Add" size="sm" />
-                <x-avian::button icon="fas fa-check" icon-only label="Approve" size="lg" variant="success" />
-                <x-avian::button icon="fas fa-ellipsis" icon-only label="More" size="xs" variant="ghost" />
-                <x-avian::button icon="fas fa-plus" icon-only label="Add" rounded />
-                <x-avian::button icon="fas fa-heart" icon-only label="Favourite" rounded variant="outline" color="danger" />
-                <x-avian::button variant="light" icon="fas fa-star" active>Starred</x-avian::button>
-                <x-avian::button rounded variant="light">Pill</x-avian::button>
-            </div>
-
-            <x-avian::button block variant="outline">Block button</x-avian::button>
+<div class="aui-showcase-demo">
+    <div class="aui-stack">
+        <div class="aui-row" style="flex-wrap: wrap">
+            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'light', 'link'] as $variant)
+                <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
+            @endforeach
         </div>
-    </div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>The default <code>type</code> is <code>button</code>, not <code>submit</code> — a button inside a form only submits it when you say so.</li>
-            <li><code>loading</code> also disables the button, which prevents double submits.</li>
-            <li><code>modal="name"</code> dispatches the <code>aui-modal-open</code> browser event, so the button can sit anywhere on the page, even outside any Alpine component.</li>
-            <li>Every other attribute (<code>wire:click</code>, <code>x-on:click</code>, <code>form</code>, <code>target</code>…) is passed to the element.</li>
-        </ul>
-    </div>
+        <div class="aui-row" style="flex-wrap: wrap">
+            @foreach (['purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
+                <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
+            @endforeach
+        </div>
 
-    @include('avian-ui::docs.partials.props')
+        <div class="aui-row" style="flex-wrap: wrap">
+            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
+                <x-avian::button variant="outline" :color="$color">{{ ucfirst($color) }}</x-avian::button>
+            @endforeach
+        </div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
+        <div class="aui-row" style="flex-wrap: wrap">
+            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
+                <x-avian::button variant="ghost" :color="$color">{{ ucfirst($color) }}</x-avian::button>
+            @endforeach
+        </div>
+
+        <div class="aui-row" style="flex-wrap: wrap">
+            <x-avian::button size="xs">Extra small</x-avian::button>
+            <x-avian::button size="sm">Small</x-avian::button>
+            <x-avian::button>Default</x-avian::button>
+            <x-avian::button size="lg">Large</x-avian::button>
+            <x-avian::button icon="fas fa-plus">Icon</x-avian::button>
+            <x-avian::button icon-right="fas fa-arrow-right" variant="light">Next</x-avian::button>
+            <x-avian::button loading>Saving</x-avian::button>
+            <x-avian::button disabled>Disabled</x-avian::button>
+        </div>
+
+        <div class="aui-row" style="flex-wrap: wrap">
+            <x-avian::button icon="fas fa-pen" icon-only label="Edit" variant="light" />
+            <x-avian::button icon="fas fa-trash" icon-only label="Delete" variant="ghost" color="danger" />
+            <x-avian::button icon="fas fa-plus" icon-only label="Add" size="sm" />
+            <x-avian::button icon="fas fa-check" icon-only label="Approve" size="lg" variant="success" />
+            <x-avian::button icon="fas fa-ellipsis" icon-only label="More" size="xs" variant="ghost" />
+            <x-avian::button icon="fas fa-plus" icon-only label="Add" rounded />
+            <x-avian::button icon="fas fa-heart" icon-only label="Favourite" rounded variant="outline" color="danger" />
+            <x-avian::button variant="light" icon="fas fa-star" active>Starred</x-avian::button>
+            <x-avian::button rounded variant="light">Pill</x-avian::button>
+        </div>
+
+        <x-avian::button block variant="outline">Block button</x-avian::button>
     </div>
-</x-avian::card>
+</div>
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>The default <code>type</code> is <code>button</code>, not <code>submit</code> — a button inside a form only submits it when you say so.</li>
+        <li><code>loading</code> also disables the button, which prevents double submits.</li>
+        <li><code>modal="name"</code> dispatches the <code>aui-modal-open</code> browser event, so the button can sit anywhere on the page, even outside any Alpine component.</li>
+        <li>Every other attribute (<code>wire:click</code>, <code>x-on:click</code>, <code>form</code>, <code>target</code>…) is passed to the element.</li>
+    </ul>
+</div>
+
+@include('avian-ui::docs.partials.props')
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

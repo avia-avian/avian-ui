@@ -8,6 +8,7 @@ return [
     'close' => 'Close',
     'confirm' => 'Confirm',
     'confirm_title' => 'Are you sure?',
+    'details' => 'Show details',
     'dismiss' => 'Dismiss',
     'grid_view' => 'Grid view',
     'list_view' => 'List view',

@@ -43,53 +43,52 @@
     ];
 @endphp
 
-<x-avian::card title="Accordion" subtitle="Collapsible sections">
-    <p class="aui-showcase-lead">
-        Stacks of sections that expand and collapse — long forms split into steps, order details, FAQs.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Accordion', 'subtitle' => 'Collapsible sections'])
+<p class="aui-showcase-lead">
+    Stacks of sections that expand and collapse — long forms split into steps, order details, FAQs.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-grid">
-            <x-avian::accordion>
-                <x-avian::accordion.item title="Shipping address" subtitle="Jl. Raya Darmo 12, Surabaya" icon="fas fa-truck" open>
-                    Delivered by the Surabaya DC fleet, usually within two working days.
+<div class="aui-showcase-demo">
+    <div class="aui-grid">
+        <x-avian::accordion>
+            <x-avian::accordion.item title="Shipping address" subtitle="Jl. Raya Darmo 12, Surabaya" icon="fas fa-truck" open>
+                Delivered by the Surabaya DC fleet, usually within two working days.
+            </x-avian::accordion.item>
+            <x-avian::accordion.item title="Billing address" icon="fas fa-file-invoice">
+                Same as the shipping address.
+            </x-avian::accordion.item>
+            <x-avian::accordion.item title="Notes" icon="fas fa-note-sticky">
+                Call the store manager before unloading.
+            </x-avian::accordion.item>
+        </x-avian::accordion>
+
+        <x-avian::card title="FAQ (flush, multiple)">
+            <x-avian::accordion flush multiple>
+                <x-avian::accordion.item title="How do I reset my password?" open>
+                    Use "Forgot password" on the sign-in page; the link expires after an hour.
                 </x-avian::accordion.item>
-                <x-avian::accordion.item title="Billing address" icon="fas fa-file-invoice">
-                    Same as the shipping address.
-                </x-avian::accordion.item>
-                <x-avian::accordion.item title="Notes" icon="fas fa-note-sticky">
-                    Call the store manager before unloading.
+                <x-avian::accordion.item title="Who approves purchase orders?">
+                    Your department head, then finance for orders above the limit.
                 </x-avian::accordion.item>
             </x-avian::accordion>
-
-            <x-avian::card title="FAQ (flush, multiple)">
-                <x-avian::accordion flush multiple>
-                    <x-avian::accordion.item title="How do I reset my password?" open>
-                        Use "Forgot password" on the sign-in page; the link expires after an hour.
-                    </x-avian::accordion.item>
-                    <x-avian::accordion.item title="Who approves purchase orders?">
-                        Your department head, then finance for orders above the limit.
-                    </x-avian::accordion.item>
-                </x-avian::accordion>
-            </x-avian::card>
-        </div>
+        </x-avian::card>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Each header is a button with <code>aria-expanded</code> / <code>aria-controls</code>, so it works with the keyboard and screen readers.</li>
-            <li>Closed items are hidden inline on first paint, so nothing flashes open before Alpine starts.</li>
-            <li>The open state lives in Alpine and survives Livewire re-renders.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Each header is a button with <code>aria-expanded</code> / <code>aria-controls</code>, so it works with the keyboard and screen readers.</li>
+        <li>Closed items are hidden inline on first paint, so nothing flashes open before Alpine starts.</li>
+        <li>The open state lives in Alpine and survives Livewire re-renders.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

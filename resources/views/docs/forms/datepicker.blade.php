@@ -94,39 +94,38 @@
     ];
 @endphp
 
-<x-avian::card title="Datepicker" subtitle="Calendar popup powered by flatpickr">
-    <p class="aui-showcase-lead">
-        A text input that opens a calendar. The component renders the input and its settings as
-        <code>data-fp-*</code> attributes; <a href="https://flatpickr.js.org" target="_blank" rel="noopener">flatpickr</a>,
-        loaded by your app, turns it into the picker. Supports single dates, multiple dates, ranges, date + time and time only.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Datepicker', 'subtitle' => 'Calendar popup powered by flatpickr'])
+<p class="aui-showcase-lead">
+    A text input that opens a calendar. The component renders the input and its settings as
+    <code>data-fp-*</code> attributes; <a href="https://flatpickr.js.org" target="_blank" rel="noopener">flatpickr</a>,
+    loaded by your app, turns it into the picker. Supports single dates, multiple dates, ranges, date + time and time only.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::datepicker name="datepicker_start" label="Start date" placeholder="dd/mm/yyyy" />
-            <x-avian::datepicker name="datepicker_period" label="Period" mode="range" placeholder="Pick a range" />
-            <x-avian::datepicker name="datepicker_appointment" label="Appointment" enable-time date-format="d/m/Y H:i" placeholder="dd/mm/yyyy hh:mm" />
-            <x-avian::datepicker name="datepicker_due" label="Due date" min-date="today" hint="Past dates are disabled (min-date=today)." placeholder="dd/mm/yyyy" />
-            <x-avian::datepicker name="datepicker_opens" label="Opens at (time only)" mode="time" min-time="08:00" max-time="17:00" hint="Between 08:00 and 17:00." placeholder="hh:mm" />
-            <x-avian::datepicker name="datepicker_reminder" label="Reminder (12-hour)" mode="time" :time24hr="false" date-format="h:i K" placeholder="hh:mm AM" />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::datepicker name="datepicker_start" label="Start date" placeholder="dd/mm/yyyy" />
+        <x-avian::datepicker name="datepicker_period" label="Period" mode="range" placeholder="Pick a range" />
+        <x-avian::datepicker name="datepicker_appointment" label="Appointment" enable-time date-format="d/m/Y H:i" placeholder="dd/mm/yyyy hh:mm" />
+        <x-avian::datepicker name="datepicker_due" label="Due date" min-date="today" hint="Past dates are disabled (min-date=today)." placeholder="dd/mm/yyyy" />
+        <x-avian::datepicker name="datepicker_opens" label="Opens at (time only)" mode="time" min-time="08:00" max-time="17:00" hint="Between 08:00 and 17:00." placeholder="hh:mm" />
+        <x-avian::datepicker name="datepicker_reminder" label="Reminder (12-hour)" mode="time" :time24hr="false" date-format="h:i K" placeholder="hh:mm AM" />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Without flatpickr loaded the component is just a plain text input — nothing breaks, you just don't get the calendar.</li>
-            <li>flatpickr makes the input <code>readonly</code> so users pick from the calendar. Pass <code>allowInput: true</code> in your flatpickr config if typing should be allowed.</li>
-            <li>The default <code>date-format</code> is <code>d/m/Y</code>. Whatever you choose is what reaches the server, so validate with the same format.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Without flatpickr loaded the component is just a plain text input — nothing breaks, you just don't get the calendar.</li>
+        <li>flatpickr makes the input <code>readonly</code> so users pick from the calendar. Pass <code>allowInput: true</code> in your flatpickr config if typing should be allowed.</li>
+        <li>The default <code>date-format</code> is <code>d/m/Y</code>. Whatever you choose is what reaches the server, so validate with the same format.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Setup &amp; examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Setup &amp; examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

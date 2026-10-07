@@ -47,40 +47,39 @@
     ];
 @endphp
 
-<x-avian::card title="Avatar" subtitle="User photo or initials">
-    <p class="aui-showcase-lead">
-        A round avatar that shows a person's photo, or their initials when there is no photo. Use it in
-        headers, comment lists and user columns.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Avatar', 'subtitle' => 'User photo or initials'])
+<p class="aui-showcase-lead">
+    A round avatar that shows a person's photo, or their initials when there is no photo. Use it in
+    headers, comment lists and user columns.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-row" style="flex-wrap: wrap">
-            <x-avian::avatar name="Ada Lovelace" size="sm" />
-            <x-avian::avatar name="Ada Lovelace" />
-            <x-avian::avatar name="Ada Lovelace" size="lg" />
-            <x-avian::avatar name="Grace Brewster Hopper" />
-            <x-avian::avatar name="Avian Brands" initials="AV" />
-            <div class="aui-row" style="margin-left: 16px">
-                <x-avian::avatar name="Alan Turing" size="sm" />
-                <span>Alan Turing</span>
-            </div>
+<div class="aui-showcase-demo">
+    <div class="aui-row" style="flex-wrap: wrap">
+        <x-avian::avatar name="Ada Lovelace" size="sm" />
+        <x-avian::avatar name="Ada Lovelace" />
+        <x-avian::avatar name="Ada Lovelace" size="lg" />
+        <x-avian::avatar name="Grace Brewster Hopper" />
+        <x-avian::avatar name="Avian Brands" initials="AV" />
+        <div class="aui-row" style="margin-left: 16px">
+            <x-avian::avatar name="Alan Turing" size="sm" />
+            <span>Alan Turing</span>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Initials are the first letter of the first two words of <code>name</code>, uppercased — "Grace Brewster Hopper" becomes <code>GB</code>. Multibyte names work.</li>
-            <li>With <code>src</code> the image fills the circle; with neither <code>src</code> nor <code>name</code> the avatar is empty.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Initials are the first letter of the first two words of <code>name</code>, uppercased — "Grace Brewster Hopper" becomes <code>GB</code>. Multibyte names work.</li>
+        <li>With <code>src</code> the image fills the circle; with neither <code>src</code> nor <code>name</code> the avatar is empty.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

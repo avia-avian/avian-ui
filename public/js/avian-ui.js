@@ -801,6 +801,60 @@
             };
         },
 
+        /**
+         * Expandable table row: shows and hides the detail <tr> rendered
+         * straight after it by <x-avian::table.row>.
+         */
+        auiTableRow: function (config) {
+            config = config || {};
+
+            return {
+                open: config.expanded === true,
+
+                init: function () {
+                    var self = this;
+
+                    this.sync();
+
+                    this.$watch('open', function () {
+                        self.sync();
+                    });
+                },
+
+                details: function () {
+                    var next = this.$el.nextElementSibling;
+
+                    return next && next.classList.contains('aui-table-details') ? next : null;
+                },
+
+                sync: function () {
+                    var details = this.details();
+
+                    if (details) {
+                        details.hidden = ! this.open;
+                    }
+                },
+
+                toggle: function () {
+                    this.open = ! this.open;
+                },
+
+                /* A clickable row ignores clicks meant for its own controls,
+                   and a click that ends a text selection. */
+                clickRow: function (event) {
+                    if (event.target.closest('a, button, input, select, textarea, label, [data-no-toggle]')) {
+                        return;
+                    }
+
+                    if (window.getSelection && String(window.getSelection()) !== '') {
+                        return;
+                    }
+
+                    this.toggle();
+                },
+            };
+        },
+
         /** Collapsible card: folds <x-avian::card collapsible> into its header. */
         auiCard: function (config) {
             config = config || {};

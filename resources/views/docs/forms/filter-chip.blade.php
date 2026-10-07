@@ -74,74 +74,73 @@
     ];
 @endphp
 
-<x-avian::card title="Filter chip" subtitle="Toggle a filter on a list">
-    <p class="aui-showcase-lead">
-        A pill that narrows a list when selected: a status, a period, "only mine". It is a checkbox (or a radio)
-        underneath, so a row of them submits like any other field — or give it an <code>href</code> and it becomes
-        a link for filters kept in the query string.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Filter chip', 'subtitle' => 'Toggle a filter on a list'])
+<p class="aui-showcase-lead">
+    A pill that narrows a list when selected: a status, a period, "only mine". It is a checkbox (or a radio)
+    underneath, so a row of them submits like any other field — or give it an <code>href</code> and it becomes
+    a link for filters kept in the query string.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack">
-            <x-avian::filter-chip.group label="Status (several)">
-                <x-avian::filter-chip name="chip_status[]" value="open" label="Open" :count="24" checked />
-                <x-avian::filter-chip name="chip_status[]" value="pending" label="Pending" :count="7" />
-                <x-avian::filter-chip name="chip_status[]" value="closed" label="Closed" :count="112" />
-                <x-avian::filter-chip name="chip_status[]" value="archived" label="Archived" disabled />
-            </x-avian::filter-chip.group>
+<div class="aui-showcase-demo">
+    <div class="aui-stack">
+        <x-avian::filter-chip.group label="Status (several)">
+            <x-avian::filter-chip name="chip_status[]" value="open" label="Open" :count="24" checked />
+            <x-avian::filter-chip name="chip_status[]" value="pending" label="Pending" :count="7" />
+            <x-avian::filter-chip name="chip_status[]" value="closed" label="Closed" :count="112" />
+            <x-avian::filter-chip name="chip_status[]" value="archived" label="Archived" disabled />
+        </x-avian::filter-chip.group>
 
-            <x-avian::filter-chip.group label="Period (one at a time)">
-                <x-avian::filter-chip type="radio" name="chip_period" value="7d" label="7 days" checked />
-                <x-avian::filter-chip type="radio" name="chip_period" value="30d" label="30 days" />
-                <x-avian::filter-chip type="radio" name="chip_period" value="1y" label="This year" />
-            </x-avian::filter-chip.group>
+        <x-avian::filter-chip.group label="Period (one at a time)">
+            <x-avian::filter-chip type="radio" name="chip_period" value="7d" label="7 days" checked />
+            <x-avian::filter-chip type="radio" name="chip_period" value="30d" label="30 days" />
+            <x-avian::filter-chip type="radio" name="chip_period" value="1y" label="This year" />
+        </x-avian::filter-chip.group>
 
-            <x-avian::filter-chip.group label="With icons, small" error="Pick at least one channel.">
-                <x-avian::filter-chip name="chip_channel[]" value="email" label="Email" icon="fas fa-envelope" size="sm" />
-                <x-avian::filter-chip name="chip_channel[]" value="sms" label="SMS" icon="fas fa-comment" size="sm" />
-                <x-avian::filter-chip name="chip_channel[]" value="push" label="Push" icon="fas fa-bell" size="sm" />
-            </x-avian::filter-chip.group>
+        <x-avian::filter-chip.group label="With icons, small" error="Pick at least one channel.">
+            <x-avian::filter-chip name="chip_channel[]" value="email" label="Email" icon="fas fa-envelope" size="sm" />
+            <x-avian::filter-chip name="chip_channel[]" value="sms" label="SMS" icon="fas fa-comment" size="sm" />
+            <x-avian::filter-chip name="chip_channel[]" value="push" label="Push" icon="fas fa-bell" size="sm" />
+        </x-avian::filter-chip.group>
 
-            <x-avian::filter-chip.group label="Links">
-                <x-avian::filter-chip href="#" label="All" active />
-                <x-avian::filter-chip href="#" label="Overdue" icon="fas fa-clock" :count="3" />
-                <x-avian::filter-chip href="#" label="Mine" icon="fas fa-user" />
-            </x-avian::filter-chip.group>
-        </div>
+        <x-avian::filter-chip.group label="Links">
+            <x-avian::filter-chip href="#" label="All" active />
+            <x-avian::filter-chip href="#" label="Overdue" icon="fas fa-clock" :count="3" />
+            <x-avian::filter-chip href="#" label="Mine" icon="fas fa-user" />
+        </x-avian::filter-chip.group>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Clicking a chip toggles it; Tab moves between chips and Space toggles the focused one.</li>
-            <li>A selected chip shows a check mark, so the state never relies on colour alone.</li>
-            <li>Old input re-selects the chips after a failed validation, including a <code>name[]</code> array.</li>
-            <li>Link chips carry <code>aria-current</code> when <code>active</code>.</li>
-        </ul>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Clicking a chip toggles it; Tab moves between chips and Space toggles the focused one.</li>
+        <li>A selected chip shows a check mark, so the state never relies on colour alone.</li>
+        <li>Old input re-selects the chips after a failed validation, including a <code>name[]</code> array.</li>
+        <li>Link chips carry <code>aria-current</code> when <code>active</code>.</li>
+    </ul>
+</div>
+
+@include('avian-ui::docs.partials.props')
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Group props</h2>
+    <div class="aui-showcase-props">
+        <x-avian::table :headers="['Prop', 'Type', 'Default', 'Description']" :hover="false">
+            @foreach ($groupProps as [$prop, $type, $default, $description])
+                <tr data-search-prop="{{ $prop }}">
+                    <td><code>{{ $prop }}</code></td>
+                    <td><code class="aui-showcase-type">{{ $type }}</code></td>
+                    <td><code class="aui-showcase-type">{{ $default }}</code></td>
+                    <td>{{ $description }}</td>
+                </tr>
+            @endforeach
+        </x-avian::table>
     </div>
+</div>
 
-    @include('avian-ui::docs.partials.props')
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Group props</h4>
-        <div class="aui-showcase-props">
-            <x-avian::table :headers="['Prop', 'Type', 'Default', 'Description']" :hover="false">
-                @foreach ($groupProps as [$prop, $type, $default, $description])
-                    <tr data-search-prop="{{ $prop }}">
-                        <td><code>{{ $prop }}</code></td>
-                        <td><code class="aui-showcase-type">{{ $type }}</code></td>
-                        <td><code class="aui-showcase-type">{{ $default }}</code></td>
-                        <td>{{ $description }}</td>
-                    </tr>
-                @endforeach
-            </x-avian::table>
-        </div>
-    </div>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

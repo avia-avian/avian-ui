@@ -65,54 +65,53 @@
     ];
 @endphp
 
-<x-avian::card title="Form" subtitle="Submission boilerplate and layout helpers">
-    <p class="aui-showcase-lead">
-        <code>&lt;x-avian::form&gt;</code> renders a normal <code>&lt;form&gt;</code> with the boilerplate
-        already done: the CSRF token, method spoofing for PUT/PATCH/DELETE and the multipart encoding for
-        uploads. Everything below shows how the form controls fit together; each control has its own page
-        in the sidebar.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Form', 'subtitle' => 'Submission boilerplate and layout helpers'])
+<p class="aui-showcase-lead">
+    <code>&lt;x-avian::form&gt;</code> renders a normal <code>&lt;form&gt;</code> with the boilerplate
+    already done: the CSRF token, method spoofing for PUT/PATCH/DELETE and the multipart encoding for
+    uploads. Everything below shows how the form controls fit together; each control has its own page
+    in the sidebar.
+</p>
 
-    <div class="aui-showcase-demo">
-        <x-avian::form action="#" method="POST" files onsubmit="event.preventDefault()">
-            <div class="aui-form-grid">
-                <x-avian::input name="form_name" label="Full name" placeholder="Ada Lovelace" required />
-                <x-avian::input name="form_email" type="email" label="Email" icon="fas fa-envelope" />
-                <x-avian::select
-                    name="form_role"
-                    label="Role"
-                    placeholder="Choose a role"
-                    :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
-                />
-                <x-avian::datepicker name="form_start_date" label="Start date" placeholder="dd/mm/yyyy" />
-                <x-avian::textarea class="aui-form-full" name="form_notes" label="Notes" rows="3" />
-            </div>
+<div class="aui-showcase-demo">
+    <x-avian::form action="#" method="POST" files onsubmit="event.preventDefault()">
+        <div class="aui-form-grid">
+            <x-avian::input name="form_name" label="Full name" placeholder="Ada Lovelace" required />
+            <x-avian::input name="form_email" type="email" label="Email" icon="fas fa-envelope" />
+            <x-avian::select
+                name="form_role"
+                label="Role"
+                placeholder="Choose a role"
+                :options="['admin' => 'Administrator', 'editor' => 'Editor', 'viewer' => 'Viewer']"
+            />
+            <x-avian::datepicker name="form_start_date" label="Start date" placeholder="dd/mm/yyyy" />
+            <x-avian::textarea class="aui-form-full" name="form_notes" label="Notes" rows="3" />
+        </div>
 
-            <x-avian::switch name="form_active" label="Active" checked />
+        <x-avian::switch name="form_active" label="Active" checked />
 
-            <div class="aui-form-actions">
-                <x-avian::button variant="light" type="reset">Cancel</x-avian::button>
-                <x-avian::button type="submit" icon="fas fa-check">Save</x-avian::button>
-            </div>
-        </x-avian::form>
-    </div>
+        <div class="aui-form-actions">
+            <x-avian::button variant="light" type="reset">Cancel</x-avian::button>
+            <x-avian::button type="submit" icon="fas fa-check">Save</x-avian::button>
+        </div>
+    </x-avian::form>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Every form control reads validation errors from Laravel's <code>$errors</code> bag and old input from the session by its <code>name</code>. After a failed <code>$request-&gt;validate()</code> the form comes back filled in and with messages under each field — no <code>@@error</code> or <code>old()</code> calls needed.</li>
-            <li>Array names work too: <code>name="items[0][qty]"</code> looks up the <code>items.0.qty</code> error and old value.</li>
-            <li>Controls are plain HTML inputs, so the form also works without the component — <code>&lt;x-avian::form&gt;</code> just saves the boilerplate.</li>
-            <li>Extra attributes (<code>id</code>, <code>class</code>, <code>x-data</code>, <code>wire:submit</code>, <code>onsubmit</code>…) land on the <code>&lt;form&gt;</code> tag.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Every form control reads validation errors from Laravel's <code>$errors</code> bag and old input from the session by its <code>name</code>. After a failed <code>$request-&gt;validate()</code> the form comes back filled in and with messages under each field — no <code>@@error</code> or <code>old()</code> calls needed.</li>
+        <li>Array names work too: <code>name="items[0][qty]"</code> looks up the <code>items.0.qty</code> error and old value.</li>
+        <li>Controls are plain HTML inputs, so the form also works without the component — <code>&lt;x-avian::form&gt;</code> just saves the boilerplate.</li>
+        <li>Extra attributes (<code>id</code>, <code>class</code>, <code>x-data</code>, <code>wire:submit</code>, <code>onsubmit</code>…) land on the <code>&lt;form&gt;</code> tag.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

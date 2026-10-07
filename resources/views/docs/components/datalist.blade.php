@@ -152,71 +152,70 @@
     ];
 @endphp
 
-<x-avian::card title="Datalist" subtitle="Paginated items as a list or a grid of cards">
-    <p class="aui-showcase-lead">
-        The table's sibling for records that read better as cards than as rows: products, files, people,
-        projects. It takes a paginator like the table does, shows an empty state when there is nothing to
-        show, and lets the viewer switch between a compact <strong>list</strong> and a visual
-        <strong>grid</strong> — no page reload.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Datalist', 'subtitle' => 'Paginated items as a list or a grid of cards'])
+<p class="aui-showcase-lead">
+    The table's sibling for records that read better as cards than as rows: products, files, people,
+    projects. It takes a paginator like the table does, shows an empty state when there is nothing to
+    show, and lets the viewer switch between a compact <strong>list</strong> and a visual
+    <strong>grid</strong> — no page reload.
+</p>
 
-    <div class="aui-showcase-demo">
-        <x-avian::datalist :paginator="$products" view="grid" persist="showcase-products">
-            <x-slot:toolbar>
-                <x-avian::input name="datalist_search" icon="fas fa-search" placeholder="Search products" :field="false" size="sm" />
-                <span class="aui-hint">48 products</span>
-            </x-slot:toolbar>
+<div class="aui-showcase-demo">
+    <x-avian::datalist :paginator="$products" view="grid" persist="showcase-products">
+        <x-slot:toolbar>
+            <x-avian::input name="datalist_search" icon="fas fa-search" placeholder="Search products" :field="false" size="sm" />
+            <span class="aui-hint">48 products</span>
+        </x-slot:toolbar>
 
-            @foreach ($products as [$name, $sku, $icon, $summary, $price, $stockVariant, $stockLabel])
-                <x-avian::datalist.item :title="$name" :subtitle="$sku" :icon="$icon" href="#">
-                    {{ $summary }}
+        @foreach ($products as [$name, $sku, $icon, $summary, $price, $stockVariant, $stockLabel])
+            <x-avian::datalist.item :title="$name" :subtitle="$sku" :icon="$icon" href="#">
+                {{ $summary }}
 
-                    <x-slot:meta>
-                        <strong style="color: var(--aui-heading)">{{ $price }}</strong>
-                        <x-avian::badge :variant="$stockVariant" dot size="sm">{{ $stockLabel }}</x-avian::badge>
-                    </x-slot:meta>
+                <x-slot:meta>
+                    <strong style="color: var(--aui-heading)">{{ $price }}</strong>
+                    <x-avian::badge :variant="$stockVariant" dot size="sm">{{ $stockLabel }}</x-avian::badge>
+                </x-slot:meta>
 
-                    <x-slot:actions>
-                        <x-avian::button icon="fas fa-pen" icon-only label="Edit {{ $name }}" size="sm" variant="light" />
-                    </x-slot:actions>
-                </x-avian::datalist.item>
-            @endforeach
-        </x-avian::datalist>
-    </div>
-
-    <div class="aui-showcase-demo" style="margin-top: 16px">
-        <x-avian::label>People, list view, avatars in the media slot</x-avian::label>
-        <x-avian::datalist :columns="4">
-            @foreach (['Ada Lovelace' => 'Administrator', 'Grace Hopper' => 'Editor', 'Alan Turing' => 'Viewer', 'Linus Torvalds' => 'Editor'] as $person => $role)
-                <x-avian::datalist.item :title="$person" :subtitle="$role">
-                    <x-slot:media><x-avian::avatar :name="$person" /></x-slot:media>
-                </x-avian::datalist.item>
-            @endforeach
-        </x-avian::datalist>
-    </div>
-
-    <div class="aui-showcase-demo" style="margin-top: 16px">
-        <x-avian::label>No items</x-avian::label>
-        <x-avian::datalist empty="No products found" empty-text="Try a different search." empty-icon="fas fa-box-open" />
-    </div>
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Every item is rendered once; the toggle only switches a class on the container, so changing the layout is instant and makes no request.</li>
-            <li>The same <code>&lt;x-avian::datalist.item&gt;</code> becomes a row in list view and a card in grid view — media, text, meta and actions move into place by themselves.</li>
-            <li>With <code>href</code> the whole row or card is clickable, while buttons in the <code>actions</code> slot still work on their own.</li>
-            <li>The empty state appears whenever the loop renders nothing, and the pagination behaves exactly like the table's (add <code>-&gt;withQueryString()</code> to keep filters).</li>
-            <li>The toggle needs Alpine and <code>&lt;x-avian::scripts /&gt;</code>. Without them the list still renders, in its initial <code>view</code>.</li>
-        </ul>
-    </div>
-
-    @include('avian-ui::docs.partials.props')
-
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
+                <x-slot:actions>
+                    <x-avian::button icon="fas fa-pen" icon-only label="Edit {{ $name }}" size="sm" variant="light" />
+                </x-slot:actions>
+            </x-avian::datalist.item>
         @endforeach
-    </div>
-</x-avian::card>
+    </x-avian::datalist>
+</div>
+
+<div class="aui-showcase-demo" style="margin-top: 16px">
+    <x-avian::label>People, list view, avatars in the media slot</x-avian::label>
+    <x-avian::datalist :columns="4">
+        @foreach (['Ada Lovelace' => 'Administrator', 'Grace Hopper' => 'Editor', 'Alan Turing' => 'Viewer', 'Linus Torvalds' => 'Editor'] as $person => $role)
+            <x-avian::datalist.item :title="$person" :subtitle="$role">
+                <x-slot:media><x-avian::avatar :name="$person" /></x-slot:media>
+            </x-avian::datalist.item>
+        @endforeach
+    </x-avian::datalist>
+</div>
+
+<div class="aui-showcase-demo" style="margin-top: 16px">
+    <x-avian::label>No items</x-avian::label>
+    <x-avian::datalist empty="No products found" empty-text="Try a different search." empty-icon="fas fa-box-open" />
+</div>
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Every item is rendered once; the toggle only switches a class on the container, so changing the layout is instant and makes no request.</li>
+        <li>The same <code>&lt;x-avian::datalist.item&gt;</code> becomes a row in list view and a card in grid view — media, text, meta and actions move into place by themselves.</li>
+        <li>With <code>href</code> the whole row or card is clickable, while buttons in the <code>actions</code> slot still work on their own.</li>
+        <li>The empty state appears whenever the loop renders nothing, and the pagination behaves exactly like the table's (add <code>-&gt;withQueryString()</code> to keep filters).</li>
+        <li>The toggle needs Alpine and <code>&lt;x-avian::scripts /&gt;</code>. Without them the list still renders, in its initial <code>view</code>.</li>
+    </ul>
+</div>
+
+@include('avian-ui::docs.partials.props')
+
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

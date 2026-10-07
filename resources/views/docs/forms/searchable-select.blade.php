@@ -207,72 +207,71 @@
     ];
 @endphp
 
-<x-avian::card title="Searchable select" subtitle="Dropdown with a search box">
-    <p class="aui-showcase-lead">
-        A replacement for the native select when the list is too long to scroll through: countries,
-        customers, products. It behaves like <code>&lt;x-avian::select&gt;</code> — same props, same
-        validation and old input — and submits a single value through a hidden input.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Searchable select', 'subtitle' => 'Dropdown with a search box'])
+<p class="aui-showcase-lead">
+    A replacement for the native select when the list is too long to scroll through: countries,
+    customers, products. It behaves like <code>&lt;x-avian::select&gt;</code> — same props, same
+    validation and old input — and submits a single value through a hidden input.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::searchable-select
-                name="searchable_country"
-                label="Country"
-                placeholder="Choose a country"
-                :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan', 'de' => 'Germany', 'fr' => 'France', 'br' => 'Brazil', 'au' => 'Australia', 'ca' => 'Canada']"
-            />
-            <x-avian::searchable-select
-                name="searchable_city"
-                label="City"
-                value="sby"
-                hint="Pre-selected through the value prop."
-                :options="['jkt' => 'Jakarta', 'sby' => 'Surabaya', 'bdg' => 'Bandung', 'mdn' => 'Medan']"
-            />
-            <x-avian::searchable-select name="searchable_item" label="Item (custom rows)" placeholder="Choose an item">
-                @foreach (['A-100' => 'Wall paint 5L', 'A-200' => 'Wood varnish 1L', 'A-300' => 'Primer 2.5L'] as $code => $itemName)
-                    <x-avian::searchable-select.option :value="$code" :label="$itemName">
-                        <strong>{{ $code }}</strong>&nbsp;<small>{{ $itemName }}</small>
-                    </x-avian::searchable-select.option>
-                @endforeach
-            </x-avian::searchable-select>
-            <x-avian::searchable-select
-                name="searchable_district"
-                label="District (clearable, taggable)"
-                value="mgl"
-                hint="Type a district that is not listed to add it."
-                clearable
-                taggable
-                :options="['mgl' => 'Menteng', 'kby' => 'Kebayoran Baru', 'tbt' => 'Tebet', 'cpt' => 'Cempaka Putih']"
-            />
-            <x-avian::searchable-select
-                name="searchable_owner"
-                label="Owner"
-                required
-                error="Please choose an owner."
-                :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper']"
-            />
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::searchable-select
+            name="searchable_country"
+            label="Country"
+            placeholder="Choose a country"
+            :options="['us' => 'United States', 'id' => 'Indonesia', 'jp' => 'Japan', 'de' => 'Germany', 'fr' => 'France', 'br' => 'Brazil', 'au' => 'Australia', 'ca' => 'Canada']"
+        />
+        <x-avian::searchable-select
+            name="searchable_city"
+            label="City"
+            value="sby"
+            hint="Pre-selected through the value prop."
+            :options="['jkt' => 'Jakarta', 'sby' => 'Surabaya', 'bdg' => 'Bandung', 'mdn' => 'Medan']"
+        />
+        <x-avian::searchable-select name="searchable_item" label="Item (custom rows)" placeholder="Choose an item">
+            @foreach (['A-100' => 'Wall paint 5L', 'A-200' => 'Wood varnish 1L', 'A-300' => 'Primer 2.5L'] as $code => $itemName)
+                <x-avian::searchable-select.option :value="$code" :label="$itemName">
+                    <strong>{{ $code }}</strong>&nbsp;<small>{{ $itemName }}</small>
+                </x-avian::searchable-select.option>
+            @endforeach
+        </x-avian::searchable-select>
+        <x-avian::searchable-select
+            name="searchable_district"
+            label="District (clearable, taggable)"
+            value="mgl"
+            hint="Type a district that is not listed to add it."
+            clearable
+            taggable
+            :options="['mgl' => 'Menteng', 'kby' => 'Kebayoran Baru', 'tbt' => 'Tebet', 'cpt' => 'Cempaka Putih']"
+        />
+        <x-avian::searchable-select
+            name="searchable_owner"
+            label="Owner"
+            required
+            error="Please choose an owner."
+            :options="['ada' => 'Ada Lovelace', 'grace' => 'Grace Hopper']"
+        />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>Click the trigger (or focus it and press Enter) to open. Type to filter, use ↑ / ↓ to move, Enter to pick and Esc to close.</li>
-            <li>With <code>clearable</code>, the × button or Backspace / Delete on the focused trigger clears the value.</li>
-            <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row (↓ then Enter, or click). The typed text is submitted as the value.</li>
-            <li>The chosen value is written to a hidden <code>&lt;input name="…"&gt;</code>, so it submits like a normal field.</li>
-            <li>The dropdown is teleported to <code>&lt;body&gt;</code>, so it is never clipped by a card, modal or scrolling table.</li>
-            <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>Click the trigger (or focus it and press Enter) to open. Type to filter, use ↑ / ↓ to move, Enter to pick and Esc to close.</li>
+        <li>With <code>clearable</code>, the × button or Backspace / Delete on the focused trigger clears the value.</li>
+        <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row (↓ then Enter, or click). The typed text is submitted as the value.</li>
+        <li>The chosen value is written to a hidden <code>&lt;input name="…"&gt;</code>, so it submits like a normal field.</li>
+        <li>The dropdown is teleported to <code>&lt;body&gt;</code>, so it is never clipped by a card, modal or scrolling table.</li>
+        <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

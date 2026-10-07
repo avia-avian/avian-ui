@@ -69,77 +69,76 @@
     ];
 @endphp
 
-<x-avian::card title="Button group & toolbar" subtitle="Grouped buttons, segmented controls and action bars">
-    <p class="aui-showcase-lead">
-        <code>button-group</code> lines related buttons up — spaced, or joined into a segmented control.
-        <code>toolbar</code> is the bar above a table or list: filters on the left, actions on the right.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Button group & toolbar', 'subtitle' => 'Grouped buttons, segmented controls and action bars'])
+<p class="aui-showcase-lead">
+    <code>button-group</code> lines related buttons up — spaced, or joined into a segmented control.
+    <code>toolbar</code> is the bar above a table or list: filters on the left, actions on the right.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack">
-            <x-avian::toolbar label="Orders">
-                <x-avian::input name="toolbar_q" icon="fas fa-search" placeholder="Search orders" :field="false" />
+<div class="aui-showcase-demo">
+    <div class="aui-stack">
+        <x-avian::toolbar label="Orders">
+            <x-avian::input name="toolbar_q" icon="fas fa-search" placeholder="Search orders" :field="false" />
 
-                <x-avian::button-group attached label="Status">
-                    <x-avian::button variant="light" active>All</x-avian::button>
-                    <x-avian::button variant="light">Paid</x-avian::button>
-                    <x-avian::button variant="light">Pending</x-avian::button>
-                </x-avian::button-group>
+            <x-avian::button-group attached label="Status">
+                <x-avian::button variant="light" active>All</x-avian::button>
+                <x-avian::button variant="light">Paid</x-avian::button>
+                <x-avian::button variant="light">Pending</x-avian::button>
+            </x-avian::button-group>
 
-                <x-slot:end>
-                    <x-avian::button variant="light" icon="fas fa-download">Export</x-avian::button>
-                    <x-avian::button icon="fas fa-plus">New order</x-avian::button>
-                </x-slot:end>
-            </x-avian::toolbar>
+            <x-slot:end>
+                <x-avian::button variant="light" icon="fas fa-download">Export</x-avian::button>
+                <x-avian::button icon="fas fa-plus">New order</x-avian::button>
+            </x-slot:end>
+        </x-avian::toolbar>
 
-            <div class="aui-row" style="flex-wrap: wrap; align-items: flex-start">
-                <x-avian::button-group attached label="View">
-                    <x-avian::button variant="light" icon="fas fa-list" active>List</x-avian::button>
-                    <x-avian::button variant="light" icon="fas fa-grip">Grid</x-avian::button>
-                    <x-avian::button variant="light" icon="fas fa-calendar">Calendar</x-avian::button>
-                </x-avian::button-group>
+        <div class="aui-row" style="flex-wrap: wrap; align-items: flex-start">
+            <x-avian::button-group attached label="View">
+                <x-avian::button variant="light" icon="fas fa-list" active>List</x-avian::button>
+                <x-avian::button variant="light" icon="fas fa-grip">Grid</x-avian::button>
+                <x-avian::button variant="light" icon="fas fa-calendar">Calendar</x-avian::button>
+            </x-avian::button-group>
 
-                <x-avian::button-group attached label="Order actions">
-                    <x-avian::button variant="light" size="sm" icon="fas fa-eye" icon-only label="View" />
-                    <x-avian::button variant="light" size="sm" icon="fas fa-pen" icon-only label="Edit" />
-                    <x-avian::button variant="light" size="sm" icon="fas fa-trash" icon-only label="Delete" />
-                </x-avian::button-group>
+            <x-avian::button-group attached label="Order actions">
+                <x-avian::button variant="light" size="sm" icon="fas fa-eye" icon-only label="View" />
+                <x-avian::button variant="light" size="sm" icon="fas fa-pen" icon-only label="Edit" />
+                <x-avian::button variant="light" size="sm" icon="fas fa-trash" icon-only label="Delete" />
+            </x-avian::button-group>
 
-                <x-avian::button-group attached label="Save">
-                    <x-avian::button icon="fas fa-check">Save</x-avian::button>
-                    <x-avian::button icon="fas fa-chevron-down" icon-only label="More save options" />
-                </x-avian::button-group>
+            <x-avian::button-group attached label="Save">
+                <x-avian::button icon="fas fa-check">Save</x-avian::button>
+                <x-avian::button icon="fas fa-chevron-down" icon-only label="More save options" />
+            </x-avian::button-group>
 
-                <x-avian::button-group attached vertical label="Alignment">
-                    <x-avian::button variant="outline" color="secondary" size="sm">Top</x-avian::button>
-                    <x-avian::button variant="outline" color="secondary" size="sm">Middle</x-avian::button>
-                    <x-avian::button variant="outline" color="secondary" size="sm">Bottom</x-avian::button>
-                </x-avian::button-group>
+            <x-avian::button-group attached vertical label="Alignment">
+                <x-avian::button variant="outline" color="secondary" size="sm">Top</x-avian::button>
+                <x-avian::button variant="outline" color="secondary" size="sm">Middle</x-avian::button>
+                <x-avian::button variant="outline" color="secondary" size="sm">Bottom</x-avian::button>
+            </x-avian::button-group>
 
-                <x-avian::button-group>
-                    <x-avian::button variant="light">Cancel</x-avian::button>
-                    <x-avian::button>Save</x-avian::button>
-                </x-avian::button-group>
-            </div>
+            <x-avian::button-group>
+                <x-avian::button variant="light">Cancel</x-avian::button>
+                <x-avian::button>Save</x-avian::button>
+            </x-avian::button-group>
         </div>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>An attached group rounds only its outer corners and overlaps borders, so neighbouring buttons share one line.</li>
-            <li>The <code>active</code> button, or one with <code>aria-pressed="true"</code>, gets the selected look — light buttons turn primary-tinted.</li>
-            <li>Both render <code>role="group"</code> / <code>role="toolbar"</code>; pass <code>label</code> so screen readers know what the controls are for.</li>
-            <li>Inside a toolbar, a search input takes a fixed width instead of stretching across the whole row.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>An attached group rounds only its outer corners and overlaps borders, so neighbouring buttons share one line.</li>
+        <li>The <code>active</code> button, or one with <code>aria-pressed="true"</code>, gets the selected look — light buttons turn primary-tinted.</li>
+        <li>Both render <code>role="group"</code> / <code>role="toolbar"</code>; pass <code>label</code> so screen readers know what the controls are for.</li>
+        <li>Inside a toolbar, a search input takes a fixed width instead of stretching across the whole row.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

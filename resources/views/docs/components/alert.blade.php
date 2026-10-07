@@ -62,37 +62,36 @@
     ];
 @endphp
 
-<x-avian::card title="Alert" subtitle="Inline messages for the user">
-    <p class="aui-showcase-lead">
-        A coloured message box for feedback that should stay on screen: success after saving, warnings,
-        errors and general information. Each variant has a matching icon.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Alert', 'subtitle' => 'Inline messages for the user'])
+<p class="aui-showcase-lead">
+    A coloured message box for feedback that should stay on screen: success after saving, warnings,
+    errors and general information. Each variant has a matching icon.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-stack" style="gap: 12px">
-            <x-avian::alert variant="info">A new version of the report is available.</x-avian::alert>
-            <x-avian::alert variant="success" dismissible>Your changes have been saved. (Dismiss me.)</x-avian::alert>
-            <x-avian::alert variant="warning" title="Heads up">Your trial ends in 3 days.</x-avian::alert>
-            <x-avian::alert variant="danger" title="Payment failed">We couldn't reach the payment provider. Try again in a few minutes.</x-avian::alert>
-            <x-avian::alert variant="neutral" icon="fas fa-lightbulb">Tip: custom icons work on every variant.</x-avian::alert>
-        </div>
+<div class="aui-showcase-demo">
+    <div class="aui-stack" style="gap: 12px">
+        <x-avian::alert variant="info">A new version of the report is available.</x-avian::alert>
+        <x-avian::alert variant="success" dismissible>Your changes have been saved. (Dismiss me.)</x-avian::alert>
+        <x-avian::alert variant="warning" title="Heads up">Your trial ends in 3 days.</x-avian::alert>
+        <x-avian::alert variant="danger" title="Payment failed">We couldn't reach the payment provider. Try again in a few minutes.</x-avian::alert>
+        <x-avian::alert variant="neutral" icon="fas fa-lightbulb">Tip: custom icons work on every variant.</x-avian::alert>
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>The alert has <code>role="alert"</code>, so screen readers announce it.</li>
-            <li><code>dismissible</code> uses a small Alpine component; the alert is hidden (not removed) and comes back on the next page load.</li>
-            <li>The slot can hold any markup — links, lists, buttons.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>The alert has <code>role="alert"</code>, so screen readers announce it.</li>
+        <li><code>dismissible</code> uses a small Alpine component; the alert is hidden (not removed) and comes back on the next page load.</li>
+        <li>The slot can hold any markup — links, lists, buttons.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

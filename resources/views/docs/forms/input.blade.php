@@ -119,61 +119,60 @@
     ];
 @endphp
 
-<x-avian::card title="Input" subtitle="Single-line text fields">
-    <p class="aui-showcase-lead">
-        A text field with label, hint and validation built in. It accepts every native input type and adds
-        icons, text addons and a money mask on top.
-    </p>
+@include('avian-ui::docs.partials.header', ['title' => 'Input', 'subtitle' => 'Single-line text fields'])
+<p class="aui-showcase-lead">
+    A text field with label, hint and validation built in. It accepts every native input type and adds
+    icons, text addons and a money mask on top.
+</p>
 
-    <div class="aui-showcase-demo">
-        <div class="aui-form-grid">
-            <x-avian::input name="input_name" label="Full name" placeholder="Ada Lovelace" required />
-            <x-avian::input name="input_email" type="email" label="Email" icon="fas fa-envelope" hint="We never share it." />
-            <x-avian::input name="input_website" label="Website" prefix="https://" suffix=".com" />
-            <x-avian::input name="input_budget" label="Budget" prefix="Rp" numeric placeholder="0" />
-            <x-avian::input name="input_username" label="Username" value="ada" error="This username is already taken." />
-            <x-avian::input name="input_code" label="Code (disabled)" value="AUI-001" disabled />
-            <x-avian::input name="input_search" label="Search with a button" icon="fas fa-search" placeholder="Search orders">
+<div class="aui-showcase-demo">
+    <div class="aui-form-grid">
+        <x-avian::input name="input_name" label="Full name" placeholder="Ada Lovelace" required />
+        <x-avian::input name="input_email" type="email" label="Email" icon="fas fa-envelope" hint="We never share it." />
+        <x-avian::input name="input_website" label="Website" prefix="https://" suffix=".com" />
+        <x-avian::input name="input_budget" label="Budget" prefix="Rp" numeric placeholder="0" />
+        <x-avian::input name="input_username" label="Username" value="ada" error="This username is already taken." />
+        <x-avian::input name="input_code" label="Code (disabled)" value="AUI-001" disabled />
+        <x-avian::input name="input_search" label="Search with a button" icon="fas fa-search" placeholder="Search orders">
+            <x-slot:append>
+                <x-avian::button>Search</x-avian::button>
+            </x-slot:append>
+        </x-avian::input>
+        <x-avian::input name="input_invite" label="Invite link" value="https://example.test/invite/8F2K" readonly>
+            <x-slot:append>
+                <x-avian::button variant="light" icon="fas fa-copy" icon-only label="Copy" />
+            </x-slot:append>
+        </x-avian::input>
+        <div x-data>
+            <x-avian::input name="input_qty" type="number" label="Quantity" value="1" suffix="pcs" x-ref="qty">
+                <x-slot:prepend>
+                    <x-avian::button variant="light" icon="fas fa-minus" icon-only label="Decrease" x-on:click="$refs.qty.stepDown()" />
+                </x-slot:prepend>
                 <x-slot:append>
-                    <x-avian::button>Search</x-avian::button>
+                    <x-avian::button variant="light" icon="fas fa-plus" icon-only label="Increase" x-on:click="$refs.qty.stepUp()" />
                 </x-slot:append>
             </x-avian::input>
-            <x-avian::input name="input_invite" label="Invite link" value="https://example.test/invite/8F2K" readonly>
-                <x-slot:append>
-                    <x-avian::button variant="light" icon="fas fa-copy" icon-only label="Copy" />
-                </x-slot:append>
-            </x-avian::input>
-            <div x-data>
-                <x-avian::input name="input_qty" type="number" label="Quantity" value="1" suffix="pcs" x-ref="qty">
-                    <x-slot:prepend>
-                        <x-avian::button variant="light" icon="fas fa-minus" icon-only label="Decrease" x-on:click="$refs.qty.stepDown()" />
-                    </x-slot:prepend>
-                    <x-slot:append>
-                        <x-avian::button variant="light" icon="fas fa-plus" icon-only label="Increase" x-on:click="$refs.qty.stepUp()" />
-                    </x-slot:append>
-                </x-avian::input>
-            </div>
-            <x-avian::input name="input_small" size="sm" label="Small" placeholder="Small control" />
-            <x-avian::input name="input_large" size="lg" label="Large" placeholder="Large control" />
         </div>
+        <x-avian::input name="input_small" size="sm" label="Small" placeholder="Small control" />
+        <x-avian::input name="input_large" size="lg" label="Large" placeholder="Large control" />
     </div>
+</div>
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">How it works</h4>
-        <ul class="aui-showcase-list">
-            <li>The <code>id</code> is generated from the name, and the label's <code>for</code> points at it — clicking the label focuses the input.</li>
-            <li>When validation fails, the first message for the name appears under the input, the border turns red and <code>aria-invalid="true"</code> is set.</li>
-            <li>After a redirect back, the input is re-filled from old input. Password inputs are never re-filled.</li>
-            <li><code>numeric</code> needs Alpine's mask plugin (<code>@alpinejs/mask</code>) loaded before Alpine starts.</li>
-        </ul>
-    </div>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">How it works</h2>
+    <ul class="aui-showcase-list">
+        <li>The <code>id</code> is generated from the name, and the label's <code>for</code> points at it — clicking the label focuses the input.</li>
+        <li>When validation fails, the first message for the name appears under the input, the border turns red and <code>aria-invalid="true"</code> is set.</li>
+        <li>After a redirect back, the input is re-filled from old input. Password inputs are never re-filled.</li>
+        <li><code>numeric</code> needs Alpine's mask plugin (<code>@alpinejs/mask</code>) loaded before Alpine starts.</li>
+    </ul>
+</div>
 
-    @include('avian-ui::docs.partials.props')
+@include('avian-ui::docs.partials.props')
 
-    <div class="aui-showcase-block">
-        <h4 class="aui-showcase-heading">Examples</h4>
-        @foreach ($examples as $example)
-            @include('avian-ui::docs.partials.example', ['example' => $example])
-        @endforeach
-    </div>
-</x-avian::card>
+<div class="aui-showcase-block">
+    <h2 class="aui-showcase-heading">Examples</h2>
+    @foreach ($examples as $example)
+        @include('avian-ui::docs.partials.example', ['example' => $example])
+    @endforeach
+</div>

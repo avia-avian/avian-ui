@@ -288,6 +288,136 @@
         return observer;
     }
 
+    /* Fixed-position placement for a floating panel (tooltip, popover)
+       anchored to its trigger. Tries the asked side first, flips to the
+       opposite one when it does not fit, then keeps the panel inside the
+       viewport. The arrow offset is where the trigger's centre lands on the
+       panel, so the arrow still points at it after the panel was nudged. */
+    var FLOATING_MARGIN = 8;
+    var FLOATING_OPPOSITE = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
+
+    function placeFloating(trigger, panel, placement, gap) {
+        /* Called right after opening, x-show may not have revealed the panel
+           yet; a hidden panel measures 0 x 0, so reveal it first. */
+        if (panel.style.display === 'none') {
+            panel.style.removeProperty('display');
+        }
+
+        var rect = trigger.getBoundingClientRect();
+        var width = panel.offsetWidth;
+        var height = panel.offsetHeight;
+        var viewWidth = window.innerWidth;
+        var viewHeight = window.innerHeight;
+        var side = FLOATING_OPPOSITE[placement] ? placement : 'top';
+
+        function fits(candidate) {
+            switch (candidate) {
+                case 'top': return rect.top - gap - height >= FLOATING_MARGIN;
+                case 'bottom': return rect.bottom + gap + height <= viewHeight - FLOATING_MARGIN;
+                case 'left': return rect.left - gap - width >= FLOATING_MARGIN;
+                default: return rect.right + gap + width <= viewWidth - FLOATING_MARGIN;
+            }
+        }
+
+        if (! fits(side) && fits(FLOATING_OPPOSITE[side])) {
+            side = FLOATING_OPPOSITE[side];
+        }
+
+        var top;
+        var left;
+
+        if (side === 'top' || side === 'bottom') {
+            top = side === 'top' ? rect.top - gap - height : rect.bottom + gap;
+            left = rect.left + rect.width / 2 - width / 2;
+        } else {
+            left = side === 'left' ? rect.left - gap - width : rect.right + gap;
+            top = rect.top + rect.height / 2 - height / 2;
+        }
+
+        left = Math.max(FLOATING_MARGIN, Math.min(left, viewWidth - width - FLOATING_MARGIN));
+        top = Math.max(FLOATING_MARGIN, Math.min(top, viewHeight - height - FLOATING_MARGIN));
+
+        return {
+            top: top,
+            left: left,
+            placement: side,
+            arrow: side === 'top' || side === 'bottom'
+                ? rect.left + rect.width / 2 - left
+                : rect.top + rect.height / 2 - top,
+        };
+    }
+
+    /* Keeps a fixed panel on its trigger while anything scrolls (capture
+       phase, since scroll events do not bubble) or the window resizes. */
+    function followAnchor(component) {
+        component.follow = function () {
+            if (component.open) {
+                component.reposition();
+            }
+        };
+
+        window.addEventListener('scroll', component.follow, true);
+        window.addEventListener('resize', component.follow);
+    }
+
+    function unfollowAnchor(component) {
+        window.removeEventListener('scroll', component.follow, true);
+        window.removeEventListener('resize', component.follow);
+    }
+
+    /* Date helpers for the date range presets, all at local midnight. */
+    function startOfDay(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function addDays(date, days) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+    }
+
+    function pad(number) {
+        return (number < 10 ? '0' : '') + number;
+    }
+
+    /* Fallback formatter for when flatpickr is not on the page: handles the
+       Y, m, d, H and i tokens, which is what a value format is made of. */
+    function formatDateValue(date, format) {
+        return format.replace(/[YmdHi]/g, function (token) {
+            switch (token) {
+                case 'Y': return String(date.getFullYear());
+                case 'm': return pad(date.getMonth() + 1);
+                case 'd': return pad(date.getDate());
+                case 'H': return pad(date.getHours());
+                default: return pad(date.getMinutes());
+            }
+        });
+    }
+
+    var DATE_PRESETS = {
+        today: function (today) {
+            return [today, today];
+        },
+        yesterday: function (today) {
+            var day = addDays(today, -1);
+
+            return [day, day];
+        },
+        last_7_days: function (today) {
+            return [addDays(today, -6), today];
+        },
+        last_30_days: function (today) {
+            return [addDays(today, -29), today];
+        },
+        this_month: function (today) {
+            return [new Date(today.getFullYear(), today.getMonth(), 1), new Date(today.getFullYear(), today.getMonth() + 1, 0)];
+        },
+        last_month: function (today) {
+            return [new Date(today.getFullYear(), today.getMonth() - 1, 1), new Date(today.getFullYear(), today.getMonth(), 0)];
+        },
+        this_year: function (today) {
+            return [new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31)];
+        },
+    };
+
     var components = {
         /**
          * Modal / dialog.
@@ -1940,6 +2070,507 @@
                 reset: function () {
                     this.$refs.input.value = '';
                     this.names = [];
+                },
+            };
+        },
+
+        /**
+         * Tooltip: a short label shown on hover and on keyboard focus.
+         *
+         * The bubble is position: fixed so a scrolling table or card cannot
+         * clip it, and it describes the first focusable element inside the
+         * trigger (aria-describedby), so screen readers announce it too.
+         */
+        auiTooltip: function (config) {
+            config = config || {};
+
+            return {
+                open: false,
+                placement: config.placement || 'top',
+                resolved: config.placement || 'top',
+                delay: typeof config.delay === 'number' ? config.delay : 150,
+                top: 0,
+                left: 0,
+                arrow: 0,
+                timer: null,
+
+                init: function () {
+                    followAnchor(this);
+
+                    var panel = this.$refs.panel;
+                    var target = this.$el.querySelector('a[href], button, input, select, textarea, [tabindex]');
+
+                    /* Plain text or an icon: make the wrapper itself reachable. */
+                    if (! target) {
+                        target = this.$el;
+                        target.setAttribute('tabindex', '0');
+                    }
+
+                    if (panel && panel.id) {
+                        var described = target.getAttribute('aria-describedby');
+
+                        if (! described || described.split(' ').indexOf(panel.id) === -1) {
+                            target.setAttribute('aria-describedby', described ? described + ' ' + panel.id : panel.id);
+                        }
+                    }
+                },
+
+                destroy: function () {
+                    clearTimeout(this.timer);
+                    unfollowAnchor(this);
+                },
+
+                show: function () {
+                    var self = this;
+
+                    clearTimeout(this.timer);
+
+                    this.timer = setTimeout(function () {
+                        self.open = true;
+                        self.$nextTick(function () {
+                            self.reposition();
+                        });
+                    }, this.delay);
+                },
+
+                hide: function () {
+                    clearTimeout(this.timer);
+                    this.open = false;
+                },
+
+                reposition: function () {
+                    if (! this.$refs.panel) {
+                        return;
+                    }
+
+                    var place = placeFloating(this.$el, this.$refs.panel, this.placement, 8);
+
+                    this.top = place.top;
+                    this.left = place.left;
+                    this.arrow = place.arrow;
+                    this.resolved = place.placement;
+                },
+            };
+        },
+
+        /**
+         * Popover: a small panel of rich content opened by clicking a trigger.
+         *
+         * Closes on a click outside and on Esc (which hands focus back to the
+         * trigger). Opened from the keyboard, focus moves into the panel.
+         */
+        auiPopover: function (config) {
+            config = config || {};
+
+            return {
+                open: config.open === true,
+                placement: config.placement || 'bottom',
+                resolved: config.placement || 'bottom',
+                top: 0,
+                left: 0,
+                arrow: 0,
+
+                init: function () {
+                    var self = this;
+
+                    followAnchor(this);
+
+                    /* The control in the trigger slot announces the panel. */
+                    var trigger = this.$refs.trigger;
+                    var control = trigger && (trigger.querySelector('button, a[href], [tabindex]') || trigger);
+
+                    if (control) {
+                        control.setAttribute('aria-haspopup', 'dialog');
+                        control.setAttribute('aria-expanded', this.open ? 'true' : 'false');
+
+                        if (trigger.dataset.auiControls) {
+                            control.setAttribute('aria-controls', trigger.dataset.auiControls);
+                        }
+                    }
+
+                    this.$watch('open', function (value) {
+                        if (control) {
+                            control.setAttribute('aria-expanded', value ? 'true' : 'false');
+                        }
+
+                        if (value) {
+                            self.$nextTick(function () {
+                                self.reposition();
+                            });
+                        }
+
+                        self.$dispatch(value ? 'aui-popover-open' : 'aui-popover-close');
+                    });
+
+                    if (this.open) {
+                        this.$nextTick(function () {
+                            self.reposition();
+                        });
+                    }
+                },
+
+                destroy: function () {
+                    unfollowAnchor(this);
+                },
+
+                /* A click with detail 0 came from Enter or Space on the trigger. */
+                toggle: function (event) {
+                    if (this.open) {
+                        this.hide();
+
+                        return;
+                    }
+
+                    this.show(event && event.detail === 0);
+                },
+
+                show: function (focusPanel) {
+                    var self = this;
+
+                    this.open = true;
+
+                    if (! focusPanel) {
+                        return;
+                    }
+
+                    /* x-show reveals the panel after the next tick. */
+                    this.$nextTick(function () {
+                        setTimeout(function () {
+                            var panel = self.$refs.panel;
+                            var first = panel && panel.querySelector('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+
+                            if (panel) {
+                                (first || panel).focus();
+                            }
+                        });
+                    });
+                },
+
+                hide: function (restoreFocus) {
+                    if (! this.open) {
+                        return;
+                    }
+
+                    this.open = false;
+
+                    if (restoreFocus) {
+                        var trigger = this.$refs.trigger;
+                        var target = trigger && (trigger.querySelector('a[href], button, input, [tabindex]') || trigger);
+
+                        if (target && typeof target.focus === 'function') {
+                            target.focus();
+                        }
+                    }
+                },
+
+                reposition: function () {
+                    if (! this.$refs.trigger || ! this.$refs.panel) {
+                        return;
+                    }
+
+                    var place = placeFloating(this.$refs.trigger, this.$refs.panel, this.placement, 10);
+
+                    this.top = place.top;
+                    this.left = place.left;
+                    this.arrow = place.arrow;
+                    this.resolved = place.placement;
+                },
+            };
+        },
+
+        /**
+         * Wizard: a form split into steps, with a stepper header and
+         * Back / Next / Finish buttons.
+         *
+         * Each <x-avian::wizard.step> is a panel; the header is built from
+         * their titles. Next only moves on once the current panel's fields
+         * pass the browser's own validation (required, min, pattern...).
+         * `step` is x-modelable, so wire:model can follow it.
+         */
+        auiWizard: function (config) {
+            config = config || {};
+
+            return {
+                step: 1,
+                steps: [],
+                linear: config.linear !== false,
+
+                init: function () {
+                    var self = this;
+
+                    this.steps = this.panels().map(function (panel) {
+                        return {
+                            title: panel.dataset.title || '',
+                            description: panel.dataset.description || '',
+                        };
+                    });
+
+                    this.step = this.clamp(parseInt(this.$el.dataset.auiStep, 10) || 1);
+
+                    this.$watch('step', function (value) {
+                        var step = self.clamp(parseInt(value, 10) || 1);
+
+                        if (step !== value) {
+                            self.step = step;
+
+                            return;
+                        }
+
+                        self.$dispatch('aui-wizard-change', { step: step, total: self.steps.length });
+                    });
+                },
+
+                /* This wizard's own panels, in document order — not a nested wizard's. */
+                panels: function () {
+                    var root = this.$root;
+
+                    return Array.prototype.filter.call(root.querySelectorAll('[data-aui-wizard-step]'), function (panel) {
+                        return panel.closest('[data-aui-wizard]') === root;
+                    });
+                },
+
+                clamp: function (step) {
+                    return Math.max(1, Math.min(step, Math.max(1, this.steps.length)));
+                },
+
+                isActive: function (panel) {
+                    return this.panels().indexOf(panel) + 1 === this.step;
+                },
+
+                status: function (index) {
+                    var number = index + 1;
+
+                    if (number < this.step) {
+                        return 'complete';
+                    }
+
+                    return number === this.step ? 'current' : 'upcoming';
+                },
+
+                get isFirst() {
+                    return this.step <= 1;
+                },
+
+                get isLast() {
+                    return this.step >= this.steps.length;
+                },
+
+                /* Reports the first invalid field of the current panel, if any. */
+                validate: function () {
+                    var panel = this.panels()[this.step - 1];
+
+                    if (! panel) {
+                        return true;
+                    }
+
+                    var fields = panel.querySelectorAll('input, select, textarea');
+
+                    for (var i = 0; i < fields.length; i++) {
+                        if (typeof fields[i].checkValidity === 'function' && ! fields[i].checkValidity()) {
+                            fields[i].reportValidity();
+
+                            return false;
+                        }
+                    }
+
+                    return true;
+                },
+
+                next: function () {
+                    if (this.isLast || ! this.validate()) {
+                        return;
+                    }
+
+                    this.step += 1;
+                    this.focusPanel();
+                },
+
+                back: function () {
+                    if (this.isFirst) {
+                        return;
+                    }
+
+                    this.step -= 1;
+                    this.focusPanel();
+                },
+
+                /* A linear wizard only jumps back to steps already done. */
+                goTo: function (number) {
+                    if (number === this.step) {
+                        return;
+                    }
+
+                    if (this.linear && number > this.step) {
+                        return;
+                    }
+
+                    this.step = this.clamp(number);
+                    this.focusPanel();
+                },
+
+                canGoTo: function (index) {
+                    return ! this.linear || index + 1 < this.step;
+                },
+
+                /* The Finish button is a submit button: block it while the
+                   last panel is invalid, otherwise let the form submit. */
+                finish: function (event) {
+                    if (! this.validate()) {
+                        event.preventDefault();
+
+                        return;
+                    }
+
+                    this.$dispatch('aui-wizard-finish', { step: this.step });
+                },
+
+                /* Moves focus to the new panel so screen readers start there.
+                   x-show reveals it after the next tick, so wait one more. */
+                focusPanel: function () {
+                    var self = this;
+
+                    this.$nextTick(function () {
+                        setTimeout(function () {
+                            var panel = self.panels()[self.step - 1];
+
+                            if (panel) {
+                                panel.focus({ preventScroll: true });
+                            }
+                        });
+                    });
+                },
+            };
+        },
+
+        /**
+         * Date range: a flatpickr range picker that submits two fields,
+         * name[from] and name[to], in a fixed value format (Y-m-d by
+         * default) whatever the display format is. Presets fill common
+         * ranges. `value` is x-modelable: { from: '...', to: '...' }.
+         */
+        auiDateRange: function (config) {
+            config = config || {};
+
+            return {
+                value: { from: '', to: '' },
+                format: config.format || 'Y-m-d',
+
+                init: function () {
+                    var self = this;
+
+                    try {
+                        this.value = this.normalize(JSON.parse(this.$el.dataset.auiValue || 'null'));
+                    } catch (e) {}
+
+                    /* A server-side change arrives here through x-modelable. */
+                    this.$watch('value', function (value) {
+                        self.syncPicker(self.normalize(value));
+                    });
+                },
+
+                normalize: function (value) {
+                    value = value || {};
+
+                    return {
+                        from: typeof value.from === 'string' ? value.from : '',
+                        to: typeof value.to === 'string' ? value.to : '',
+                    };
+                },
+
+                picker: function () {
+                    return (this.$refs.input && this.$refs.input._flatpickr) || null;
+                },
+
+                /* flatpickr fires change after each click: the first click of a
+                   range only picks the start, so wait for the second. */
+                changed: function () {
+                    var picker = this.picker();
+
+                    if (! picker) {
+                        return;
+                    }
+
+                    var dates = picker.selectedDates;
+
+                    if (dates.length === 1) {
+                        return;
+                    }
+
+                    this.value = {
+                        from: dates[0] ? picker.formatDate(dates[0], this.format) : '',
+                        to: dates[1] ? picker.formatDate(dates[1], this.format) : '',
+                    };
+                },
+
+                syncPicker: function (value) {
+                    var picker = this.picker();
+
+                    if (! picker) {
+                        return;
+                    }
+
+                    var current = picker.selectedDates.map(function (date) {
+                        return picker.formatDate(date, this.format);
+                    }, this);
+
+                    if (current[0] === (value.from || undefined) && current[1] === (value.to || undefined)) {
+                        return;
+                    }
+
+                    if (! value.from) {
+                        picker.clear(false);
+
+                        return;
+                    }
+
+                    picker.setDate([value.from, value.to || value.from], false, this.format);
+                },
+
+                preset: function (key) {
+                    var range = DATE_PRESETS[key];
+
+                    if (! range) {
+                        return;
+                    }
+
+                    var dates = range(startOfDay(new Date()));
+                    var picker = this.picker();
+
+                    if (picker) {
+                        picker.setDate(dates, true);
+
+                        return;
+                    }
+
+                    this.value = {
+                        from: formatDateValue(dates[0], this.format),
+                        to: formatDateValue(dates[1], this.format),
+                    };
+                },
+
+                isPreset: function (key) {
+                    var range = DATE_PRESETS[key];
+
+                    if (! range || ! this.value.from) {
+                        return false;
+                    }
+
+                    var dates = range(startOfDay(new Date()));
+
+                    return formatDateValue(dates[0], this.format) === this.value.from
+                        && formatDateValue(dates[1], this.format) === this.value.to;
+                },
+
+                clear: function () {
+                    var picker = this.picker();
+
+                    if (picker) {
+                        picker.clear(false);
+                    } else if (this.$refs.input) {
+                        this.$refs.input.value = '';
+                    }
+
+                    this.value = { from: '', to: '' };
                 },
             };
         },

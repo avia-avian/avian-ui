@@ -1,6 +1,6 @@
 @php
     $props = [
-        ['variant', 'string', "'info'", 'info, success, warning, danger or neutral. Sets the colour and the default icon.'],
+        ['variant', 'string', "'info'", 'primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink. Sets the colour; info, success, warning, danger and neutral also pick a default icon.'],
         ['title', 'string|null', 'null', 'Bold first line above the message.'],
         ['icon', 'string|false|null', 'null', 'Override the default icon with another class, or pass :icon="false" to hide it.'],
         ['dismissible', 'bool', 'false', 'Adds a close button. Closing only hides it on this page view.'],

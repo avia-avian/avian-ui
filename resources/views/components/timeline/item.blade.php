@@ -29,7 +29,7 @@
     }
 @endphp
 
-<li {{ $attributes->class(['aui-timeline-item', 'aui-timeline-item-'.$variant => filled($variant)]) }}>
+<li {{ $attributes->class(['aui-timeline-item', 'aui-tone-'.($variant ?? 'primary')]) }}>
     <span @class(['aui-timeline-marker', 'aui-timeline-marker-icon' => filled($icon)]) aria-hidden="true">
         @if (filled($icon))
             <i class="{{ $icon }}"></i>

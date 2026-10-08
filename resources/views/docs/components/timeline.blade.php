@@ -6,7 +6,7 @@
         ['time-format', 'string', "'M j, Y g:i A'", 'Item: PHP date format used for a date time.'],
         ['relative', 'bool', 'false', 'Item: shows a date as "3 hours ago", with the exact time on hover.'],
         ['icon', 'string|null', 'null', 'Item: icon class shown in a round marker instead of a dot.'],
-        ['variant', 'string|null', 'null', 'Item: marker colour — success, warning, danger, info or neutral. Omit for the theme\'s primary colour.'],
+        ['variant', 'string|null', 'null', 'Item: marker colour — primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink. Omit for the theme\'s primary colour.'],
     ];
 
     $examples = [

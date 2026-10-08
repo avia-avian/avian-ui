@@ -1,7 +1,7 @@
 @php
     $props = [
-        ['variant', 'string', "'primary'", 'primary, secondary, success, warning, danger, info, dark, purple, indigo, teal, orange, pink, light, link — or the shapes outline / ghost.'],
-        ['color', 'string|null', 'null', 'Only for outline and ghost: primary, secondary, success, warning, danger, info, dark, purple, indigo, teal, orange or pink. Ignored on other variants.'],
+        ['variant', 'string', "'primary'", 'primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange, pink, light, link — or the shapes outline / ghost.'],
+        ['color', 'string|null', 'null', 'Only for outline and ghost: primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink. Ignored on other variants.'],
         ['size', "'xs'|'sm'|'lg'|null", 'null', 'Button size. Omit for the default size; xs suits dense table rows.'],
         ['type', 'string', "'button'", 'Native button type: button, submit or reset. Ignored when href is set.'],
         ['href', 'string|null', 'null', 'Renders an <a> instead of a <button>, styled the same way.'],
@@ -131,19 +131,19 @@
         </div>
 
         <div class="aui-row" style="flex-wrap: wrap">
-            @foreach (['purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
+            @foreach (['neutral', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
                 <x-avian::button :variant="$variant">{{ ucfirst($variant) }}</x-avian::button>
             @endforeach
         </div>
 
         <div class="aui-row" style="flex-wrap: wrap">
-            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
+            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'neutral', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
                 <x-avian::button variant="outline" :color="$color">{{ ucfirst($color) }}</x-avian::button>
             @endforeach
         </div>
 
         <div class="aui-row" style="flex-wrap: wrap">
-            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
+            @foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'neutral', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color)
                 <x-avian::button variant="ghost" :color="$color">{{ ucfirst($color) }}</x-avian::button>
             @endforeach
         </div>

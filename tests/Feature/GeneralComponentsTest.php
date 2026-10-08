@@ -10,31 +10,56 @@ use Illuminate\Support\Facades\Blade;
 it('renders a button with its variant and size', function () {
     $html = Blade::render('<x-avian::button variant="danger" size="sm">Delete</x-avian::button>');
 
-    expect($html)->toContain('aui-btn aui-btn-danger aui-btn-sm')
+    expect($html)->toContain('aui-btn aui-btn-solid aui-tone-danger aui-btn-sm')
         ->toContain('type="button"')
         ->toContain('Delete');
 });
 
-it('renders the accent colours as solid, outline and ghost buttons', function (string $color) {
+dataset('colors', ['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'neutral', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink']);
+
+it('renders every colour as a solid, outline and ghost button', function (string $color) {
     expect(Blade::render("<x-avian::button variant=\"{$color}\">Go</x-avian::button>"))
-        ->toContain("aui-btn aui-btn-{$color}");
+        ->toContain("aui-btn aui-btn-solid aui-tone-{$color}");
 
     expect(Blade::render("<x-avian::button variant=\"outline\" color=\"{$color}\">Go</x-avian::button>"))
-        ->toContain("aui-btn aui-btn-outline-{$color}");
+        ->toContain("aui-btn aui-btn-outline aui-tone-{$color}");
 
     expect(Blade::render("<x-avian::button variant=\"ghost\" color=\"{$color}\">Go</x-avian::button>"))
-        ->toContain("aui-btn aui-btn-ghost-{$color}");
-})->with(['dark', 'purple', 'indigo', 'teal', 'orange', 'pink']);
+        ->toContain("aui-btn aui-btn-ghost aui-tone-{$color}");
+})->with('colors');
 
-it('ships a stylesheet rule for every button colour', function () {
+it('falls back to primary outline and secondary ghost buttons without a colour', function () {
+    expect(Blade::render('<x-avian::button variant="outline">Go</x-avian::button>'))
+        ->toContain('aui-btn aui-btn-outline aui-tone-primary');
+
+    expect(Blade::render('<x-avian::button variant="ghost">Go</x-avian::button>'))
+        ->toContain('aui-btn aui-btn-ghost aui-tone-secondary');
+
+    expect(Blade::render('<x-avian::button variant="light" color="danger">Go</x-avian::button>'))
+        ->toContain('aui-btn aui-btn-light')
+        ->not->toContain('aui-tone-');
+});
+
+it('applies every colour to every coloured component', function (string $color) {
+    expect(Blade::render("<x-avian::badge variant=\"{$color}\">New</x-avian::badge>"))->toContain("aui-badge aui-tone-{$color}")
+        ->and(Blade::render("<x-avian::alert variant=\"{$color}\">Hi</x-avian::alert>"))->toContain("aui-alert aui-tone-{$color}")
+        ->and(Blade::render("<x-avian::progress :value=\"50\" variant=\"{$color}\" />"))->toContain("aui-progress-bar aui-tone-{$color}")
+        ->and(Blade::render("<x-avian::timeline.item title=\"Shipped\" variant=\"{$color}\" />"))->toContain("aui-timeline-item aui-tone-{$color}")
+        ->and(Blade::render("<x-avian::stat label=\"Revenue\" value=\"1\" icon=\"fas fa-wallet\" color=\"{$color}\" />"))->toContain("aui-stat-icon aui-tone-{$color}");
+})->with('colors');
+
+it('ships a tone for every colour in the stylesheet', function (string $color) {
     $css = file_get_contents(__DIR__.'/../../public/css/avian-ui.css');
 
-    foreach (['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $color) {
-        expect($css)->toContain(".aui-btn-{$color} {")
-            ->toContain(".aui-btn-outline-{$color} {")
-            ->toContain(".aui-btn-ghost-{$color} {");
-    }
-});
+    preg_match('/\.aui-tone-'.$color.' \{(.*?)\}/s', $css, $tone);
+
+    expect($tone)->not->toBeEmpty()
+        ->and($tone[1])->toContain('--aui-tone:')
+        ->toContain('--aui-tone-hover:')
+        ->toContain('--aui-tone-soft:')
+        ->toContain('--aui-tone-strong:')
+        ->toContain('--aui-tone-border:');
+})->with('colors');
 
 it('renders a button as a link when given an href', function () {
     $html = Blade::render('<x-avian::button href="/reports" icon="fas fa-file">Reports</x-avian::button>');
@@ -221,14 +246,14 @@ it('ignores collapsed on a card that is not collapsible', function () {
 
 it('renders a badge with a variant', function () {
     expect(Blade::render('<x-avian::badge variant="success" dot>Complete</x-avian::badge>'))
-        ->toContain('aui-badge aui-badge-success aui-badge-dot')
+        ->toContain('aui-badge aui-tone-success aui-badge-dot')
         ->toContain('Complete');
 });
 
 it('renders an alert with its default icon', function () {
     $html = Blade::render('<x-avian::alert variant="danger" title="Failed">Something broke.</x-avian::alert>');
 
-    expect($html)->toContain('aui-alert aui-alert-danger')
+    expect($html)->toContain('aui-alert aui-tone-danger')
         ->toContain('role="alert"')
         ->toContain('fa-circle-exclamation')
         ->toContain('<p class="aui-alert-title">Failed</p>')
@@ -722,7 +747,7 @@ it('renders a stat with its trend read from the sign of the change', function ()
     expect($up)->toContain('aui-stat-change aui-stat-change-good')
         ->toContain('fa-arrow-trend-up')
         ->toContain('vs last month')
-        ->toContain('aui-stat-icon aui-stat-icon-primary')
+        ->toContain('aui-stat-icon aui-tone-primary')
         ->and($down)->toContain('aui-stat-change-bad')
         ->toContain('fa-arrow-trend-down')
         ->not->toContain('aui-stat-icon')

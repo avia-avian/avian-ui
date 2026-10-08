@@ -16,8 +16,9 @@
         $dispatch('aui-toast', { message: 'Copied!' })
         $this->dispatch('aui-toast', message: 'Order saved.', variant: 'success');
 
-    Options: `message`, `title`, `variant` (success, danger / error, warning,
-    info, neutral; `success` by default), `duration` in ms (`0` keeps it until
+    Options: `message`, `title`, `variant` (any shared color — success,
+    danger / error, warning, info, neutral get a matching icon; `success` by
+    default), `duration` in ms (`0` keeps it until
     dismissed), `icon` (a class, or `false` for none) and `dismissible`.
     Hovering or focusing a toast pauses its timer.
 --}}
@@ -45,7 +46,7 @@
     <template x-for="toast in toasts" x-bind:key="toast.id">
         <div
             class="aui-toast"
-            x-bind:class="'aui-toast-' + toast.variant"
+            x-bind:class="'aui-tone-' + toast.variant"
             x-bind:role="toast.variant === 'danger' ? 'alert' : 'status'"
             x-show="toast.visible"
             x-transition:enter="aui-toast-transition"

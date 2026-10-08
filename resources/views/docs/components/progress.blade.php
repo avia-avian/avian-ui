@@ -2,7 +2,7 @@
     $props = [
         ['value', 'int|float', '0', 'Current amount.'],
         ['max', 'int|float', '100', 'Amount that means "complete". The bar shows value / max as a percentage, clamped to 0–100%.'],
-        ['variant', "'success'|'warning'|'danger'|null", 'null', 'Bar colour. Omit for the theme\'s primary colour.'],
+        ['variant', 'string|null', 'null', 'Bar colour: primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink. Omit for the theme\'s primary colour.'],
         ['label', 'string|null', 'null', 'Text shown above the bar on the left.'],
         ['show-value', 'bool', 'false', 'Shows the percentage above the bar on the right.'],
     ];

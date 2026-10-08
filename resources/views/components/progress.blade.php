@@ -22,6 +22,6 @@
     @endif
 
     <div class="aui-progress" role="progressbar" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100">
-        <div @class(['aui-progress-bar', 'aui-progress-bar-'.$variant => filled($variant)]) style="width: {{ $percent }}%"></div>
+        <div class="aui-progress-bar aui-tone-{{ $variant ?? 'primary' }}" style="width: {{ $percent }}%"></div>
     </div>
 </div>

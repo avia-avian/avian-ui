@@ -18,7 +18,7 @@
 @endphp
 
 <div
-    {{ $attributes->class(['aui-alert', 'aui-alert-'.$variant])->merge(['role' => 'alert']) }}
+    {{ $attributes->class(['aui-alert', 'aui-tone-'.$variant])->merge(['role' => 'alert']) }}
     @if ($dismissible) x-data="auiDismiss()" x-show="visible" @endif
 >
     @if (filled($alertIcon))

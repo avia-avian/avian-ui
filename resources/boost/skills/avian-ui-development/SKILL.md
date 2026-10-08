@@ -3,8 +3,8 @@ name: avian-ui-development
 description: >
   Build Laravel UI with the Avian Ui Blade component library: asset tags,
   theming tokens, form controls with validation wiring, paginated tables, and
-  the Alpine-backed modal, dropdown, searchable select, multi select and tab components in
-  Blade and Livewire applications.
+  the Alpine-backed modal, dropdown, popover, tooltip, searchable select, multi
+  select, date range, wizard and tab components in Blade and Livewire applications.
 license: MIT
 metadata:
   author: Aldo Octavio Cahyadi
@@ -37,8 +37,8 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `tabs` (+ `tabs.panel`)
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `skeleton` (+ `skeleton.table`), `kbd`, `stepper`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `popover`, `tooltip`, `tabs` (+ `tabs.panel`)
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`, `wizard` (+ `wizard.step`)
 
 Form controls render their own label, hint and validation message from `name`
 (or the `wire:model` property when there is no `name`), and repopulate from old
@@ -101,6 +101,23 @@ class and `data-fp-*` attributes (`mode`, `enable-time`, `date-format`,
 app loads it and upgrades every `.flatpickr-input` on page load, reading its
 config from the `data-fp-*` attributes.
 
+Use `date-range` for a from–to filter or period instead of two datepickers: it
+submits `name[from]` and `name[to]` in `value-format` (`Y-m-d` by default)
+whatever `date-format` it shows, so validate `period.from` / `period.to`.
+`presets` adds quick ranges (`true`, or keys out of `today`, `yesterday`,
+`last_7_days`, `last_30_days`, `this_month`, `last_month`, `this_year`),
+`clearable` a Clear button, and `wire:model` binds `['from' => ..., 'to' => ...]`.
+It needs flatpickr exactly like `datepicker`.
+
+Use `wizard` with `wizard.step` children (each a `title`, optional
+`description`) to split a long form into steps; keep the wizard inside one
+`<form>` (or `wire:submit` form) so Finish submits every step at once. Next
+relies on native validation attributes (`required`, `type`, `min`, `pattern`)
+on the step's fields, so put them on the inputs; `wire:model` on the wizard
+binds the step number, which lets the server jump back to a step that failed
+validation. For a read-only progress indicator use `stepper` (`steps`,
+`current`, `vertical`) instead.
+
 For destructive actions, place `<x-avian::confirm />` once in the layout and
 add `confirm="message"` to the `button` (or `data-aui-confirm` to any element
 or form) — never hand-roll a confirm modal or use `wire:confirm`. From
@@ -124,6 +141,17 @@ dashboard KPI tiles (pre-formatted `value`, `change` sign picks the arrow,
 `invert` when less is better), `breadcrumbs` (`label => url` items, last one
 current) right above `page-header`, `accordion` for collapsible sections and
 `divider` between blocks.
+
+Wrap an element in `tooltip` (`text`, `placement`) to label it on hover and
+focus; an `icon-only` button still needs its own `label`. Use `popover`
+(`trigger` slot, `title`, `footer` slot, `width`) for small interactive panels
+such as quick filters; call `hide()` from inside to close it. Prefer
+`dropdown` for a menu of actions and `modal` for anything that needs focus.
+
+Use `skeleton` (`variant` `text` with `lines`, `circle`, `rect`, `button`) or
+`skeleton.table` (`rows`, `columns`, `label`) as a Livewire lazy component's
+`placeholder()` or inside `wire:loading`, and `kbd` (`keys="Ctrl+K"`) to show
+keyboard shortcuts.
 
 Pass `icon-only` to `button` for a square, icon-only button (table row
 actions, a toolbar) — it has no visible text, so it needs `label` for an
@@ -195,7 +223,14 @@ initialises elements inside an `x-data` tree.
 **Styling.** Compose with the `aui-*` classes (`aui-form-grid`, `aui-stack`,
 `aui-row`, `aui-grid`, `aui-form-actions`, `aui-table-align-right`). Override
 design tokens (`--aui-primary`, `--aui-radius-lg`, `--aui-font-sans`) in the
-app's own CSS instead of restyling components with new rules. Pick a bundled
+app's own CSS instead of restyling components with new rules. Every colored
+component shares one palette — `primary`, `secondary`, `success`, `warning`,
+`danger`, `info`, `neutral`, `dark`, `purple`, `indigo`, `teal`, `orange`,
+`pink` — so any of them works as a badge, alert, toast, progress or timeline
+`variant`, a button `variant` (or `color` with `outline` / `ghost`), a stat
+`color` and a confirm `variant`. Recolor one with its tokens:
+`--aui-{color}` plus `-hover`, `-soft`, `-strong` and `-border` (primary uses
+`--aui-primary-dark`, `-light` and `-darker`). Pick a bundled
 palette with `data-theme` on `<html>` only when the app has no `--color-*`
 theme system of its own.
 
@@ -214,6 +249,9 @@ Read before executing:
 - Pass a `paginate()` result to `<x-avian::table :paginator="$items">` instead of hand-rolling Previous/Next links.
 - Replace hand-styled status toggles above a list with `<x-avian::filter-chip>` checkboxes (or `href` links for query-string filters) inside `<x-avian::filter-chip.group>`.
 - Use `<x-avian::slider range>` for a min/max filter such as a price bracket; it submits `name[min]` and `name[max]`.
+- Replace two separate start/end datepickers with `<x-avian::date-range name="period" presets>` and validate `period.from` / `period.to`.
+- Split a long signup form into `<x-avian::wizard>` steps inside the existing `<form>`, keeping native `required` attributes so Next validates each step.
+- Return `<x-avian::skeleton.table>` from a lazy Livewire component's `placeholder()` instead of a spinner.
 - Render an audit log or order history with `<x-avian::timeline>` and `timeline.item`, passing the model's date as `time` with `relative`.
 - Theme an application by defining `--aui-primary` in the app stylesheet rather than editing the package CSS.
 
@@ -223,4 +261,5 @@ Read before executing:
 - do not bundle or load a second copy of Alpine in a Livewire application
 - do not place `<x-avian::scripts />` after the application's own Alpine tag
 - do not hardcode brand colors in views; use the design tokens
+- do not add per-component color classes (`.aui-badge-brand`); pick a palette color or override its `--aui-{color}` tokens
 - do not publish the package views to tweak one component when a prop, a slot or a token override does the job

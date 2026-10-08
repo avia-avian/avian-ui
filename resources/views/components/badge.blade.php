@@ -8,7 +8,7 @@
 
 <span {{ $attributes->class([
     'aui-badge',
-    'aui-badge-'.$variant,
+    'aui-tone-'.$variant,
     'aui-badge-'.$size => filled($size),
     'aui-badge-dot' => $dot,
     'aui-badge-uppercase' => $uppercase,

@@ -1,6 +1,6 @@
 @php
     $props = [
-        ['variant', 'string', "'neutral'", 'neutral, primary, success, warning, danger, info, dark, purple, indigo, teal, orange or pink.'],
+        ['variant', 'string', "'neutral'", 'primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink.'],
         ['size', "'sm'|null", 'null', 'Smaller badge for dense tables and lists.'],
         ['dot', 'bool', 'false', 'Adds a small coloured dot before the text — the usual look for a status.'],
         ['icon', 'string|null', 'null', 'Icon class shown before the text.'],
@@ -64,7 +64,7 @@
 <div class="aui-showcase-demo">
     <div class="aui-stack">
         <div class="aui-row" style="flex-wrap: wrap">
-            @foreach (['neutral', 'primary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
+            @foreach (['neutral', 'primary', 'secondary', 'success', 'warning', 'danger', 'info', 'dark', 'purple', 'indigo', 'teal', 'orange', 'pink'] as $variant)
                 <x-avian::badge :variant="$variant">{{ ucfirst($variant) }}</x-avian::badge>
             @endforeach
         </div>

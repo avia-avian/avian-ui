@@ -21,11 +21,12 @@
         <x-avian::button href="{{ route('dashboard') }}" navigate>Dashboard</x-avian::button>
 
     `outline` and `ghost` are shapes, not colors on their own — pair either
-    with `color` (`primary`, `secondary`, `success`, `warning`, `danger`,
-    `info`, or an accent: `dark`, `purple`, `indigo`, `teal`, `orange`,
-    `pink`) to pick one. Every color also works as a solid variant. Without `color` they fall back to `primary`
-    (outline) or `secondary` (ghost); `color` is ignored on every other
-    variant, which is already a color (`primary`, `success`, ...):
+    with `color` (any shared color: `primary`, `secondary`, `success`,
+    `warning`, `danger`, `info`, `neutral`, `dark`, `purple`, `indigo`,
+    `teal`, `orange`, `pink`) to pick one. Every color also works as a solid
+    variant. Without `color` they fall back to `primary` (outline) or
+    `secondary` (ghost); `color` is ignored on every other variant, which is
+    already a color (`primary`, `success`, ...) or `light` / `link`:
 
         <x-avian::button variant="outline" color="danger">Remove</x-avian::button>
         <x-avian::button variant="ghost" color="success">Approve</x-avian::button>
@@ -73,15 +74,19 @@
         ? '$dispatch(\'aui-modal-open\', { name: '.Illuminate\Support\Js::from($modal).' })'
         : null;
 
-    // `color` only applies to the "shape" variants — every other variant is
-    // already a color of its own (primary, success, light, link, ...).
-    $resolvedVariant = in_array($variant, ['outline', 'ghost'], true) && filled($color)
-        ? $variant.'-'.$color
-        : $variant;
+    // `outline` and `ghost` are shapes painted with `color`; `light` and `link`
+    // are styles of their own; any other variant is a color for a solid button.
+    [$shape, $tone] = match ($variant) {
+        'outline' => ['outline', $color ?? 'primary'],
+        'ghost' => ['ghost', $color ?? 'secondary'],
+        'light', 'link' => [$variant, null],
+        default => ['solid', $variant],
+    };
 
     $classes = [
         'aui-btn',
-        'aui-btn-'.$resolvedVariant,
+        'aui-btn-'.$shape,
+        'aui-tone-'.$tone => filled($tone),
         'aui-btn-'.$size => filled($size),
         'aui-btn-icon' => $iconOnly,
         'aui-btn-block' => $block,

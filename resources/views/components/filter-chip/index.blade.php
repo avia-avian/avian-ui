@@ -51,7 +51,7 @@
     @php
         $type = $type === 'radio' ? 'radio' : 'checkbox';
         $fieldName = $avianUi->fieldName($name, $attributes);
-        $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')).'-'.$value : null);
+        $inputId = $id ?? (filled($fieldName) ? 'aui-'.str_replace(['[', ']', '.', '_'], '-', trim((string) $fieldName, '[]')).'-'.trim((string) preg_replace('/[^A-Za-z0-9_-]+/', '-', (string) $value), '-') : null);
 
         $wired = $attributes->whereStartsWith('wire:model')->isNotEmpty();
         $isChecked = $wired ? (bool) $checked : $avianUi->oldChecked($name, $value, (bool) $checked);

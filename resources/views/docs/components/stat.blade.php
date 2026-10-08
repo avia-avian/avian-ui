@@ -7,7 +7,7 @@
         ['invert', 'bool', 'false', 'Down is good (costs, returns, overdue): flips the green / red.'],
         ['description', 'string|null', 'null', 'Muted text after the change, e.g. "vs last month".'],
         ['icon', 'string|null', 'null', 'Icon class shown in a tinted square.'],
-        ['color', "'primary'|'success'|'warning'|'danger'|'info'|'neutral'", "'primary'", 'Tint of the icon.'],
+        ['color', 'string', "'primary'", 'Tint of the icon: primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink.'],
         ['href', 'string|null', 'null', 'Makes the whole tile a link.'],
         ['navigate', 'bool', 'false', 'Adds wire:navigate to an href tile.'],
         ['default slot', 'slot', '—', 'Extra content under the numbers: a progress bar, a small chart.'],

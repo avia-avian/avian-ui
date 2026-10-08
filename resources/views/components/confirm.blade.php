@@ -27,8 +27,8 @@
     next to `data-aui-confirm` (the message): `title`
     (`data-aui-confirm-title`), `message`, `confirmText`
     (`data-aui-confirm-text`), `cancelText` (`data-aui-cancel-text`) and
-    `variant` (`data-aui-confirm-variant`; `danger` by default, also
-    `primary`, `warning`, `success`, `info`). Without this component on the page, `AvianUI.confirm()` falls
+    `variant` (`data-aui-confirm-variant`; `danger` by default, or any
+    other shared color: `primary`, `warning`, `success`, `info`, ...). Without this component on the page, `AvianUI.confirm()` falls
     back to the browser's native `confirm()`.
 
     Loading — with `loading` (`data-aui-confirm-loading`, or the `loading`
@@ -73,7 +73,7 @@
 >
     <div {{ $attributes->class(['aui-modal', 'aui-modal-sm', 'aui-confirm']) }}>
         <div class="aui-modal-body aui-confirm-body">
-            <span class="aui-confirm-icon" x-bind:class="'aui-confirm-icon-' + current.variant" aria-hidden="true">
+            <span class="aui-confirm-icon" x-bind:class="'aui-tone-' + current.variant" aria-hidden="true">
                 <i x-bind:class="icon"></i>
             </span>
 
@@ -88,7 +88,7 @@
             <button
                 type="button"
                 class="aui-btn"
-                x-bind:class="['aui-btn-' + current.variant, busy ? 'aui-btn-loading' : '']"
+                x-bind:class="['aui-btn-solid', 'aui-tone-' + current.variant, busy ? 'aui-btn-loading' : '']"
                 x-bind:disabled="busy"
                 x-bind:aria-busy="busy ? 'true' : null"
                 x-on:click="answer(true)"

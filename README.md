@@ -163,6 +163,33 @@ in your own CSS:
 }
 ```
 
+#### Colors
+
+Every colored component shares one palette: `primary`, `secondary`,
+`success`, `warning`, `danger`, `info`, `neutral`, `dark`, `purple`,
+`indigo`, `teal`, `orange` and `pink`. Any of them works wherever a component
+takes a `variant` or `color` (buttons, badges, alerts, toasts, progress
+bars, timeline items, stat icons and the confirm dialog):
+
+```blade
+<x-avian::badge variant="purple">Beta</x-avian::badge>
+<x-avian::progress :value="40" variant="teal" />
+<x-avian::button variant="outline" color="orange">Export</x-avian::button>
+```
+
+Each color is a base token plus four shades: `--aui-{color}` (the solid
+fill), `-hover`, `-soft` (a tinted background), `-strong` (text on that
+background) and `-border`. Primary takes its shades from `--aui-primary-dark`,
+`-light` and `-darker`, which the themes set. A component reads them through
+an `aui-tone-{color}` class, so restyling a color is one override:
+
+```css
+:root {
+    --aui-purple: #9333ea;
+    --aui-purple-soft: #faf5ff;
+}
+```
+
 Icons are passed through as class strings (`icon="fas fa-plus"`), so the
 package does not depend on any particular icon set.
 
@@ -229,6 +256,7 @@ bound property for its id and its error lookup.
 | `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
 | `mode` (incl. `time`), `enable-time`, `time-24hr`, `date-format`, `min-date`, `max-date`, `min-time`, `max-time` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
+| `value-format`, `presets`, `clearable` | date-range | Submitted format of `name[from]` / `name[to]`; quick ranges; a Clear button |
 
 Put buttons in the `prepend` or `append` slot to attach them to the input,
 for example a search box with its submit button. Give the button the same
@@ -532,13 +560,15 @@ validation message:
 
 Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
 `badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
-`divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `page-header`,
-`pagination`, `progress`, `scripts`, `spinner`, `stat`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`,
+`divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `kbd`, `page-header`,
+`pagination`, `popover`, `progress`, `scripts`, `skeleton` (+ `skeleton.table`), `spinner`, `stat`,
+`stepper`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`, `tooltip`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
 `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`,
-`slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`.
+`slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`,
+`wizard` (+ `wizard.step`).
 
 Pass `collapsible` to let the viewer fold a card into its header. A chevron
 appears in the header, and clicking the header outside its actions toggles it
@@ -791,7 +821,7 @@ its items either as a list or as a grid of cards, with a toggle between the two:
 `<x-avian::timeline>` lists events in order — an order's history, an audit
 log. Each `timeline.item` takes a `title`, a `time` (a string, or a date
 printed with `time-format`, or as "3 hours ago" with `relative`), and an
-`icon` or `variant` (`success`, `warning`, `danger`, `info`, `neutral`) for
+`icon` or `variant` (any [color](#colors), `primary` by default) for
 its marker; the slot holds the details:
 
 ```blade
@@ -802,6 +832,66 @@ its marker; the slot holds the details:
         </x-avian::timeline.item>
     @endforeach
 </x-avian::timeline>
+```
+
+`<x-avian::stepper>` shows progress through a process. Pass `steps` (titles,
+or arrays of `title`, `description`, `icon`, `href` and `status`) and the
+1-based `current` step; `vertical` stacks them. On phones a horizontal
+stepper keeps only the current step's title:
+
+```blade
+<x-avian::stepper :steps="['Cart', 'Shipping', 'Payment', 'Review']" :current="2" />
+```
+
+`<x-avian::skeleton>` draws loading placeholders (`variant` `text` with
+`lines`, `circle`, `rect` or `button`; numbers are pixels), and
+`<x-avian::skeleton.table>` a table-shaped one announced as a busy status,
+which suits a Livewire lazy component's `placeholder()`:
+
+```blade
+<x-avian::skeleton.table :rows="5" :columns="4" label="Loading orders" />
+```
+
+`<x-avian::kbd>` shows a key, or a shortcut with `keys="Ctrl+K"`.
+
+#### Date ranges and wizards
+
+`<x-avian::date-range>` is a flatpickr range picker (loaded by the host app,
+like the datepicker) that submits `name[from]` and `name[to]` in
+`value-format` (`Y-m-d` by default), whatever `date-format` it shows:
+
+```blade
+<x-avian::date-range name="period" label="Period" presets clearable />
+```
+
+```php
+$request->validate([
+    'period.from' => ['nullable', 'date'],
+    'period.to' => ['nullable', 'date', 'after_or_equal:period.from'],
+]);
+```
+
+`presets` is `true` for the common ranges or a list out of `today`,
+`yesterday`, `last_7_days`, `last_30_days`, `this_month`, `last_month` and
+`this_year`. With Livewire, `wire:model` binds an array with `from` and `to`.
+
+`<x-avian::wizard>` splits a form into `wizard.step`s under a stepper header,
+with Back / Next / Finish buttons. Next only moves on once the current step's
+fields pass the browser's validation; Finish is a submit button, so the whole
+form (every step) is sent at once, by a plain form or `wire:submit`.
+`wire:model` on the wizard follows the step number:
+
+```blade
+<form wire:submit="save">
+    <x-avian::wizard wire:model="step" finish-label="Create account">
+        <x-avian::wizard.step title="Account">
+            <x-avian::input name="email" type="email" label="Email" required />
+        </x-avian::wizard.step>
+        <x-avian::wizard.step title="Profile" description="Optional">
+            <x-avian::input name="name" label="Name" />
+        </x-avian::wizard.step>
+    </x-avian::wizard>
+</form>
 ```
 
 ### 5. Modals, dropdowns and tabs
@@ -933,9 +1023,33 @@ window.AvianUI.toast({ title: 'Export ready', message: 'Check your inbox.', dura
 Hovering or focusing a toast pauses its timer. Messages are rendered as text,
 so HTML in them is escaped.
 
+#### Tooltips and popovers
+
+`<x-avian::tooltip>` shows `text` on hover and keyboard focus and describes
+the first focusable element in its slot (`aria-describedby`). `<x-avian::popover>`
+opens a panel of rich content from its `trigger` slot; a click outside or Esc
+closes it, and `hide()` closes it from inside. Both take a `placement` (`top`,
+`bottom`, `left`, `right`), flip when there is no room, and are
+`position: fixed`, so scrolling tables and cards never clip them:
+
+```blade
+<x-avian::tooltip text="Edit order">
+    <x-avian::button variant="light" icon="fas fa-pen" icon-only label="Edit order" />
+</x-avian::tooltip>
+
+<x-avian::popover title="Filters" width="280px">
+    <x-slot:trigger>
+        <x-avian::button variant="light" icon="fas fa-filter">Filters</x-avian::button>
+    </x-slot:trigger>
+
+    <x-avian::select name="status" label="Status" :options="$statuses" wire:model.live="status" />
+</x-avian::popover>
+```
+
 The Alpine components registered by the package are `auiModal`, `auiConfirm`, `auiToasts`,
 `auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
-`auiDatalist`, `auiSearchableSelect`, `auiMultiSelect`, `auiSlider` and `auiTableRow`. The modal
+`auiDatalist`, `auiSearchableSelect`, `auiMultiSelect`, `auiSlider`, `auiTableRow`,
+`auiTooltip`, `auiPopover`, `auiWizard` and `auiDateRange`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`
 never strands a locked page.
 

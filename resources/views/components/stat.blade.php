@@ -6,8 +6,8 @@
     `trend` (`up`, `down` or `flat`) picks the arrow; left out, it is read
     from the sign of `change`. Up is shown as good (green) and down as bad
     (red) — set `invert` for numbers where less is better (costs, returns,
-    overdue invoices). `color` tints the icon (`primary` by default,
-    `success`, `warning`, `danger`, `info`, `neutral`).
+    overdue invoices). `color` tints the icon (`primary` by default, or
+    any other shared color: `success`, `warning`, `danger`, `info`, ...).
 
     `href` turns the whole tile into a link (with `navigate` for
     `wire:navigate`). The default slot renders under the numbers, for a
@@ -75,7 +75,7 @@
         </div>
 
         @if (filled($icon))
-            <span class="aui-stat-icon aui-stat-icon-{{ $color }}" aria-hidden="true">
+            <span class="aui-stat-icon aui-tone-{{ $color }}" aria-hidden="true">
                 <i class="{{ $icon }}"></i>
             </span>
         @endif

@@ -3,7 +3,7 @@
         ['title', 'string|null', "'Are you sure?'", 'Default heading, used when a request does not pass one (translated).'],
         ['confirm-text', 'string|null', "'Confirm'", 'Default label of the yes button.'],
         ['cancel-text', 'string|null', "'Cancel'", 'Default label of the no button.'],
-        ['variant', "'danger'|'primary'|'warning'|'success'|'info'", "'danger'", 'Default color of the icon and the yes button.'],
+        ['variant', 'string', "'danger'", 'Default color of the icon and the yes button: primary, secondary, success, warning, danger, info, neutral, dark, purple, indigo, teal, orange or pink.'],
         ['loading', 'bool', 'false', 'Keep the dialog open with a spinner after a yes, until the work it started is done. Per request: data-aui-confirm-loading, or `loading` / `action` from JS and Livewire.'],
         ['confirm (button prop)', 'string|null', 'null', 'On <x-avian::button>: the message. The click only goes through after a yes.'],
         ['data-aui-confirm', 'attribute', '—', 'On any element or <form>: the message. Tune it with data-aui-confirm-title, data-aui-confirm-text, data-aui-cancel-text and data-aui-confirm-variant.'],

@@ -558,11 +558,13 @@ validation message:
 </x-avian::card>
 ```
 
-Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`,
-`badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`, `confirm`,
+Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`, `avatar-group`,
+`badge`, `breadcrumbs` (+ `breadcrumbs.item`), `button`, `button-group`, `card`,
+`command` (+ `command.group`, `command.item`), `confirm`, `copy-button`,
+`description-list` (+ `description-list.item`),
 `divider`, `drawer`, `dropdown` (+ `dropdown.item`), `empty`, `kbd`, `page-header`,
 `pagination`, `popover`, `progress`, `scripts`, `skeleton` (+ `skeleton.table`), `spinner`, `stat`,
-`stepper`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`, `tooltip`,
+`stepper`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`, `tooltip`, `tree`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
 `textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
@@ -854,6 +856,40 @@ which suits a Livewire lazy component's `placeholder()`:
 
 `<x-avian::kbd>` shows a key, or a shortcut with `keys="Ctrl+K"`.
 
+`<x-avian::description-list>` lays out a record's label / value details in
+1–3 columns (one on phones). A `description-list.item` takes a `label` and a
+`value` or a slot; dates are formatted (`date-format`), enums show their
+`label()`, booleans Yes / No, and a blank value shows a muted dash.
+`copyable` adds a copy button, `full` spans the row; `inline` puts labels
+beside values and `divided` rules off the rows. `items` takes a plain
+`label => value` array. The copy button is also `<x-avian::copy-button :text="...">`.
+
+```blade
+<x-avian::description-list>
+    <x-avian::description-list.item label="Status">
+        <x-avian::badge :variant="$order->status->variant()" dot>{{ $order->status->label() }}</x-avian::badge>
+    </x-avian::description-list.item>
+    <x-avian::description-list.item label="Invoice no." :value="$order->number" copyable />
+    <x-avian::description-list.item label="Created" :value="$order->created_at" />
+    <x-avian::description-list.item label="Notes" :value="$order->notes" full />
+</x-avian::description-list>
+```
+
+`<x-avian::avatar-group :users="$task->assignees" :max="3" />` overlaps
+avatars and collapses the rest into a "+N" chip; each name shows as a tooltip.
+`name-key` / `src-key` pick the attributes (`name`, `avatar_url`).
+
+`<x-avian::tree>` shows nested `items` (each with an id, a label, and optional
+`children`, `href`, `icon`, `badge`), following the WAI-ARIA tree keyboard
+pattern. `expanded` opens branches (true or ids) and `active` marks the
+current node. `selectable` turns it into a form field with tri-state
+checkboxes: checking a branch checks all of it, `name` submits `name[]` with
+every checked id, and `wire:model` binds the array:
+
+```blade
+<x-avian::tree name="permissions" label="Permissions" :items="$permissionTree" :value="$role->permission_ids" selectable />
+```
+
 #### Date ranges and wizards
 
 `<x-avian::date-range>` is a flatpickr range picker (loaded by the host app,
@@ -1046,10 +1082,33 @@ closes it, and `hide()` closes it from inside. Both take a `placement` (`top`,
 </x-avian::popover>
 ```
 
+#### Command palette
+
+Place `<x-avian::command>` once in the layout: `mod+k` (Cmd on a Mac, Ctrl
+elsewhere; change it with `shortcut`) opens a search over `command.item`s,
+grouped by `command.group`. Items filter in the browser by their text and
+`keywords`; with `search-model` the query is bound to a Livewire property and
+the server renders the items. An item with `href` navigates (`navigate` adds
+`wire:navigate`), `modal` opens a modal, and anything else runs its own
+`wire:click` / `x-on:click`. Open it from code with
+`$dispatch('aui-command-open')`, `window.AvianUI.openCommand()` or a Livewire
+`dispatch('aui-command-open')`:
+
+```blade
+<x-avian::command>
+    <x-avian::command.group label="Pages">
+        <x-avian::command.item icon="fas fa-box" :href="route('orders.index')" keywords="sales" navigate>Orders</x-avian::command.item>
+    </x-avian::command.group>
+    <x-avian::command.group label="Actions">
+        <x-avian::command.item icon="fas fa-plus" modal="create-order">New order</x-avian::command.item>
+    </x-avian::command.group>
+</x-avian::command>
+```
+
 The Alpine components registered by the package are `auiModal`, `auiConfirm`, `auiToasts`,
 `auiDropdown`, `auiTabs`, `auiAccordion`, `auiDismiss`, `auiFile`,
 `auiDatalist`, `auiSearchableSelect`, `auiMultiSelect`, `auiSlider`, `auiTableRow`,
-`auiTooltip`, `auiPopover`, `auiWizard` and `auiDateRange`. The modal
+`auiTooltip`, `auiPopover`, `auiWizard`, `auiDateRange`, `auiCopy`, `auiTree` and `auiCommand`. The modal
 releases the body scroll lock on `livewire:navigating`, so `wire:navigate`
 never strands a locked page.
 

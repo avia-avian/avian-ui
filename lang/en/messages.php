@@ -3,13 +3,20 @@
 declare(strict_types=1);
 
 return [
+    'and_more' => 'and :count more',
     'back' => 'Back',
     'breadcrumb' => 'Breadcrumb',
     'cancel' => 'Cancel',
     'clear' => 'Clear',
     'close' => 'Close',
+    'command' => 'Command palette',
+    'command_choose' => 'to choose',
+    'command_move' => 'to move',
+    'command_placeholder' => 'Search or jump to…',
     'confirm' => 'Confirm',
     'confirm_title' => 'Are you sure?',
+    'copied' => 'Copied',
+    'copy' => 'Copy',
     'date_presets' => 'Date presets',
     'details' => 'Show details',
     'dismiss' => 'Dismiss',
@@ -17,7 +24,9 @@ return [
     'grid_view' => 'Grid view',
     'list_view' => 'List view',
     'loading' => 'Loading',
+    'more_people' => ':count more',
     'next' => 'Next',
+    'no' => 'No',
     'no_results' => 'No data found',
     'notifications' => 'Notifications',
     'presets' => [
@@ -33,4 +42,5 @@ return [
     'step_of' => 'Step :current of :total',
     'toggle' => 'Toggle content',
     'view' => 'View',
+    'yes' => 'Yes',
 ];

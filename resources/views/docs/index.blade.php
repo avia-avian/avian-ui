@@ -9,6 +9,7 @@
             'components.button-group' => ['label' => 'Button group & toolbar', 'icon' => 'fas fa-grip-lines-vertical'],
             'components.badge' => ['label' => 'Badge', 'icon' => 'fas fa-certificate'],
             'components.avatar' => ['label' => 'Avatar', 'icon' => 'fas fa-circle-user'],
+            'components.avatar-group' => ['label' => 'Avatar group', 'icon' => 'fas fa-users'],
             'components.progress' => ['label' => 'Progress', 'icon' => 'fas fa-chart-simple'],
             'components.spinner' => ['label' => 'Spinner', 'icon' => 'fas fa-spinner'],
             'components.skeleton' => ['label' => 'Skeleton', 'icon' => 'fas fa-bars-progress'],
@@ -19,6 +20,7 @@
             'components.breadcrumbs' => ['label' => 'Breadcrumbs', 'icon' => 'fas fa-angles-right'],
             'components.card' => ['label' => 'Card', 'icon' => 'fas fa-square'],
             'components.stat' => ['label' => 'Stat', 'icon' => 'fas fa-chart-line'],
+            'components.description-list' => ['label' => 'Description list', 'icon' => 'fas fa-list-ul'],
             'components.accordion' => ['label' => 'Accordion', 'icon' => 'fas fa-bars-staggered'],
             'components.divider' => ['label' => 'Divider', 'icon' => 'fas fa-grip-lines'],
         ],
@@ -44,6 +46,7 @@
             'components.table' => ['label' => 'Table', 'icon' => 'fas fa-table'],
             'components.datalist' => ['label' => 'Datalist', 'icon' => 'fas fa-grip'],
             'components.timeline' => ['label' => 'Timeline', 'icon' => 'fas fa-timeline'],
+            'components.tree' => ['label' => 'Tree', 'icon' => 'fas fa-folder-tree'],
             'components.pagination' => ['label' => 'Pagination', 'icon' => 'fas fa-ellipsis'],
             'components.tabs' => ['label' => 'Tabs', 'icon' => 'fas fa-folder'],
             'components.stepper' => ['label' => 'Stepper', 'icon' => 'fas fa-list-ol'],
@@ -55,6 +58,7 @@
             'components.confirm' => ['label' => 'Confirm dialog', 'icon' => 'fas fa-circle-question'],
             'components.popover' => ['label' => 'Popover', 'icon' => 'fas fa-message'],
             'components.tooltip' => ['label' => 'Tooltip', 'icon' => 'fas fa-comment-dots'],
+            'components.command' => ['label' => 'Command palette', 'icon' => 'fas fa-terminal'],
             'components.toast' => ['label' => 'Toast', 'icon' => 'fas fa-bell'],
             'components.alert' => ['label' => 'Alert', 'icon' => 'fas fa-circle-info'],
             'components.empty' => ['label' => 'Empty state', 'icon' => 'fas fa-inbox'],
@@ -819,6 +823,21 @@
             <x-avian::button icon="fas fa-check">Create</x-avian::button>
         </x-slot:footer>
     </x-avian::modal>
+
+    {{-- The command palette demo lives at the page level, like a layout's would:
+         inside a hidden docs section it could not show. --}}
+    <x-avian::command name="docs-demo">
+        <x-avian::command.group label="Pages">
+            <x-avian::command.item icon="fas fa-gauge" hint="Page">Dashboard</x-avian::command.item>
+            <x-avian::command.item icon="fas fa-box" keywords="sales invoices" hint="Page">Orders</x-avian::command.item>
+            <x-avian::command.item icon="fas fa-users" keywords="clients" hint="Page">Customers</x-avian::command.item>
+            <x-avian::command.item icon="fas fa-gear" keywords="preferences" hint="Page">Settings</x-avian::command.item>
+        </x-avian::command.group>
+        <x-avian::command.group label="Actions">
+            <x-avian::command.item icon="fas fa-plus" modal="demo">New record</x-avian::command.item>
+            <x-avian::command.item icon="fas fa-bell" x-on:click="window.AvianUI.toast('Hello from the palette', 'info')">Show a toast</x-avian::command.item>
+        </x-avian::command.group>
+    </x-avian::command>
 
     {{-- One shared confirm dialog for the whole page, as an app layout would have. --}}
     <x-avian::confirm />

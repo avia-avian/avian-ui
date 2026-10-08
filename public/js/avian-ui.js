@@ -418,6 +418,76 @@
         },
     };
 
+    /* Clipboard API first; the textarea fallback covers plain-http hosts
+       other than localhost and browsers that deny the clipboard permission. */
+    function copyWithTextarea(text) {
+        var area = document.createElement('textarea');
+
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+
+        var ok = false;
+
+        try {
+            ok = document.execCommand('copy');
+        } catch (e) {}
+
+        area.remove();
+
+        return ok ? Promise.resolve() : Promise.reject(new Error('Copy failed'));
+    }
+
+    function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text).catch(function () {
+                return copyWithTextarea(text);
+            });
+        }
+
+        return copyWithTextarea(text);
+    }
+
+    /* "mod+k", "ctrl+shift+p", "alt+/" → { key, ctrl, meta, shift, alt, mod }.
+       `mod` is Cmd on a Mac and Ctrl elsewhere. */
+    function parseShortcut(text) {
+        if (typeof text !== 'string' || text.trim() === '') {
+            return null;
+        }
+
+        var parts = text.toLowerCase().split('+').map(function (part) {
+            return part.trim();
+        });
+        var key = parts.pop() || '+';
+
+        return {
+            key: key === 'space' ? ' ' : key,
+            ctrl: parts.indexOf('ctrl') !== -1,
+            meta: parts.indexOf('meta') !== -1 || parts.indexOf('cmd') !== -1,
+            shift: parts.indexOf('shift') !== -1,
+            alt: parts.indexOf('alt') !== -1,
+            mod: parts.indexOf('mod') !== -1,
+        };
+    }
+
+    var IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+
+    function matchesShortcut(event, shortcut) {
+        var ctrl = shortcut.ctrl || (shortcut.mod && ! IS_MAC);
+        var meta = shortcut.meta || (shortcut.mod && IS_MAC);
+
+        return (event.key || '').toLowerCase() === shortcut.key
+            && event.ctrlKey === ctrl
+            && event.metaKey === meta
+            && event.shiftKey === shortcut.shift
+            && event.altKey === shortcut.alt;
+    }
+
+    var commandIds = 0;
+
     var components = {
         /**
          * Modal / dialog.
@@ -2574,6 +2644,636 @@
                 },
             };
         },
+
+        /** Copy button: copies a string and shows "copied" for a moment. */
+        auiCopy: function () {
+            return {
+                copied: false,
+                timer: null,
+
+                copy: function (text) {
+                    var self = this;
+
+                    copyText(String(text || '')).then(function () {
+                        self.copied = true;
+                        clearTimeout(self.timer);
+                        self.timer = setTimeout(function () {
+                            self.copied = false;
+                        }, 2000);
+                        self.$dispatch('aui-copied', { text: text });
+                    }, function () {});
+                },
+
+                destroy: function () {
+                    clearTimeout(this.timer);
+                },
+            };
+        },
+
+        /**
+         * Tree view, following the WAI-ARIA tree pattern.
+         *
+         * Open branches, checked nodes and the focused node are kept here as
+         * ids, and every node binds to them, so a Livewire morph does not
+         * collapse the tree. `value` (x-modelable) is the list of checked ids.
+         */
+        auiTree: function (config) {
+            config = config || {};
+
+            return {
+                selectable: config.selectable === true,
+                value: [],
+                opened: [],
+                allOpen: false,
+                focused: null,
+                typed: '',
+                typedTimer: null,
+
+                init: function () {
+                    var self = this;
+                    var state = {};
+
+                    try {
+                        state = JSON.parse(this.$el.dataset.auiTree || '{}') || {};
+                    } catch (e) {}
+
+                    this.allOpen = state.open === true;
+                    this.opened = Array.isArray(state.open) ? state.open.map(String) : [];
+                    this.value = Array.isArray(state.checked) ? state.checked.map(String) : [];
+
+                    var first = this.items()[0];
+                    this.focused = state.active && this.node(state.active) ? String(state.active) : (first ? first.dataset.auiNode : null);
+
+                    /* A server-side change arrives here through x-modelable:
+                       normalise it, so a checked branch checks all of it. */
+                    this.$watch('value', function (value) {
+                        var normal = self.normalize(Array.isArray(value) ? value.map(String) : []);
+
+                        if (normal.join('|') !== (value || []).map(String).join('|')) {
+                            self.value = normal;
+                        }
+                    });
+                },
+
+                /* Every node, in document order. */
+                items: function () {
+                    return Array.prototype.slice.call(this.$root.querySelectorAll('[role="treeitem"]'));
+                },
+
+                node: function (id) {
+                    return this.items().filter(function (item) {
+                        return item.dataset.auiNode === String(id);
+                    })[0] || null;
+                },
+
+                childNodes: function (item) {
+                    var group = item.querySelector(':scope > [role="group"]');
+
+                    return group ? Array.prototype.slice.call(group.querySelectorAll(':scope > [role="treeitem"]')) : [];
+                },
+
+                parentNode: function (item) {
+                    var parent = item.parentElement && item.parentElement.closest('[role="treeitem"]');
+
+                    return parent && this.$root.contains(parent) ? parent : null;
+                },
+
+                /* The nodes not hidden inside a closed branch. */
+                visibleItems: function () {
+                    var self = this;
+
+                    return this.items().filter(function (item) {
+                        var parent = self.parentNode(item);
+
+                        while (parent) {
+                            if (! self.isOpen(parent.dataset.auiNode)) {
+                                return false;
+                            }
+
+                            parent = self.parentNode(parent);
+                        }
+
+                        return true;
+                    });
+                },
+
+                isOpen: function (id) {
+                    return this.allOpen || this.opened.indexOf(String(id)) !== -1;
+                },
+
+                setOpen: function (id, open) {
+                    id = String(id);
+
+                    if (this.allOpen && ! open) {
+                        /* Turn "all open" into an explicit list before closing one. */
+                        this.allOpen = false;
+                        this.opened = this.items().filter(function (item) {
+                            return item.hasAttribute('aria-expanded');
+                        }).map(function (item) {
+                            return item.dataset.auiNode;
+                        });
+                    }
+
+                    var index = this.opened.indexOf(id);
+
+                    if (open && index === -1) {
+                        this.opened.push(id);
+                    } else if (! open && index !== -1) {
+                        this.opened.splice(index, 1);
+                    }
+                },
+
+                toggle: function (id) {
+                    this.setOpen(id, ! this.isOpen(id));
+                },
+
+                /* 'true', 'false' or 'mixed', derived from the leaves under a branch. */
+                checkState: function (id) {
+                    var item = this.node(id);
+
+                    if (! item) {
+                        return 'false';
+                    }
+
+                    var children = this.childNodes(item);
+
+                    if (children.length === 0) {
+                        return this.value.indexOf(String(id)) !== -1 ? 'true' : 'false';
+                    }
+
+                    var states = children.map(function (child) {
+                        return this.checkState(child.dataset.auiNode);
+                    }, this);
+
+                    if (states.every(function (state) { return state === 'true'; })) {
+                        return 'true';
+                    }
+
+                    return states.some(function (state) { return state !== 'false'; }) ? 'mixed' : 'false';
+                },
+
+                /* Checking a node checks (or clears) everything under it; then
+                   each branch above is checked exactly when all of it is. */
+                check: function (id) {
+                    if (! this.selectable) {
+                        return;
+                    }
+
+                    var item = this.node(id);
+
+                    if (! item) {
+                        return;
+                    }
+
+                    var on = this.checkState(id) !== 'true';
+                    var ids = this.value.slice();
+                    var branch = [item].concat(Array.prototype.slice.call(item.querySelectorAll('[role="treeitem"]')));
+
+                    branch.forEach(function (node) {
+                        var nodeId = node.dataset.auiNode;
+                        var index = ids.indexOf(nodeId);
+
+                        if (on && index === -1) {
+                            ids.push(nodeId);
+                        } else if (! on && index !== -1) {
+                            ids.splice(index, 1);
+                        }
+                    });
+
+                    this.value = this.withBranches(ids);
+                },
+
+                /* Adds every fully checked branch, removes partly checked ones. */
+                withBranches: function (ids) {
+                    var self = this;
+                    var leaves = this.items().filter(function (item) {
+                        return self.childNodes(item).length === 0;
+                    });
+                    var checkedLeaves = leaves.filter(function (leaf) {
+                        return ids.indexOf(leaf.dataset.auiNode) !== -1;
+                    }).map(function (leaf) {
+                        return leaf.dataset.auiNode;
+                    });
+
+                    var result = checkedLeaves.slice();
+
+                    this.items().forEach(function (item) {
+                        if (self.childNodes(item).length === 0) {
+                            return;
+                        }
+
+                        var under = Array.prototype.filter.call(item.querySelectorAll('[role="treeitem"]'), function (node) {
+                            return self.childNodes(node).length === 0;
+                        });
+
+                        if (under.length && under.every(function (leaf) { return checkedLeaves.indexOf(leaf.dataset.auiNode) !== -1; })) {
+                            result.push(item.dataset.auiNode);
+                        }
+                    });
+
+                    /* Document order, so the submitted list is stable. */
+                    var order = this.items().map(function (item) { return item.dataset.auiNode; });
+
+                    return result.sort(function (a, b) {
+                        return order.indexOf(a) - order.indexOf(b);
+                    });
+                },
+
+                /* A checked branch in an incoming value checks all of it. */
+                normalize: function (ids) {
+                    var expanded = ids.slice();
+
+                    ids.forEach(function (id) {
+                        var item = this.node(id);
+
+                        if (item) {
+                            Array.prototype.forEach.call(item.querySelectorAll('[role="treeitem"]'), function (node) {
+                                if (expanded.indexOf(node.dataset.auiNode) === -1) {
+                                    expanded.push(node.dataset.auiNode);
+                                }
+                            });
+                        }
+                    }, this);
+
+                    return this.withBranches(expanded);
+                },
+
+                /* A row click: a link follows itself, a checkbox tree toggles
+                   the check, anything else opens or closes the branch. */
+                rowClick: function (id, event) {
+                    var item = this.node(id);
+
+                    this.focus(item);
+
+                    if (event.target.closest('a[href]')) {
+                        return;
+                    }
+
+                    if (this.selectable) {
+                        this.check(id);
+
+                        return;
+                    }
+
+                    this.activate(item);
+                },
+
+                activate: function (item) {
+                    var id = item.dataset.auiNode;
+                    var link = item.querySelector(':scope > .aui-tree-row a[href]');
+
+                    if (link) {
+                        link.click();
+
+                        return;
+                    }
+
+                    if (this.selectable) {
+                        this.check(id);
+
+                        return;
+                    }
+
+                    if (this.childNodes(item).length) {
+                        this.toggle(id);
+                    }
+
+                    var label = item.querySelector(':scope > .aui-tree-row .aui-tree-label');
+
+                    this.$dispatch('aui-tree-select', { id: id, label: label ? label.textContent.trim() : '' });
+                },
+
+                focus: function (item) {
+                    if (! item) {
+                        return;
+                    }
+
+                    this.focused = item.dataset.auiNode;
+                    item.focus({ preventScroll: false });
+                },
+
+                keydown: function (event) {
+                    var item = event.target.closest('[role="treeitem"]');
+
+                    if (! item || event.altKey || event.ctrlKey || event.metaKey) {
+                        return;
+                    }
+
+                    var id = item.dataset.auiNode;
+                    var visible = this.visibleItems();
+                    var index = visible.indexOf(item);
+                    var hasChildren = this.childNodes(item).length > 0;
+                    var handled = true;
+
+                    switch (event.key) {
+                        case 'ArrowDown':
+                            this.focus(visible[index + 1]);
+                            break;
+                        case 'ArrowUp':
+                            this.focus(visible[index - 1]);
+                            break;
+                        case 'Home':
+                            this.focus(visible[0]);
+                            break;
+                        case 'End':
+                            this.focus(visible[visible.length - 1]);
+                            break;
+                        case 'ArrowRight':
+                            if (hasChildren && ! this.isOpen(id)) {
+                                this.setOpen(id, true);
+                            } else if (hasChildren) {
+                                this.focus(this.childNodes(item)[0]);
+                            }
+                            break;
+                        case 'ArrowLeft':
+                            if (hasChildren && this.isOpen(id)) {
+                                this.setOpen(id, false);
+                            } else {
+                                this.focus(this.parentNode(item));
+                            }
+                            break;
+                        case 'Enter':
+                            this.activate(item);
+                            break;
+                        case ' ':
+                            if (this.selectable) {
+                                this.check(id);
+                            } else {
+                                this.activate(item);
+                            }
+                            break;
+                        case '*':
+                            /* Opens every sibling branch at this level. */
+                            Array.prototype.forEach.call(item.parentElement.children, function (sibling) {
+                                if (sibling.hasAttribute('aria-expanded')) {
+                                    this.setOpen(sibling.dataset.auiNode, true);
+                                }
+                            }, this);
+                            break;
+                        default:
+                            handled = this.typeahead(event.key, visible, index);
+                    }
+
+                    if (handled) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                },
+
+                /* Typing jumps to the next visible node starting with the typed text. */
+                typeahead: function (key, visible, index) {
+                    if (key.length !== 1 || ! /\S/.test(key)) {
+                        return false;
+                    }
+
+                    var self = this;
+
+                    clearTimeout(this.typedTimer);
+                    this.typed += key.toLowerCase();
+                    this.typedTimer = setTimeout(function () {
+                        self.typed = '';
+                    }, 500);
+
+                    var ordered = visible.slice(index + 1).concat(visible.slice(0, index + 1));
+                    var match = ordered.filter(function (node) {
+                        var label = node.querySelector(':scope > .aui-tree-row .aui-tree-label');
+
+                        return label && label.textContent.trim().toLowerCase().indexOf(self.typed) === 0;
+                    })[0];
+
+                    this.focus(match);
+
+                    return true;
+                },
+            };
+        },
+
+        /**
+         * Command palette: a shortcut opens a search box over the page.
+         *
+         * The input keeps focus the whole time (the list is a listbox driven
+         * by aria-activedescendant), so focus never leaves the dialog. It goes
+         * back to where it was on close.
+         */
+        auiCommand: function (config) {
+            config = config || {};
+
+            var shortcut = parseShortcut(config.shortcut);
+
+            return {
+                open: false,
+                name: config.name || null,
+                server: config.server === true,
+                query: '',
+                empty: false,
+                active: null,
+                returnFocus: null,
+                observer: null,
+
+                init: function () {
+                    var self = this;
+
+                    this.$watch('open', function (value) {
+                        value ? lockScroll() : unlockScroll();
+                    });
+
+                    /* Items morphed in by Livewire (server search) or re-rendered:
+                       refilter and keep a valid highlight. Attribute changes are
+                       ignored, so hiding items here cannot loop. */
+                    if (typeof MutationObserver !== 'undefined' && this.$refs.list) {
+                        this.observer = new MutationObserver(function () {
+                            self.refresh();
+                        });
+
+                        this.observer.observe(this.$refs.list, { childList: true, subtree: true });
+                    }
+
+                    this.refresh();
+                },
+
+                destroy: function () {
+                    if (this.observer) {
+                        this.observer.disconnect();
+                    }
+
+                    if (this.open) {
+                        unlockScroll();
+                    }
+                },
+
+                shortcutPressed: function (event) {
+                    if (shortcut && matchesShortcut(event, shortcut)) {
+                        event.preventDefault();
+                        this.open ? this.hide() : this.show();
+                    }
+                },
+
+                openFrom: function (event) {
+                    var target = eventName(event);
+
+                    if (! target || target === this.name) {
+                        this.show();
+                    }
+                },
+
+                show: function () {
+                    var self = this;
+
+                    if (this.open) {
+                        return;
+                    }
+
+                    this.returnFocus = document.activeElement;
+                    this.open = true;
+
+                    /* x-show reveals the dialog after the next tick. */
+                    this.$nextTick(function () {
+                        setTimeout(function () {
+                            self.$refs.input.focus();
+                            self.$refs.input.select();
+                            self.refresh();
+                        });
+                    });
+                },
+
+                hide: function () {
+                    if (! this.open) {
+                        return;
+                    }
+
+                    this.open = false;
+
+                    var target = this.returnFocus;
+                    this.returnFocus = null;
+
+                    if (target && typeof target.focus === 'function' && document.contains(target)) {
+                        target.focus();
+                    }
+                },
+
+                allItems: function () {
+                    return Array.prototype.slice.call(this.$refs.list.querySelectorAll('[data-aui-command-item]'));
+                },
+
+                visible: function () {
+                    return this.allItems().filter(function (item) {
+                        return ! item.hidden;
+                    });
+                },
+
+                search: function (text) {
+                    this.query = String(text || '');
+
+                    if (! this.server) {
+                        this.refresh();
+                    }
+                },
+
+                /* Client-side filter: every word of the query must appear in
+                   the item's text or keywords. Server mode leaves it alone. */
+                refresh: function () {
+                    var words = this.server ? [] : this.query.toLowerCase().split(/\s+/).filter(Boolean);
+                    var counter = 0;
+
+                    this.allItems().forEach(function (item) {
+                        if (! item.id) {
+                            item.id = 'aui-command-item-' + (++commandIds);
+                        }
+
+                        var haystack = (item.textContent + ' ' + (item.dataset.keywords || '')).toLowerCase();
+                        var match = words.every(function (word) {
+                            return haystack.indexOf(word) !== -1;
+                        });
+
+                        item.hidden = ! match;
+                        counter += match ? 1 : 0;
+                    });
+
+                    Array.prototype.forEach.call(this.$refs.list.querySelectorAll('[data-aui-command-group]'), function (group) {
+                        group.hidden = ! group.querySelector('[data-aui-command-item]:not([hidden])');
+                    });
+
+                    this.empty = counter === 0;
+
+                    var visible = this.visible();
+
+                    this.highlight(visible.indexOf(this.active) !== -1 ? this.active : visible[0] || null);
+                },
+
+                highlight: function (item) {
+                    this.allItems().forEach(function (other) {
+                        other.classList.toggle('is-active', other === item);
+                        other.setAttribute('aria-selected', other === item ? 'true' : 'false');
+                    });
+
+                    this.active = item || null;
+
+                    if (this.$refs.input) {
+                        if (item) {
+                            this.$refs.input.setAttribute('aria-activedescendant', item.id);
+                        } else {
+                            this.$refs.input.removeAttribute('aria-activedescendant');
+                        }
+                    }
+                },
+
+                move: function (step) {
+                    var visible = this.visible();
+
+                    if (! visible.length) {
+                        return;
+                    }
+
+                    var index = visible.indexOf(this.active);
+                    var next = visible[(index + step + visible.length) % visible.length];
+
+                    this.highlight(next);
+                    next.scrollIntoView({ block: 'nearest' });
+                },
+
+                moveTo: function (end) {
+                    var visible = this.visible();
+                    var item = end === 'first' ? visible[0] : visible[visible.length - 1];
+
+                    if (item) {
+                        this.highlight(item);
+                        item.scrollIntoView({ block: 'nearest' });
+                    }
+                },
+
+                /* Enter clicks the highlighted item, so links navigate and
+                   wire:click / x-on:click handlers run as for a mouse click. */
+                chooseActive: function () {
+                    if (this.active) {
+                        this.active.click();
+                    }
+                },
+
+                chosen: function (item) {
+                    /* Open the modal once this click is over, or the modal reads
+                       the very same click as a click outside and closes. */
+                    if (item.dataset.modal) {
+                        var modal = item.dataset.modal;
+
+                        setTimeout(function () {
+                            window.dispatchEvent(new CustomEvent('aui-modal-open', { detail: { name: modal } }));
+                        });
+                    }
+
+                    this.$dispatch('aui-command-select', {
+                        value: item.dataset.value || null,
+                        label: (item.querySelector('.aui-command-text') || item).textContent.trim(),
+                    });
+
+                    /* A modal takes focus itself: don't send it back behind it. */
+                    if (item.dataset.modal) {
+                        this.returnFocus = null;
+                    }
+
+                    this.hide();
+                },
+            };
+        },
     };
 
     /*
@@ -2618,6 +3318,13 @@
         },
         confirm: confirmDialog,
         toast: toast,
+        openCommand: function (name) {
+            window.dispatchEvent(new CustomEvent('aui-command-open', { detail: { name: name || null } }));
+        },
+        closeCommand: function () {
+            window.dispatchEvent(new CustomEvent('aui-command-close'));
+        },
+        copy: copyText,
     };
 
     document.addEventListener('alpine:init', function () {

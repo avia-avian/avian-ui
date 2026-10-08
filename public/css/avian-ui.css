@@ -4311,6 +4311,434 @@ button.aui-step-inner:not(:disabled):hover .aui-step-title {
 }
 
 /* ==========================================================================
+   Copy button
+   ========================================================================== */
+
+.aui-copy-button {
+    display: inline-grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    color: var(--aui-text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background var(--aui-transition-fast), color var(--aui-transition-fast);
+}
+
+.aui-copy-button:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-text);
+}
+
+.aui-copy-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+.aui-copy-button.is-copied {
+    color: var(--aui-success);
+}
+
+.aui-copy-button-sm {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+}
+
+/* ==========================================================================
+   Description list
+   ========================================================================== */
+
+.aui-dl {
+    display: grid;
+    gap: 18px 28px;
+    margin: 0;
+}
+
+.aui-dl-cols-1 {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.aui-dl-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.aui-dl-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.aui-dl-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.aui-dl-full {
+    grid-column: 1 / -1;
+}
+
+.aui-dl-label {
+    color: var(--aui-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.aui-dl-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    margin: 0;
+    color: var(--aui-heading);
+    font-size: var(--aui-font-size);
+    line-height: 1.5;
+}
+
+.aui-dl-content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.aui-dl-value.is-empty {
+    color: var(--aui-slate-400);
+}
+
+/* Inline: the label sits beside its value, for a narrow sidebar. */
+.aui-dl-inline .aui-dl-item {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.aui-dl-inline .aui-dl-label {
+    flex: 0 0 38%;
+}
+
+.aui-dl-inline .aui-dl-value {
+    flex: 1 1 auto;
+}
+
+.aui-dl-divided {
+    gap: 0 28px;
+}
+
+.aui-dl-divided .aui-dl-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--aui-border-soft);
+}
+
+/* ==========================================================================
+   Avatar group
+   ========================================================================== */
+
+.aui-avatar-group {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.aui-avatar-group > * + * {
+    margin-left: -6px;
+}
+
+.aui-avatar-group-sm > * + * {
+    margin-left: -4px;
+}
+
+.aui-avatar-group-lg > * + * {
+    margin-left: -9px;
+}
+
+/* A ring in the page colour keeps each avatar's edge visible. */
+.aui-avatar-group .aui-avatar {
+    position: relative;
+    box-shadow: 0 0 0 2px var(--aui-surface);
+}
+
+.aui-avatar-group > *:hover,
+.aui-avatar-group > *:focus-within {
+    position: relative;
+    z-index: 1;
+}
+
+.aui-avatar-more {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-600);
+    font-size: 12px;
+}
+
+.aui-avatar-more.aui-avatar-sm {
+    font-size: 10px;
+}
+
+/* ==========================================================================
+   Tree
+   ========================================================================== */
+
+.aui-tree ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.aui-tree-item {
+    outline: none;
+}
+
+.aui-tree-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 4px 8px 4px calc(4px + var(--aui-tree-level, 0) * 20px);
+    border-radius: var(--aui-radius-md);
+    color: var(--aui-text);
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.aui-tree-row:hover {
+    background: var(--aui-surface-muted);
+}
+
+.aui-tree-item:focus-visible > .aui-tree-row {
+    box-shadow: inset 0 0 0 2px var(--aui-primary);
+}
+
+.aui-tree-row.is-active {
+    background: var(--aui-primary-light, var(--aui-ring));
+    color: var(--aui-primary-darker, var(--aui-primary));
+    font-weight: 600;
+}
+
+.aui-tree-toggle {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--aui-radius-sm);
+    color: var(--aui-text-muted);
+    font-size: 10px;
+}
+
+.aui-tree-toggle:not(.aui-tree-leaf):hover {
+    background: var(--aui-slate-200);
+}
+
+.aui-tree-toggle i {
+    transition: transform var(--aui-transition-fast);
+}
+
+.aui-tree-item[aria-expanded="true"] > .aui-tree-row .aui-tree-toggle i {
+    transform: rotate(90deg);
+}
+
+.aui-tree-checkbox {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--aui-primary);
+    cursor: pointer;
+}
+
+.aui-tree-icon {
+    width: 16px;
+    flex-shrink: 0;
+    color: var(--aui-text-muted);
+    text-align: center;
+}
+
+.aui-tree-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+a.aui-tree-label:hover {
+    color: var(--aui-primary);
+}
+
+.aui-tree-badge {
+    flex-shrink: 0;
+    padding: 0 7px;
+    background: var(--aui-slate-100);
+    border-radius: var(--aui-radius-full);
+    color: var(--aui-slate-600);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+}
+
+.aui-tree-invalid .aui-tree-checkbox {
+    outline: 1px solid var(--aui-danger);
+    outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aui-tree-toggle i {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   Command palette
+   ========================================================================== */
+
+.aui-command-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1150;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12vh 16px 16px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.aui-command {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+    max-height: min(520px, 76vh);
+    overflow: hidden;
+    background: var(--aui-surface);
+    border-radius: var(--aui-radius-xl);
+    box-shadow: var(--aui-shadow-overlay);
+}
+
+.aui-command-search {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--aui-border-soft);
+    color: var(--aui-text-muted);
+}
+
+.aui-command-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 54px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--aui-heading);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+}
+
+.aui-command-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.aui-command-group + .aui-command-group {
+    margin-top: 4px;
+}
+
+.aui-command-group-label {
+    padding: 8px 10px 4px;
+    color: var(--aui-text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.aui-command-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-md);
+    color: var(--aui-text);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.aui-command-item[hidden],
+.aui-command-group[hidden] {
+    display: none;
+}
+
+.aui-command-item.is-active {
+    background: var(--aui-primary-light, var(--aui-ring));
+    color: var(--aui-primary-darker, var(--aui-primary));
+}
+
+.aui-command-icon {
+    width: 18px;
+    flex-shrink: 0;
+    color: var(--aui-text-muted);
+    text-align: center;
+}
+
+.aui-command-item.is-active .aui-command-icon {
+    color: inherit;
+}
+
+.aui-command-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aui-command-hint {
+    flex-shrink: 0;
+    color: var(--aui-text-muted);
+    font-size: 12px;
+}
+
+.aui-command-empty {
+    margin: 0;
+    padding: 28px 16px;
+    color: var(--aui-text-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.aui-command-footer {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--aui-border-soft);
+    color: var(--aui-text-muted);
+    font-size: 12px;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 
@@ -4325,6 +4753,10 @@ button.aui-step-inner:not(:disabled):hover .aui-step-title {
 }
 
 @media (max-width: 1024px) {
+    .aui-dl-cols-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .aui-grid-3,
     .aui-grid-4,
     .aui-form-grid-3,
@@ -4497,5 +4929,31 @@ button.aui-step-inner:not(:disabled):hover .aui-step-title {
 
     .aui-wizard-spacer {
         display: none;
+    }
+
+    .aui-dl-cols-2,
+    .aui-dl-cols-3 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .aui-dl {
+        gap: 14px;
+    }
+
+    /* The palette fills the top of the screen, clear of the keyboard. */
+    .aui-command-overlay {
+        padding: 8px;
+    }
+
+    .aui-command {
+        max-height: 70vh;
+    }
+
+    .aui-command-footer {
+        display: none;
+    }
+
+    .aui-tree-row {
+        min-height: 40px;
     }
 }

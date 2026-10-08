@@ -10,6 +10,10 @@
 - `wizard` (+ `wizard.step`): a form split into steps with native per-step validation and `wire:model` support.
 - `date-range`: a flatpickr range picker that submits `name[from]` / `name[to]` in a fixed value format, with presets and a clear button.
 - `kbd` for keyboard keys and shortcuts.
+- `description-list` (+ `description-list.item`) for a record's label / value details, with date, enum and boolean formatting and copyable values; `copy-button` on its own.
+- `avatar-group`: overlapping avatars with a "+N" overflow chip and name tooltips.
+- `tree`: nested data with the WAI-ARIA tree keyboard pattern, links, badges, and a `selectable` mode with tri-state cascading checkboxes that works as a form field and with `wire:model`.
+- `command` (+ `command.group`, `command.item`): a Cmd/Ctrl+K command palette with client-side filtering or Livewire `search-model` results; `AvianUI.openCommand()`.
 - Denser spacing and type on phones (640px and below) across cards, modals, drawers, tables, stats, tabs, alerts and badges.
 
 ### Fixed

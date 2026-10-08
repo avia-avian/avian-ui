@@ -3,8 +3,9 @@ name: avian-ui-development
 description: >
   Build Laravel UI with the Avian Ui Blade component library: asset tags,
   theming tokens, form controls with validation wiring, paginated tables, and
-  the Alpine-backed modal, dropdown, popover, tooltip, searchable select, multi
-  select, date range, wizard and tab components in Blade and Livewire applications.
+  the Alpine-backed modal, dropdown, popover, tooltip, command palette, tree,
+  searchable select, multi select, date range, wizard and tab components in Blade
+  and Livewire applications.
 license: MIT
 metadata:
   author: Aldo Octavio Cahyadi
@@ -37,7 +38,7 @@ building. Never add a CDN tag for the package assets.
 
 **Components.** Use the anonymous components rather than hand-written markup:
 
-- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `progress`, `spinner`, `skeleton` (+ `skeleton.table`), `kbd`, `stepper`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `popover`, `tooltip`, `tabs` (+ `tabs.panel`)
+- general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `avatar-group`, `description-list` (+ `description-list.item`), `copy-button`, `tree`, `command` (+ `command.group`, `command.item`), `progress`, `spinner`, `skeleton` (+ `skeleton.table`), `kbd`, `stepper`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `popover`, `tooltip`, `tabs` (+ `tabs.panel`)
 - form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`, `wizard` (+ `wizard.step`)
 
 Form controls render their own label, hint and validation message from `name`
@@ -148,6 +149,21 @@ focus; an `icon-only` button still needs its own `label`. Use `popover`
 such as quick filters; call `hide()` from inside to close it. Prefer
 `dropdown` for a menu of actions and `modal` for anything that needs focus.
 
+Use `description-list` for the label / value block of a show page instead of a
+hand-written `<dl>` or table: items take `label` plus `value` (dates, enums and
+booleans are formatted) or a slot, `copyable` for ids and numbers, `full` for
+long text. Use `avatar-group :users="..." :max="3"` for assignees or members.
+
+Use `tree` for nested data (categories, folders, permission sets) rather than
+nested lists: pass `items` with `id`, `label` and `children` (eager-load the
+relation). With `selectable` and `name` it is a form field submitting
+`name[]` (validate `name` and `name.*`); checking a branch checks all of it.
+
+Place one `command` in the layout for a Cmd/Ctrl+K palette; items with `href`
+(+ `navigate`), `modal`, or their own `wire:click`. For record search, pass
+`search-model` and render the items from a Livewire computed property. Never
+hand-roll a keyboard-shortcut search overlay.
+
 Use `skeleton` (`variant` `text` with `lines`, `circle`, `rect`, `button`) or
 `skeleton.table` (`rows`, `columns`, `label`) as a Livewire lazy component's
 `placeholder()` or inside `wire:loading`, and `kbd` (`keys="Ctrl+K"`) to show
@@ -251,6 +267,9 @@ Read before executing:
 - Use `<x-avian::slider range>` for a min/max filter such as a price bracket; it submits `name[min]` and `name[max]`.
 - Replace two separate start/end datepickers with `<x-avian::date-range name="period" presets>` and validate `period.from` / `period.to`.
 - Split a long signup form into `<x-avian::wizard>` steps inside the existing `<form>`, keeping native `required` attributes so Next validates each step.
+- Replace a hand-written details table on a show page with `<x-avian::description-list>` items, marking the invoice number `copyable`.
+- Render a role's permission groups as `<x-avian::tree name="permissions" selectable>` instead of nested checkbox lists.
+- Add `<x-avian::command>` to the app layout with the main pages and a Livewire `search-model` for records.
 - Return `<x-avian::skeleton.table>` from a lazy Livewire component's `placeholder()` instead of a spinner.
 - Render an audit log or order history with `<x-avian::timeline>` and `timeline.item`, passing the model's date as `time` with `relative`.
 - Theme an application by defining `--aui-primary` in the app stylesheet rather than editing the package CSS.

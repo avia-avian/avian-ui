@@ -85,13 +85,15 @@
         ],
         [
             'title' => 'Upload images and files with Livewire',
-            'text' => 'Picked, dropped and pasted files are uploaded straight away: Livewire puts the file in upload-model, then calls the upload method, which stores it and returns its URL. Images are inserted as images, other files as a link named after the file (add link and file to the toolbar for those). A failed validation shows under the editor.',
+            'text' => 'Picked, dropped and pasted files are uploaded straight away: Livewire puts the file in upload-model, then calls the upload method, which stores it and returns its URL. Store uploads in a temporary folder: they only belong to the record once its content is saved (see the cleanup examples below). Images are inserted as images, other files as a link named after the file. A failed validation shows under the editor.',
             'code' => <<<'BLADE'
                 use Livewire\WithFileUploads;
 
                 class EditPost extends Component
                 {
                     use WithFileUploads;
+
+                    public Post $post;
 
                     public string $body = '';
 
@@ -101,7 +103,7 @@
                     {
                         $this->validate(['editorUpload' => ['required', 'file', 'max:5120', 'mimes:png,jpg,gif,webp,pdf']]);
 
-                        $path = $this->editorUpload->store('editor', 'public');
+                        $path = $this->editorUpload->store('editor-tmp', 'public');
                         $this->reset('editorUpload');
 
                         return Storage::disk('public')->url($path);
@@ -125,21 +127,71 @@
                 Route::post('/editor/uploads', function (Request $request) {
                     $request->validate(['file' => ['required', 'image', 'max:5120']]);
 
-                    return ['url' => Storage::disk('public')->url($request->file('file')->store('editor', 'public'))];
+                    return ['url' => Storage::disk('public')->url($request->file('file')->store('editor-tmp', 'public'))];
                 })->middleware('auth');
 
                 <x-avian::editor name="body" toolbar="bold italic | image" :upload-url="url('/editor/uploads')" />
                 BLADE,
         ],
         [
-            'title' => 'Cleaning up files that were removed',
-            'text' => 'A file is stored the moment it is added, so one the user deletes again, or a draft that is never saved, leaves an unused file behind. Keep the files of each record in a folder of its own and, when the content is saved, delete the ones its HTML no longer points at. For a record that does not exist yet, upload into a temporary folder and prune old files there on a schedule.',
+            'title' => 'Cleaning up, step 1: keep what the saved content uses',
+            'text' => 'Do not delete a file the moment it leaves the editor: undo or cut-and-paste would bring the image back without its file. Settle the files when the content is saved instead: move the temporary uploads the HTML still uses into the record\'s own folder (rewriting their URLs), and delete the files in that folder the HTML no longer uses. Images removed before saving were never moved; images removed from a saved post go now. Put the rewritten HTML back in the editor too, so its URLs point at the new place.',
             'code' => <<<'BLADE'
-                // After saving: delete the files in this post's folder that its HTML no longer uses.
-                $folder = 'posts/'.$post->id;
-                $used = Str::matchAll('#/storage/('.preg_quote($folder, '#').'/[^"'?]+)#', $post->body)->all();
+                public function save(): void
+                {
+                    $this->validate(['body' => ['required', 'string']]);
 
-                Storage::disk('public')->delete(array_diff(Storage::disk('public')->files($folder), $used));
+                    $this->post->save(); // a new post needs its id for the folder
+
+                    $this->body = $this->claimEditorFiles($this->body, 'posts/'.$this->post->id);
+
+                    $this->post->update(['body' => $this->body]);
+                }
+
+                /**
+                 * Move the temporary uploads the HTML uses into $folder, and delete
+                 * the files in $folder it no longer uses. Returns the rewritten HTML.
+                 */
+                protected function claimEditorFiles(string $html, string $folder): string
+                {
+                    $disk = Storage::disk('public');
+                    $tmpUrl = $disk->url('editor-tmp/');
+
+                    preg_match_all('#'.preg_quote($tmpUrl, '#').'([^"\'?\#]+)#', $html, $uploads);
+
+                    foreach (array_unique($uploads[1]) as $file) {
+                        if ($disk->exists('editor-tmp/'.$file)) {
+                            $disk->move('editor-tmp/'.$file, $folder.'/'.$file);
+                        }
+
+                        $html = str_replace($tmpUrl.$file, $disk->url($folder.'/'.$file), $html);
+                    }
+
+                    preg_match_all('#'.preg_quote($disk->url($folder.'/'), '#').'([^"\'?\#]+)#', $html, $used);
+
+                    $unused = array_diff($disk->files($folder), array_map(fn ($file) => $folder.'/'.$file, $used[1]));
+
+                    $disk->delete($unused);
+
+                    return $html;
+                }
+                BLADE,
+        ],
+        [
+            'title' => 'Cleaning up, step 2: drop what was never saved',
+            'text' => 'Files uploaded into an editor that was closed without saving never leave the temporary folder. Prune it on a schedule; a day\'s grace keeps the images of a draft someone is still writing.',
+            'code' => <<<'BLADE'
+                // routes/console.php
+                use Illuminate\Support\Facades\Schedule;
+                use Illuminate\Support\Facades\Storage;
+
+                Schedule::call(function () {
+                    $disk = Storage::disk('public');
+
+                    collect($disk->files('editor-tmp'))
+                        ->filter(fn (string $file) => $disk->lastModified($file) < now()->subDay()->getTimestamp())
+                        ->each(fn (string $file) => $disk->delete($file));
+                })->daily();
                 BLADE,
         ],
         [
@@ -149,6 +201,22 @@
                 <x-avian::editor name="body" label="Body" :value="old('body', $post->body)" />
 
                 <x-avian::editor name="body"><p>Dear customer,</p></x-avian::editor>
+                BLADE,
+        ],
+        [
+            'title' => 'Set or insert content from outside',
+            'text' => 'Two browser events change an editor from a Livewire method, Alpine or plain JS, aimed at it by its name (or its wire:model property). aui-editor-set replaces everything, for a picked template; aui-editor-insert adds HTML at the cursor and keeps the rest, for snippets such as a signature. Both go through the same schema as typing and pasting.',
+            'code' => <<<'BLADE'
+                // Livewire
+                $this->dispatch('aui-editor-set', name: 'body', html: $template->body);
+                $this->dispatch('aui-editor-insert', name: 'body', html: $snippet->body);
+
+                {{-- Alpine --}}
+                <button type="button" x-on:click="$dispatch('aui-editor-insert', { name: 'body', html: '<p>Kind regards,</p>' })">Add signature</button>
+
+                // Plain JS
+                window.AvianUI.setEditor('body', '<p>Dear customer,</p>');
+                window.AvianUI.insertIntoEditor('body', '<p>Kind regards,</p>');
                 BLADE,
         ],
         [
@@ -216,6 +284,11 @@
             value="<h3>Everything on</h3><p style='text-align: center'>Centered, with <mark>highlight</mark>, <span style='color: #dc2626'>colour</span>, <span style='font-size: 20px'>size</span> and a <a href='https://tiptap.dev'>link</a>.</p><table><tbody><tr><th><p>Plan</p></th><th><p>Seats</p></th><th><p>Price</p></th></tr><tr><td><p>Starter</p></td><td><p>5</p></td><td><p>$9</p></td></tr><tr><td><p>Team</p></td><td><p>25</p></td><td><p>$29</p></td></tr></tbody></table><ul data-type='taskList'><li data-type='taskItem' data-checked='true'><p>Task lists</p></li><li data-type='taskItem' data-checked='false'><p>Images by URL or upload</p></li></ul><pre><code>composer require avia-avian/avian-ui</code></pre>"
         />
     </div>
+
+    <div class="aui-toolbar" style="margin-top: 12px">
+        <x-avian::button size="sm" variant="outline" x-data x-on:click="$dispatch('aui-editor-set', { name: 'editor_comment', html: '<p>Thanks for the report. We are looking into it.</p>' })">Load a template into Comment</x-avian::button>
+        <x-avian::button size="sm" variant="outline" x-data x-on:click="$dispatch('aui-editor-insert', { name: 'editor_comment', html: '<p><strong>Kind regards,</strong><br>Support team</p>' })">Insert a signature</x-avian::button>
+    </div>
 </div>
 
 <div class="aui-showcase-block">
@@ -225,6 +298,8 @@
         <li>The toolbar decides the schema: an editor with only bold and italic turns a pasted heading into a paragraph. Add more with <code>nodes</code>.</li>
         <li>Link and image ask for their URL in a bar under the toolbar. Empty the link URL to remove the link. With an upload set, the image bar also offers an upload button.</li>
         <li>Uploads happen as soon as a file is picked, dropped or pasted; the file is inserted where it was dropped once the server returns its URL.</li>
+        <li>An upload is temporary until the content is saved: on save, move the files the HTML uses into the record's folder and delete the rest; prune the temporary folder on a schedule for editors closed without saving.</li>
+        <li><code>aui-editor-set</code> and <code>aui-editor-insert</code> events replace the content or add to it at the cursor, from Livewire or JS. The buttons under the demo use them.</li>
         <li>Wrap stored HTML in <code>aui-editor-prose</code> to display it with the same typography as the editor.</li>
     </ul>
 </div>

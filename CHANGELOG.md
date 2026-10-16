@@ -14,7 +14,7 @@
 - `avatar-group`: overlapping avatars with a "+N" overflow chip and name tooltips.
 - `tree`: nested data with the WAI-ARIA tree keyboard pattern, links, badges, and a `selectable` mode with tri-state cascading checkboxes that works as a form field and with `wire:model`.
 - `command` (+ `command.group`, `command.item`): a Cmd/Ctrl+K command palette with client-side filtering or Livewire `search-model` results; `AvianUI.openCommand()`.
-- `editor`: a Tiptap rich text editor with a configurable toolbar (presets, a string or an array) whose buttons decide which nodes and marks the content may hold, plus `nodes` for extras. Tables, text colour and size, task lists, images and file uploads through a Livewire method (`upload`) or an endpoint (`upload-url`). Submits HTML and binds with `wire:model`. Tiptap is bundled in a separate `avian-ui-editor.js`, loaded with `<x-avian::scripts editor />`.
+- `editor`: a Tiptap rich text editor with a configurable toolbar (presets, a string or an array) whose buttons decide which nodes and marks the content may hold, plus `nodes` for extras. Tables, text colour and size, task lists, images and file uploads through a Livewire method (`upload`) or an endpoint (`upload-url`). Submits HTML and binds with `wire:model`; `aui-editor-set` / `aui-editor-insert` events (and `AvianUI.setEditor()` / `AvianUI.insertIntoEditor()`) replace the content or insert at the cursor. Tiptap is bundled in a separate `avian-ui-editor.js`, loaded with `<x-avian::scripts editor />`.
 - Denser spacing and type on phones (640px and below) across cards, modals, drawers, tables, stats, tabs, alerts and badges.
 
 ### Fixed

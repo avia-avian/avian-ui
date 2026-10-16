@@ -50,6 +50,7 @@ it('renders an editor with the default toolbar, a label and a hidden input', fun
     expect(editorToolbar($html))->toBe(['h2', 'h3', '|', 'bold', 'italic', 'underline', 'strike', '|', 'bullet-list', 'ordered-list', 'blockquote', '|', 'link', '|', 'undo', 'redo']);
 
     expect(editorConfig($html))->toBe([
+        'name' => 'body',
         'nodes' => ['bold', 'italic', 'underline', 'strike', 'bullet-list', 'ordered-list', 'blockquote', 'link'],
         'headings' => [2, 3],
         'placeholder' => 'Write…',
@@ -222,4 +223,10 @@ it('shows a rejected livewire upload as the editor error', function () {
 
     expect(Blade::render('<x-avian::editor wire:model="body" upload="store" upload-model="photo" />'))->toContain('The photo must be an image.')
         ->and(Blade::render('<x-avian::editor wire:model="body" />'))->not->toContain('The photo must be an image.');
+});
+
+it('names the editor for the set and insert events by its name or wire:model property', function () {
+    expect(editorConfig(Blade::render('<x-avian::editor name="letter" />'))['name'])->toBe('letter')
+        ->and(editorConfig(Blade::render('<x-avian::editor wire:model.live="form.body" />'))['name'])->toBe('form.body')
+        ->and(editorConfig(Blade::render('<x-avian::editor />'))['name'])->toBeNull();
 });

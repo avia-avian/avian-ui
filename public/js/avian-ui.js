@@ -698,6 +698,18 @@
         });
     }
 
+    /* { name, html } out of an aui-editor-set / -insert event, or null.
+       Livewire puts named dispatch params straight into the detail. */
+    function editorEventDetail(event) {
+        var detail = event.detail;
+
+        if (! detail || typeof detail !== 'object' || typeof detail.name !== 'string' || detail.name === '') {
+            return null;
+        }
+
+        return { name: detail.name, html: typeof detail.html === 'string' ? detail.html : '' };
+    }
+
     /* The CSRF token for a plain fetch upload: the meta tag, the form's
        _token field, or Laravel's XSRF-TOKEN cookie. */
     function csrfHeaders(el) {
@@ -730,12 +742,20 @@
          * With `config.uploads`, picked, dropped and pasted files go to a
          * Livewire method (through a WithFileUploads property) or are POSTed
          * to a URL; each is inserted once the server answers with its URL.
+         *
+         * Change the content from outside with a browser event naming the
+         * editor (its `name`, or the property it is wire:model'd to):
+         *   window.AvianUI.setEditor('body', html)                           // plain JS
+         *   $dispatch('aui-editor-insert', { name: 'body', html: html })     // Alpine
+         *   $this->dispatch('aui-editor-set', name: 'body', html: $html);    // Livewire
+         * "set" replaces everything; "insert" adds at the cursor.
          */
         auiEditor: function (config) {
             config = config || {};
 
             var editor = null;
             var destroyed = false;
+            var focused = false;
             var uploads = config.uploads || null;
             var messages = config.messages || {};
 
@@ -781,11 +801,33 @@
                             editor.commands.setContent(value || '', { emitUpdate: false });
                         }
                     });
+
+                    this.onSet = function (event) {
+                        var detail = editorEventDetail(event);
+
+                        if (detail && detail.name === config.name) {
+                            self.setContent(detail.html);
+                        }
+                    };
+
+                    this.onInsert = function (event) {
+                        var detail = editorEventDetail(event);
+
+                        if (detail && detail.name === config.name) {
+                            self.insertContent(detail.html);
+                        }
+                    };
+
+                    window.addEventListener('aui-editor-set', this.onSet);
+                    window.addEventListener('aui-editor-insert', this.onInsert);
                 },
 
                 destroy: function () {
                     destroyed = true;
                     pending.length = 0;
+
+                    window.removeEventListener('aui-editor-set', this.onSet);
+                    window.removeEventListener('aui-editor-insert', this.onInsert);
 
                     if (editor) {
                         editor.destroy();
@@ -826,11 +868,50 @@
 
                             refresh();
                         },
-                        onFocus: refresh,
+                        onFocus: function () {
+                            focused = true;
+                            refresh();
+                        },
                         onBlur: refresh,
                     });
 
                     refresh();
+                },
+
+                /* Replace the whole document. Before Tiptap has loaded, the
+                   value is simply what the editor will start with. */
+                setContent: function (html) {
+                    if (! editor) {
+                        this.value = html;
+
+                        return;
+                    }
+
+                    editor.commands.setContent(html, { emitUpdate: false });
+                    this.value = this.html();
+                },
+
+                /* Insert at the cursor (the end, if the editor never had one),
+                   replacing any selected text. Read-only editors are left alone. */
+                insertContent: function (html) {
+                    if (! editor) {
+                        this.value = (this.value || '') + html;
+
+                        return;
+                    }
+
+                    if (! editor.isEditable || html === '') {
+                        return;
+                    }
+
+                    /* Never focused: after the last block, not inside it (a list, say). */
+                    if (! focused) {
+                        editor.chain().insertContentAt(editor.state.doc.content.size, html).focus('end').run();
+
+                        return;
+                    }
+
+                    editor.chain().focus().insertContent(html).run();
                 },
 
                 /* An empty document submits as '' rather than '<p></p>'. */
@@ -3959,6 +4040,13 @@
             window.dispatchEvent(new CustomEvent('aui-command-close'));
         },
         copy: copyText,
+        /* Replace an editor's content, or insert HTML at its cursor. */
+        setEditor: function (name, html) {
+            window.dispatchEvent(new CustomEvent('aui-editor-set', { detail: { name: name, html: html } }));
+        },
+        insertIntoEditor: function (name, html) {
+            window.dispatchEvent(new CustomEvent('aui-editor-insert', { detail: { name: name, html: html } }));
+        },
     };
 
     document.addEventListener('alpine:init', function () {

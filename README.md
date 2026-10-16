@@ -554,7 +554,7 @@ public function storeEditorFile(): string
 {
     $this->validate(['editorUpload' => ['required', 'file', 'max:5120', 'mimes:png,jpg,gif,webp,pdf']]);
 
-    $path = $this->editorUpload->store('editor', 'public');
+    $path = $this->editorUpload->store('editor-tmp', 'public');
     $this->reset('editorUpload');
 
     return Storage::disk('public')->url($path);
@@ -566,9 +566,30 @@ public function storeEditorFile(): string
 <x-avian::editor name="body" toolbar="bold italic | image" :upload-url="url('/editor/uploads')" />
 ```
 
-Because files are stored when they are added, one that is removed again, or a
-draft that is never saved, leaves an unused file behind: keep each record's
-files in its own folder and delete the ones its saved HTML no longer refers to.
+Two browser events change an editor from outside, aimed at it by its `name`
+or `wire:model` property: `aui-editor-set` replaces the content (a picked
+template), `aui-editor-insert` adds HTML at the cursor (a snippet or
+signature). From plain JS, `window.AvianUI.setEditor(name, html)` and
+`window.AvianUI.insertIntoEditor(name, html)` dispatch them:
+
+```php
+$this->dispatch('aui-editor-set', name: 'body', html: $template->body);
+$this->dispatch('aui-editor-insert', name: 'body', html: $snippet->body);
+```
+
+Because files are stored when they are added, treat each upload as temporary
+until the content is saved. Don't delete a file the moment it leaves the
+editor: undo would bring the image back without its file. Instead:
+
+- upload into a temporary folder (`editor-tmp` above);
+- on save, move the temporary files the HTML still uses into the record's own
+  folder, rewrite their URLs, and delete the files in that folder the HTML no
+  longer uses;
+- prune the temporary folder on a schedule (files older than a day) for editors
+  closed without saving.
+
+The documentation page has the full `save()` / `claimEditorFiles()` and
+scheduler code.
 
 An app that already bundles Tiptap can skip the editor script and assign its
 own `window.AvianUITiptap = { Editor, StarterKit, ... }` instead (see the

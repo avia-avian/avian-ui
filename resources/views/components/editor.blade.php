@@ -25,6 +25,12 @@
     Tiptap comes from <x-avian::scripts editor />, or from the host app's own
     `window.AvianUITiptap = { Editor, StarterKit, ... }`.
 
+    `aui-editor-set` (replace everything) and `aui-editor-insert` (add at the
+    cursor) browser events change the content from outside, aimed at the editor
+    by its `name` or its wire:model property:
+
+        $this->dispatch('aui-editor-insert', name: 'body', html: $snippet->body);
+
     With Livewire, `wire:model` binds the HTML through Alpine's `x-modelable`;
     the editable area is `wire:ignore`d so a morph never rebuilds it.
 --}}
@@ -181,6 +187,7 @@
         : __('avian-ui::messages.editor.'.str_replace('-', '_', $item));
 
     $config = [
+        'name' => $fieldName,
         'nodes' => $schema,
         'headings' => $headings,
         'placeholder' => $placeholder,

@@ -29,6 +29,7 @@
             'forms.field' => ['label' => 'Field, label & error', 'icon' => 'fas fa-tag'],
             'forms.input' => ['label' => 'Input', 'icon' => 'fas fa-i-cursor'],
             'forms.textarea' => ['label' => 'Textarea', 'icon' => 'fas fa-align-left'],
+            'forms.editor' => ['label' => 'Editor', 'icon' => 'fas fa-pen-nib'],
             'forms.select' => ['label' => 'Select', 'icon' => 'fas fa-list'],
             'forms.searchable-select' => ['label' => 'Searchable select', 'icon' => 'fas fa-magnifying-glass'],
             'forms.multi-select' => ['label' => 'Multi select', 'icon' => 'fas fa-list-check'],
@@ -92,7 +93,7 @@
     <x-avian::styles />
 
     {{-- The package script registers its Alpine components, so it loads first. --}}
-    <x-avian::scripts />
+    <x-avian::scripts editor />
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 

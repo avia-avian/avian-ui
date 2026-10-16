@@ -4739,6 +4739,463 @@ a.aui-tree-label:hover {
 }
 
 /* ==========================================================================
+   Editor (Tiptap)
+   ========================================================================== */
+
+.aui-editor {
+    --aui-editor-min-height: 160px;
+
+    display: flex;
+    flex-direction: column;
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-md);
+    transition: border-color var(--aui-transition), box-shadow var(--aui-transition);
+}
+
+.aui-editor:focus-within {
+    border-color: var(--aui-primary);
+    box-shadow: 0 0 0 3px var(--aui-ring);
+}
+
+.aui-editor-invalid,
+.aui-editor-invalid:focus-within {
+    border-color: var(--aui-danger);
+}
+
+.aui-editor-invalid:focus-within {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.aui-editor.is-disabled {
+    background: var(--aui-slate-50);
+}
+
+.aui-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    background: var(--aui-surface-muted);
+    border-bottom: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-md) var(--aui-radius-md) 0 0;
+}
+
+.aui-editor-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.aui-editor-group + .aui-editor-group {
+    padding-left: 4px;
+    border-left: 1px solid var(--aui-border);
+}
+
+.aui-editor-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 6px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--aui-slate-600);
+    cursor: pointer;
+    transition: background var(--aui-transition-fast), color var(--aui-transition-fast);
+}
+
+.aui-editor-btn:not(:disabled):hover {
+    background: var(--aui-slate-200);
+    color: var(--aui-slate-900);
+}
+
+.aui-editor-btn:focus-visible {
+    outline: 2px solid var(--aui-primary);
+    outline-offset: 1px;
+}
+
+.aui-editor-btn.is-active {
+    background: var(--aui-primary-light);
+    color: var(--aui-primary-dark);
+}
+
+.aui-editor-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.aui-editor-btn-text {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.aui-editor-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--aui-border);
+    color: var(--aui-text-muted);
+}
+
+.aui-editor-panel-input {
+    flex: 1 1 200px;
+    width: auto;
+}
+
+.aui-editor-content {
+    flex: 1;
+    min-height: var(--aui-editor-min-height);
+    cursor: text;
+}
+
+.aui-editor.is-disabled .aui-editor-content {
+    cursor: not-allowed;
+}
+
+.aui-editor-prose {
+    min-height: var(--aui-editor-min-height);
+    padding: 10px 12px;
+    font-size: var(--aui-font-size);
+    line-height: 1.65;
+    color: var(--aui-slate-800);
+    overflow-wrap: break-word;
+    outline: none;
+}
+
+/* Browser and host margins off; the rule below spaces the blocks instead. */
+.aui-editor-prose :where(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote, pre, table, figure) {
+    margin: 0;
+}
+
+.aui-editor-prose > * + * {
+    margin-top: 0.65em;
+}
+
+.aui-editor-prose h1,
+.aui-editor-prose h2,
+.aui-editor-prose h3,
+.aui-editor-prose h4,
+.aui-editor-prose h5,
+.aui-editor-prose h6 {
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--aui-slate-900);
+}
+
+.aui-editor-prose h1 { font-size: 1.75em; }
+.aui-editor-prose h2 { font-size: 1.45em; }
+.aui-editor-prose h3 { font-size: 1.2em; }
+.aui-editor-prose h4 { font-size: 1.05em; }
+.aui-editor-prose h5,
+.aui-editor-prose h6 { font-size: 1em; }
+
+.aui-editor-prose ul,
+.aui-editor-prose ol {
+    padding-left: 1.5em;
+}
+
+.aui-editor-prose ul { list-style: disc; }
+.aui-editor-prose ol { list-style: decimal; }
+
+.aui-editor-prose li p {
+    margin: 0;
+}
+
+.aui-editor-prose ul[data-type="taskList"] {
+    padding-left: 0.25em;
+    list-style: none;
+}
+
+.aui-editor-prose ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.aui-editor-prose ul[data-type="taskList"] li > label {
+    flex: none;
+    margin-top: 0.2em;
+}
+
+.aui-editor-prose ul[data-type="taskList"] li > div {
+    flex: 1;
+}
+
+.aui-editor-prose ul[data-type="taskList"] input[type="checkbox"] {
+    accent-color: var(--aui-primary);
+}
+
+.aui-editor-prose blockquote {
+    padding-left: 12px;
+    border-left: 3px solid var(--aui-slate-300);
+    color: var(--aui-slate-600);
+}
+
+.aui-editor-prose a {
+    color: var(--aui-primary);
+    text-decoration: underline;
+}
+
+.aui-editor-prose code {
+    padding: 0.1em 0.35em;
+    background: var(--aui-slate-100);
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+}
+
+.aui-editor-prose pre {
+    padding: 10px 12px;
+    background: var(--aui-slate-900);
+    border-radius: var(--aui-radius-sm);
+    color: var(--aui-slate-100);
+    overflow-x: auto;
+}
+
+.aui-editor-prose pre code {
+    padding: 0;
+    background: none;
+    color: inherit;
+}
+
+.aui-editor-prose mark {
+    padding: 0 0.1em;
+    background: #fef08a;
+    border-radius: 2px;
+}
+
+.aui-editor-prose hr {
+    margin: 1em 0;
+    border: 0;
+    border-top: 1px solid var(--aui-border);
+}
+
+.aui-editor-prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--aui-radius-sm);
+}
+
+.aui-editor-prose img.ProseMirror-selectednode {
+    outline: 2px solid var(--aui-primary);
+}
+
+.aui-editor-select {
+    height: 30px;
+    padding: 0 22px 0 8px;
+    background: transparent url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='1.6'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 5px center / 12px;
+    border: 1px solid transparent;
+    border-radius: var(--aui-radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--aui-slate-600);
+    appearance: none;
+    cursor: pointer;
+}
+
+.aui-editor-select:not(:disabled):hover {
+    background-color: var(--aui-slate-200);
+}
+
+.aui-editor-select:focus-visible {
+    outline: 2px solid var(--aui-primary);
+    outline-offset: 1px;
+}
+
+.aui-editor-select:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.aui-editor-color {
+    position: relative;
+}
+
+.aui-editor-btn[data-aui-command="color"] {
+    flex-direction: column;
+    gap: 1px;
+}
+
+.aui-editor-color-bar {
+    display: block;
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.aui-editor-color-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, 24px);
+    gap: 6px;
+    padding: 8px;
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-md);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.aui-editor-swatch {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: var(--aui-swatch);
+    border: 2px solid var(--aui-surface);
+    border-radius: var(--aui-radius-full);
+    box-shadow: 0 0 0 1px var(--aui-border);
+    cursor: pointer;
+}
+
+.aui-editor-swatch:hover,
+.aui-editor-swatch.is-active {
+    box-shadow: 0 0 0 2px var(--aui-primary);
+}
+
+.aui-editor-swatch-reset {
+    grid-column: 1 / -1;
+    padding: 4px 0;
+    background: none;
+    border: 0;
+    border-top: 1px solid var(--aui-border-soft);
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--aui-text-muted);
+    cursor: pointer;
+}
+
+.aui-editor-swatch-reset:hover {
+    color: var(--aui-slate-900);
+}
+
+.aui-editor-table-bar {
+    gap: 2px;
+    background: var(--aui-surface-muted);
+}
+
+.aui-editor-table-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 8px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--aui-slate-600);
+    cursor: pointer;
+}
+
+.aui-editor-table-btn i {
+    font-size: 10px;
+}
+
+.aui-editor-table-btn:not(:disabled):hover {
+    background: var(--aui-slate-200);
+    color: var(--aui-slate-900);
+}
+
+.aui-editor-table-btn[data-aui-command="table-delete"]:not(:disabled):hover {
+    background: var(--aui-danger-soft);
+    color: var(--aui-danger-strong);
+}
+
+.aui-editor-table-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.aui-editor-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 6px 12px;
+    border-top: 1px solid var(--aui-border);
+    font-size: 12px;
+}
+
+.aui-editor-status-busy {
+    color: var(--aui-text-muted);
+}
+
+.aui-editor-status-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--aui-danger);
+}
+
+.aui-editor-status-dismiss {
+    padding: 0 2px;
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+}
+
+.aui-editor-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    overflow: hidden;
+}
+
+.aui-editor-prose th,
+.aui-editor-prose td {
+    position: relative;
+    min-width: 60px;
+    padding: 6px 8px;
+    border: 1px solid var(--aui-slate-300);
+    text-align: left;
+    vertical-align: top;
+}
+
+.aui-editor-prose th {
+    background: var(--aui-slate-50);
+    font-weight: 600;
+}
+
+.aui-editor-prose th > * + *,
+.aui-editor-prose td > * + * {
+    margin-top: 0.4em;
+}
+
+/* Cells picked by dragging across them. */
+.aui-editor-prose .selectedCell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--aui-ring);
+    pointer-events: none;
+}
+
+.aui-editor-prose .tableWrapper {
+    overflow-x: auto;
+}
+
+/* Tiptap's Placeholder extension marks the empty first paragraph. */
+.aui-editor-prose p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--aui-slate-400);
+    pointer-events: none;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 

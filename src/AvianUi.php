@@ -46,6 +46,14 @@ class AvianUi
     }
 
     /**
+     * Get the absolute URL for the bundled Tiptap script the editor runs on.
+     */
+    public function editorScriptUrl(): string
+    {
+        return $this->assetUrl('js/avian-ui-editor.js');
+    }
+
+    /**
      * Build the absolute URL for a packaged asset.
      */
     public function assetUrl(string $file): string
@@ -112,7 +120,7 @@ class AvianUi
 
         $stamp = '';
 
-        foreach (['css/avian-ui.css', 'css/avian-ui-themes.css', 'js/avian-ui.js'] as $file) {
+        foreach (['css/avian-ui.css', 'css/avian-ui-themes.css', 'js/avian-ui.js', 'js/avian-ui-editor.js'] as $file) {
             $path = $this->assetPath($file);
 
             $stamp .= $path === null ? '0' : (string) filemtime($path);

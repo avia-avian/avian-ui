@@ -623,6 +623,23 @@ it('renders the script tag deferred', function () {
         ->toContain('defer');
 });
 
+it('only adds the bundled editor script when asked', function () {
+    expect(Blade::render('<x-avian::scripts />'))->not->toContain('avian-ui-editor.js');
+
+    $html = Blade::render('<x-avian::scripts editor />');
+
+    expect($html)->toContain('avian-ui/js/avian-ui.js?id=')
+        ->toContain('avian-ui/js/avian-ui-editor.js?id=')
+        ->and(preg_match_all('/<script [^>]*defer/', $html))->toBe(2);
+});
+
+it('serves the bundled editor script with Tiptap in it', function () {
+    $response = $this->get('/avian-ui/js/avian-ui-editor.js')->assertOk();
+
+    expect($response->headers->get('Content-Type'))->toStartWith('text/javascript')
+        ->and(file_get_contents(app(AvianUi\AvianUi\AvianUi::class)->assetPath('js/avian-ui-editor.js') ?? ''))->toContain('AvianUITiptap');
+});
+
 it('holds a button click back behind the confirm dialog when asked', function () {
     expect(Blade::render('<x-avian::button wire:click="delete(1)" confirm="Delete this order?" data-aui-confirm-title="Delete order">Delete</x-avian::button>'))
         ->toContain('data-aui-confirm="Delete this order?"')

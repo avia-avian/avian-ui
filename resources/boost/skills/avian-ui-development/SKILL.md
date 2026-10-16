@@ -39,7 +39,7 @@ building. Never add a CDN tag for the package assets.
 **Components.** Use the anonymous components rather than hand-written markup:
 
 - general: `button`, `button-group`, `toolbar`, `card`, `stat`, `badge`, `alert`, `table` (+ `table.row`), `datalist` (+ `datalist.item`), `timeline` (+ `timeline.item`), `pagination`, `page-header`, `breadcrumbs` (+ `breadcrumbs.item`), `empty`, `avatar`, `avatar-group`, `description-list` (+ `description-list.item`), `copy-button`, `tree`, `command` (+ `command.group`, `command.item`), `progress`, `spinner`, `skeleton` (+ `skeleton.table`), `kbd`, `stepper`, `divider`, `accordion` (+ `accordion.item`), `modal`, `drawer`, `confirm`, `toasts`, `dropdown` (+ `dropdown.item`), `popover`, `tooltip`, `tabs` (+ `tabs.panel`)
-- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`, `wizard` (+ `wizard.step`)
+- form: `form`, `field`, `label`, `error`, `hint`, `input`, `textarea`, `editor`, `select`, `searchable-select` (+ `searchable-select.option`), `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`, `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`, `wizard` (+ `wizard.step`)
 
 Form controls render their own label, hint and validation message from `name`
 (or the `wire:model` property when there is no `name`), and repopulate from old
@@ -264,6 +264,7 @@ Read before executing:
 - Replace a `<select multiple>` with `<x-avian::multi-select>` so users can search the options and see their picks as chips.
 - Pass a `paginate()` result to `<x-avian::table :paginator="$items">` instead of hand-rolling Previous/Next links.
 - Replace hand-styled status toggles above a list with `<x-avian::filter-chip>` checkboxes (or `href` links for query-string filters) inside `<x-avian::filter-chip.group>`.
+- Replace a plain `<x-avian::textarea>` for formatted content with `<x-avian::editor toolbar="bold italic | bullet-list ordered-list | link">`, listing only the buttons the content needs, and load `<x-avian::scripts editor />` in the layout; for images, add `image` and an `upload` Livewire method that stores `upload-model` and returns the URL. Sanitize the submitted HTML before display.
 - Use `<x-avian::slider range>` for a min/max filter such as a price bracket; it submits `name[min]` and `name[max]`.
 - Replace two separate start/end datepickers with `<x-avian::date-range name="period" presets>` and validate `period.from` / `period.to`.
 - Split a long signup form into `<x-avian::wizard>` steps inside the existing `<form>`, keeping native `required` attributes so Next validates each step.

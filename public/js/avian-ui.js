@@ -486,9 +486,643 @@
             && event.altKey === shortcut.alt;
     }
 
+    /*
+     * The editor runs on Tiptap from window.AvianUITiptap = { Editor, StarterKit, ... }:
+     * either the bundled avian-ui-editor.js (<x-avian::scripts editor />) or
+     * the host app's own Tiptap. Editors that start before it is there wait
+     * for the assignment, so the order of the script tags does not matter.
+     */
+    var tiptapKit = window.AvianUITiptap || null;
+    var tiptapWaiting = [];
+
+    try {
+        Object.defineProperty(window, 'AvianUITiptap', {
+            configurable: true,
+            get: function () {
+                return tiptapKit;
+            },
+            set: function (kit) {
+                tiptapKit = kit;
+
+                if (kit && kit.Editor) {
+                    tiptapWaiting.splice(0).forEach(function (callback) {
+                        callback(kit);
+                    });
+                }
+            },
+        });
+    } catch (e) {}
+
+    function withTiptap(callback) {
+        if (tiptapKit && tiptapKit.Editor) {
+            callback(tiptapKit);
+
+            return;
+        }
+
+        tiptapWaiting.push(callback);
+    }
+
+    /*
+     * What each toolbar item runs on a Tiptap chain, the command it needs and
+     * how it reads as active. Only some items ask Tiptap whether they can run
+     * (`dryRun`): a dry run of a toggle chain skips its own clearNodes step,
+     * so it reports a list or heading toggle as impossible when it is not.
+     */
+    var EDITOR_COMMANDS = {
+        paragraph: { needs: 'setParagraph', run: function (c) { return c.setParagraph(); }, active: ['paragraph'] },
+        bold: { needs: 'toggleBold', run: function (c) { return c.toggleBold(); }, active: ['bold'] },
+        italic: { needs: 'toggleItalic', run: function (c) { return c.toggleItalic(); }, active: ['italic'] },
+        underline: { needs: 'toggleUnderline', run: function (c) { return c.toggleUnderline(); }, active: ['underline'] },
+        strike: { needs: 'toggleStrike', run: function (c) { return c.toggleStrike(); }, active: ['strike'] },
+        code: { needs: 'toggleCode', run: function (c) { return c.toggleCode(); }, active: ['code'] },
+        highlight: { needs: 'toggleHighlight', run: function (c) { return c.toggleHighlight(); }, active: ['highlight'] },
+        color: { needs: 'setColor' },
+        'font-size': { needs: 'setFontSize' },
+        'bullet-list': { needs: 'toggleBulletList', run: function (c) { return c.toggleBulletList(); }, active: ['bulletList'] },
+        'ordered-list': { needs: 'toggleOrderedList', run: function (c) { return c.toggleOrderedList(); }, active: ['orderedList'] },
+        'task-list': { needs: 'toggleTaskList', run: function (c) { return c.toggleTaskList(); }, active: ['taskList'] },
+        blockquote: { needs: 'toggleBlockquote', run: function (c) { return c.toggleBlockquote(); }, active: ['blockquote'] },
+        'code-block': { needs: 'toggleCodeBlock', run: function (c) { return c.toggleCodeBlock(); }, active: ['codeBlock'] },
+        'horizontal-rule': { needs: 'setHorizontalRule', run: function (c) { return c.setHorizontalRule(); } },
+        'align-left': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('left'); }, active: [{ textAlign: 'left' }] },
+        'align-center': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('center'); }, active: [{ textAlign: 'center' }] },
+        'align-right': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('right'); }, active: [{ textAlign: 'right' }] },
+        'align-justify': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('justify'); }, active: [{ textAlign: 'justify' }] },
+        link: { needs: 'setLink', active: ['link'] },
+        image: { needs: 'setImage', active: ['image'] },
+        file: { needs: 'insertContentAt' },
+        table: { needs: 'insertTable', run: function (c) { return c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }); }, active: ['table'] },
+        'table-row-before': { needs: 'addRowBefore', dryRun: true, run: function (c) { return c.addRowBefore(); } },
+        'table-row-after': { needs: 'addRowAfter', dryRun: true, run: function (c) { return c.addRowAfter(); } },
+        'table-column-before': { needs: 'addColumnBefore', dryRun: true, run: function (c) { return c.addColumnBefore(); } },
+        'table-column-after': { needs: 'addColumnAfter', dryRun: true, run: function (c) { return c.addColumnAfter(); } },
+        'table-delete-row': { needs: 'deleteRow', dryRun: true, run: function (c) { return c.deleteRow(); } },
+        'table-delete-column': { needs: 'deleteColumn', dryRun: true, run: function (c) { return c.deleteColumn(); } },
+        'table-header-row': { needs: 'toggleHeaderRow', dryRun: true, run: function (c) { return c.toggleHeaderRow(); } },
+        'table-merge': { needs: 'mergeOrSplit', dryRun: true, run: function (c) { return c.mergeOrSplit(); } },
+        'table-delete': { needs: 'deleteTable', dryRun: true, run: function (c) { return c.deleteTable(); } },
+        clear: { needs: 'unsetAllMarks', run: function (c) { return c.unsetAllMarks().clearNodes(); } },
+        undo: { needs: 'undo', dryRun: true, run: function (c) { return c.undo(); } },
+        redo: { needs: 'redo', dryRun: true, run: function (c) { return c.redo(); } },
+    };
+
+    function editorCommand(item) {
+        var heading = /^h([1-6])$/.exec(item);
+
+        if (heading) {
+            var level = Number(heading[1]);
+
+            return {
+                needs: 'toggleHeading',
+                run: function (c) { return c.toggleHeading({ level: level }); },
+                active: ['heading', { level: level }],
+            };
+        }
+
+        return EDITOR_COMMANDS[item] || null;
+    }
+
+    /* The Tiptap extensions holding exactly the nodes and marks asked for:
+       StarterKit with everything else switched off, plus the optional extras.
+       `onFiles` receives dropped and pasted files when uploads are on. */
+    function editorExtensions(kit, config, onFiles) {
+        var nodes = config.nodes || [];
+        var has = function (node) {
+            return nodes.indexOf(node) !== -1;
+        };
+        var on = function (node, options) {
+            return has(node) ? (options || {}) : false;
+        };
+        var lists = has('bullet-list') || has('ordered-list');
+        var extensions = [];
+        var missing = [];
+
+        extensions.push(kit.StarterKit.configure({
+            heading: config.headings && config.headings.length ? { levels: config.headings } : false,
+            bold: on('bold'),
+            italic: on('italic'),
+            underline: on('underline'),
+            strike: on('strike'),
+            code: on('code'),
+            link: on('link', { openOnClick: false, autolink: true, defaultProtocol: 'https' }),
+            bulletList: on('bullet-list'),
+            orderedList: on('ordered-list'),
+            listItem: lists ? {} : false,
+            listKeymap: lists ? {} : false,
+            blockquote: on('blockquote'),
+            codeBlock: on('code-block'),
+            horizontalRule: on('horizontal-rule'),
+        }));
+
+        var extras = [
+            ['highlight', ['Highlight'], function () { return [kit.Highlight]; }],
+            ['color', ['TextStyle', 'Color'], function () { return [kit.TextStyle, kit.Color]; }],
+            ['font-size', ['TextStyle', 'FontSize'], function () { return [kit.TextStyle, kit.FontSize]; }],
+            ['task-list', ['TaskList', 'TaskItem'], function () { return [kit.TaskList, kit.TaskItem.configure({ nested: true })]; }],
+            ['image', ['Image'], function () { return [kit.Image]; }],
+            ['text-align', ['TextAlign'], function () { return [kit.TextAlign.configure({ types: ['heading', 'paragraph'] })]; }],
+            ['table', ['Table', 'TableRow', 'TableHeader', 'TableCell'], function () {
+                return [kit.Table.configure({ resizable: false }), kit.TableRow, kit.TableHeader, kit.TableCell];
+            }],
+        ];
+
+        if (config.uploads) {
+            extras.push(['uploads', ['FileHandler'], function () {
+                return [kit.FileHandler.configure({
+                    onDrop: function (editor, files, pos) {
+                        onFiles(files, pos);
+                    },
+                    onPaste: function (editor, files) {
+                        onFiles(files, null);
+                    },
+                })];
+            }]);
+        }
+
+        extras.forEach(function (extra) {
+            if (extra[0] !== 'uploads' && ! has(extra[0])) {
+                return;
+            }
+
+            var absent = extra[1].filter(function (key) {
+                return ! kit[key];
+            });
+
+            if (absent.length) {
+                missing = missing.concat(absent);
+
+                return;
+            }
+
+            /* Color and font size share TextStyle: add it once. */
+            extra[2]().forEach(function (extension) {
+                if (extensions.indexOf(extension) === -1) {
+                    extensions.push(extension);
+                }
+            });
+        });
+
+        if (config.placeholder && kit.Placeholder) {
+            extensions.push(kit.Placeholder.configure({ placeholder: config.placeholder }));
+        }
+
+        if (missing.length) {
+            console.warn('[Avian UI] The editor needs ' + missing.join(', ') + ' in window.AvianUITiptap. Load <x-avian::scripts editor /> or add them to your own Tiptap.');
+        }
+
+        return extensions;
+    }
+
+    /* Does a file match an accept list like "image/*, application/pdf, .docx"? */
+    function acceptsFile(file, accept) {
+        if (! accept || ! accept.length) {
+            return true;
+        }
+
+        var type = (file.type || '').toLowerCase();
+        var name = (file.name || '').toLowerCase();
+
+        return accept.some(function (rule) {
+            rule = rule.toLowerCase();
+
+            if (rule.charAt(0) === '.') {
+                return name.slice(-rule.length) === rule;
+            }
+
+            if (rule.slice(-2) === '/*') {
+                return type.indexOf(rule.slice(0, -1)) === 0;
+            }
+
+            return type === rule;
+        });
+    }
+
+    /* The CSRF token for a plain fetch upload: the meta tag, the form's
+       _token field, or Laravel's XSRF-TOKEN cookie. */
+    function csrfHeaders(el) {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        var form = el.closest('form');
+        var field = form ? form.querySelector('input[name="_token"]') : null;
+        var token = (meta && meta.content) || (field && field.value);
+
+        if (token) {
+            return { 'X-CSRF-TOKEN': token };
+        }
+
+        var cookie = document.cookie.split('; ').filter(function (part) {
+            return part.indexOf('XSRF-TOKEN=') === 0;
+        })[0];
+
+        return cookie ? { 'X-XSRF-TOKEN': decodeURIComponent(cookie.slice(11)) } : {};
+    }
+
     var commandIds = 0;
 
     var components = {
+        /**
+         * Rich text editor on Tiptap (see withTiptap).
+         *
+         * The Tiptap instance lives in this closure, never on the Alpine data:
+         * a reactive proxy around ProseMirror's state breaks it. `tick` goes up
+         * on every transaction so the toolbar bindings read its state again.
+         *
+         * With `config.uploads`, picked, dropped and pasted files go to a
+         * Livewire method (through a WithFileUploads property) or are POSTed
+         * to a URL; each is inserted once the server answers with its URL.
+         */
+        auiEditor: function (config) {
+            config = config || {};
+
+            var editor = null;
+            var destroyed = false;
+            var uploads = config.uploads || null;
+            var messages = config.messages || {};
+
+            /* Where each pending upload goes, kept in step with the edits made meanwhile. */
+            var pending = [];
+
+            /* data-aui-* on the content element → attributes of the editable. */
+            var ATTRIBUTES = {
+                auiId: 'id',
+                auiLabel: 'aria-label',
+                auiInvalid: 'aria-invalid',
+            };
+
+            function message(key, name) {
+                return (messages[key] || key).replace(':name', name || '');
+            }
+
+            return {
+                value: '',
+                tick: 0,
+                panel: null,
+                panelUrl: '',
+                colorOpen: false,
+                uploading: 0,
+                uploadError: '',
+
+                init: function () {
+                    var self = this;
+
+                    try {
+                        this.value = JSON.parse(this.$el.dataset.auiValue || '""') || '';
+                    } catch (e) {}
+
+                    withTiptap(function (kit) {
+                        if (! destroyed) {
+                            self.mount(kit);
+                        }
+                    });
+
+                    /* A server-side change arrives here through x-modelable. */
+                    this.$watch('value', function (value) {
+                        if (editor && (value || '') !== self.html()) {
+                            editor.commands.setContent(value || '', { emitUpdate: false });
+                        }
+                    });
+                },
+
+                destroy: function () {
+                    destroyed = true;
+                    pending.length = 0;
+
+                    if (editor) {
+                        editor.destroy();
+                        editor = null;
+                    }
+                },
+
+                mount: function (kit) {
+                    var self = this;
+                    var content = this.$refs.content;
+                    var attributes = { class: 'aui-editor-prose', role: 'textbox', 'aria-multiline': 'true' };
+
+                    Object.keys(ATTRIBUTES).forEach(function (key) {
+                        if (content.dataset[key]) {
+                            attributes[ATTRIBUTES[key]] = content.dataset[key];
+                        }
+                    });
+
+                    var refresh = function () {
+                        self.tick++;
+                    };
+
+                    editor = new kit.Editor({
+                        element: content,
+                        extensions: editorExtensions(kit, config, function (files, pos) {
+                            self.uploadFiles(files, pos);
+                        }),
+                        content: this.value || '',
+                        editable: ! config.disabled,
+                        editorProps: { attributes: attributes },
+                        onUpdate: function () {
+                            self.value = self.html();
+                        },
+                        onTransaction: function (props) {
+                            pending.forEach(function (upload) {
+                                upload.pos = props.transaction.mapping.map(upload.pos);
+                            });
+
+                            refresh();
+                        },
+                        onFocus: refresh,
+                        onBlur: refresh,
+                    });
+
+                    refresh();
+                },
+
+                /* An empty document submits as '' rather than '<p></p>'. */
+                html: function () {
+                    return ! editor || editor.isEmpty ? '' : editor.getHTML();
+                },
+
+                isActive: function (item) {
+                    var command = editorCommand(item);
+
+                    if (this.tick < 0 || ! editor || ! command || ! command.active) {
+                        return false;
+                    }
+
+                    return editor.isActive.apply(editor, command.active);
+                },
+
+                can: function (item) {
+                    var command = editorCommand(item);
+
+                    if (this.tick < 0 || ! editor || ! command || ! editor.isEditable) {
+                        return false;
+                    }
+
+                    if (item === 'file' && ! this.canUpload()) {
+                        return false;
+                    }
+
+                    /* A command whose extension is not loaded is not there. */
+                    if (typeof editor.commands[command.needs] !== 'function') {
+                        return false;
+                    }
+
+                    return ! command.dryRun || command.run(editor.can().chain()).run();
+                },
+
+                run: function (item) {
+                    if (item === 'link' || item === 'image') {
+                        this.openPanel(item);
+
+                        return;
+                    }
+
+                    if (item === 'color') {
+                        this.colorOpen = ! this.colorOpen && this.can('color');
+
+                        return;
+                    }
+
+                    if (item === 'file') {
+                        this.pickFile('file');
+
+                        return;
+                    }
+
+                    var command = editorCommand(item);
+
+                    if (command && this.can(item)) {
+                        command.run(editor.chain().focus()).run();
+                    }
+                },
+
+                /* Text colour and size live on the textStyle mark. */
+                textStyle: function (attribute) {
+                    if (this.tick < 0 || ! editor) {
+                        return '';
+                    }
+
+                    return editor.getAttributes('textStyle')[attribute] || '';
+                },
+
+                setColor: function (color) {
+                    this.colorOpen = false;
+
+                    if (! this.can('color')) {
+                        return;
+                    }
+
+                    var chain = editor.chain().focus();
+
+                    (color ? chain.setColor(color) : chain.unsetColor()).run();
+                },
+
+                setFontSize: function (size) {
+                    if (! this.can('font-size')) {
+                        return;
+                    }
+
+                    var chain = editor.chain().focus();
+
+                    (size ? chain.setFontSize(size) : chain.unsetFontSize()).run();
+                },
+
+                /* Link and image ask for their URL in a bar under the toolbar. */
+                openPanel: function (kind) {
+                    if (! this.can(kind)) {
+                        return;
+                    }
+
+                    var self = this;
+
+                    this.panelUrl = kind === 'link' ? (editor.getAttributes('link').href || '') : '';
+                    this.panel = kind;
+
+                    this.$nextTick(function () {
+                        self.$refs.panelInput.focus();
+                        self.$refs.panelInput.select();
+                    });
+                },
+
+                closePanel: function () {
+                    this.panel = null;
+                    this.panelUrl = '';
+
+                    if (editor) {
+                        editor.commands.focus();
+                    }
+                },
+
+                applyPanel: function () {
+                    var url = (this.panelUrl || '').trim();
+
+                    if (this.panel === 'link' && url === '') {
+                        this.removeLink();
+
+                        return;
+                    }
+
+                    /* "example.com" is a host, not a relative path. */
+                    if (! /^([a-z][a-z0-9+.-]*:|[\/#?])/i.test(url)) {
+                        url = 'https://' + url;
+                    }
+
+                    if (this.panel === 'link') {
+                        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+                    } else if (url !== '') {
+                        editor.chain().focus().setImage({ src: url }).run();
+                    }
+
+                    this.closePanel();
+                },
+
+                removeLink: function () {
+                    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+                    this.closePanel();
+                },
+
+                /* Uploads ----------------------------------------------------- */
+
+                canUpload: function () {
+                    if (! uploads) {
+                        return false;
+                    }
+
+                    return uploads.method ? !! this.$wire : !! uploads.url;
+                },
+
+                pickFile: function (kind) {
+                    if (! this.canUpload() || ! editor || ! editor.isEditable) {
+                        return;
+                    }
+
+                    var input = this.$refs.fileInput;
+                    var images = (uploads.accept || []).filter(function (rule) {
+                        return rule.indexOf('image/') === 0;
+                    });
+
+                    input.accept = (kind === 'image' ? (images.length ? images : ['image/*']) : (uploads.accept || [])).join(',');
+                    input.click();
+                },
+
+                picked: function (event) {
+                    var files = Array.prototype.slice.call(event.target.files || []);
+
+                    event.target.value = '';
+                    this.panel = null;
+                    this.uploadFiles(files, null);
+                },
+
+                uploadFiles: function (files, pos) {
+                    var self = this;
+
+                    if (! this.canUpload()) {
+                        return;
+                    }
+
+                    this.uploadError = '';
+
+                    files.forEach(function (file) {
+                        if (! acceptsFile(file, uploads.accept)) {
+                            self.uploadError = message('rejected', file.name);
+
+                            return;
+                        }
+
+                        self.uploadFile(file, pos);
+                    });
+                },
+
+                uploadFile: function (file, pos) {
+                    var self = this;
+                    var upload = { pos: pos === null || pos === undefined ? editor.state.selection.to : pos };
+
+                    pending.push(upload);
+                    this.uploading++;
+
+                    this.sendFile(file).then(function (result) {
+                        var url = typeof result === 'string' ? result : (result && result.url);
+
+                        if (! url) {
+                            throw new Error(message('failed', file.name));
+                        }
+
+                        self.insertFile(file, url, (result && result.name) || file.name, upload.pos);
+                        self.$dispatch('aui-editor-uploaded', { url: url, name: file.name });
+                    }).catch(function (error) {
+                        self.uploadError = (error && error.message) || message('failed', file.name);
+                        self.$dispatch('aui-editor-upload-failed', { name: file.name, message: self.uploadError });
+                    }).then(function () {
+                        pending.splice(pending.indexOf(upload), 1);
+                        self.uploading = Math.max(0, self.uploading - 1);
+                    });
+                },
+
+                /* An image becomes an image when the editor has them; anything
+                   else becomes a link to the file, or its name as text. */
+                insertFile: function (file, url, name, pos) {
+                    if (! editor || destroyed) {
+                        return;
+                    }
+
+                    var schema = editor.schema;
+                    var content;
+
+                    if (/^image\//.test(file.type) && schema.nodes.image) {
+                        content = { type: 'image', attrs: { src: url, alt: name } };
+                    } else {
+                        content = { type: 'text', text: name };
+
+                        if (schema.marks.link) {
+                            content.marks = [{ type: 'link', attrs: { href: url } }];
+                        }
+                    }
+
+                    pos = Math.min(Math.max(0, pos), editor.state.doc.content.size);
+
+                    editor.chain().focus().insertContentAt(pos, content).run();
+                },
+
+                /* Resolves with the file's URL, or { url, name }. */
+                sendFile: function (file) {
+                    if (uploads.method) {
+                        var wire = this.$wire;
+
+                        return new Promise(function (resolve, reject) {
+                            wire.upload(uploads.model, file, function () {
+                                Promise.resolve(wire[uploads.method]()).then(resolve, reject);
+                            }, function () {
+                                reject(new Error(message('failed', file.name)));
+                            });
+                        });
+                    }
+
+                    var body = new FormData();
+
+                    body.append('file', file);
+
+                    var headers = csrfHeaders(this.$el);
+
+                    headers.Accept = 'application/json';
+                    headers['X-Requested-With'] = 'XMLHttpRequest';
+
+                    return fetch(uploads.url, {
+                        method: 'POST',
+                        body: body,
+                        headers: headers,
+                        credentials: 'same-origin',
+                    }).then(function (response) {
+                        return response.json().catch(function () {
+                            return {};
+                        }).then(function (data) {
+                            if (! response.ok) {
+                                throw new Error((data && data.message) || message('failed', file.name));
+                            }
+
+                            return data;
+                        });
+                    });
+                },
+            };
+        },
+
         /**
          * Modal / dialog.
          *

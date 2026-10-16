@@ -51,6 +51,7 @@ it('serves the documentation with every component on it', function () {
         ->toContain('aui-stat-change-good')
         ->toContain('aui-divider-labelled')
         ->toContain('auiSlider(')
+        ->toContain('auiEditor(')
         ->toContain('auiTableRow(')
         ->toContain('aui-filter-chips')
         ->toContain('aui-timeline-marker-icon')
@@ -107,6 +108,7 @@ function avianUiDocsPages(): array
         'forms.field' => ['Forms', 'forms.field', 'Field, label & error'],
         'forms.input' => ['Forms', 'forms.input', 'Input'],
         'forms.textarea' => ['Forms', 'forms.textarea', 'Textarea'],
+        'forms.editor' => ['Forms', 'forms.editor', 'Editor'],
         'forms.select' => ['Forms', 'forms.select', 'Select'],
         'forms.searchable-select' => ['Forms', 'forms.searchable-select', 'Searchable select'],
         'forms.multi-select' => ['Forms', 'forms.multi-select', 'Multi select'],

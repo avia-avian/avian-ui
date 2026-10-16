@@ -510,6 +510,75 @@ to a `['min' => ..., 'max' => ...]` array with `wire:model`:
 <x-avian::slider wire:model.live.debounce.300ms="price" :max="1000" range />
 ```
 
+`<x-avian::editor>` is a rich text editor on [Tiptap](https://tiptap.dev) that
+submits HTML through a hidden input. Tiptap and its extensions ship with the
+package in a separate script, so only pages that load it pay for it:
+
+```blade
+<x-avian::scripts editor />
+```
+
+`toolbar` picks the buttons and their order, `|` starting a new group: a
+preset (`default`, `minimal`, `full`), a space-separated string, an array, or
+`false` for none. The editor only accepts the nodes and marks its buttons can
+make, so pasted content it has no button for is reduced to paragraphs and
+text; `nodes` allows more without a button. An empty editor submits `''`, and
+`wire:model` binds the HTML string:
+
+```blade
+<x-avian::editor name="body" label="Body" placeholder="Write something…" />
+<x-avian::editor name="note" toolbar="bold italic | bullet-list ordered-list | link" />
+<x-avian::editor name="note" toolbar="bold italic" nodes="h2 h3 code-block" />
+<x-avian::editor wire:model="content" toolbar="full" :min-height="320" />
+```
+
+Toolbar items: `paragraph`, `h1`–`h6`, `font-size`, `bold`, `italic`,
+`underline`, `strike`, `code`, `highlight`, `color`, `link`, `bullet-list`,
+`ordered-list`, `task-list`, `blockquote`, `code-block`, `horizontal-rule`,
+`table`, `image`, `file`, `align-left`, `align-center`, `align-right`,
+`align-justify`, `clear`, `undo`, `redo`. While the cursor is in a table, a bar
+offers row, column, header, merge/split and delete actions. `colors` and
+`font-sizes` set the palette and the size list.
+
+Images and files are uploaded as soon as they are picked, dropped or pasted,
+and inserted once the server returns their URL: images as images, other files
+as a link. With Livewire, `upload` names a method that stores the file put in
+the `upload-model` property (`WithFileUploads`) and returns its URL; without
+it, `upload-url` receives the file as a `file` POST field and answers
+`{"url": "..."}`. `accept` limits the file types:
+
+```php
+public $editorUpload;
+
+public function storeEditorFile(): string
+{
+    $this->validate(['editorUpload' => ['required', 'file', 'max:5120', 'mimes:png,jpg,gif,webp,pdf']]);
+
+    $path = $this->editorUpload->store('editor', 'public');
+    $this->reset('editorUpload');
+
+    return Storage::disk('public')->url($path);
+}
+```
+
+```blade
+<x-avian::editor wire:model="body" toolbar="bold italic | link image file" upload="storeEditorFile" upload-model="editorUpload" accept="image/*, application/pdf" />
+<x-avian::editor name="body" toolbar="bold italic | image" :upload-url="url('/editor/uploads')" />
+```
+
+Because files are stored when they are added, one that is removed again, or a
+draft that is never saved, leaves an unused file behind: keep each record's
+files in its own folder and delete the ones its saved HTML no longer refers to.
+
+An app that already bundles Tiptap can skip the editor script and assign its
+own `window.AvianUITiptap = { Editor, StarterKit, ... }` instead (see the
+documentation page for the full list). The HTML is user input: sanitize it on
+the server before echoing it unescaped, and wrap it in `aui-editor-prose` to
+display it with the editor's typography.
+
+To rebuild the bundled script after changing `resources/js/editor.js` or the
+Tiptap version in `package.json`, run `npm install` and `npm run build:editor`.
+
 `<x-avian::filter-chip>` is a toggleable pill for narrowing a list. It is a
 checkbox underneath (`type="radio"` for one pick at a time), so a row of them
 submits and repopulates like checkboxes; `count` adds a number pill. Given an
@@ -567,7 +636,7 @@ Available components: `accordion` (+ `accordion.item`), `alert`, `avatar`, `avat
 `stepper`, `styles`, `table` (+ `table.row`), `timeline` (+ `timeline.item`), `toasts`, `toolbar`, `tooltip`, `tree`,
 `datalist` (+ `datalist.item`), `tabs` (+ `tabs.panel`),
 `modal`, plus the form set `form`, `field`, `label`, `error`, `hint`, `input`,
-`textarea`, `select`, `searchable-select` (+ `searchable-select.option`),
+`textarea`, `editor`, `select`, `searchable-select` (+ `searchable-select.option`),
 `multi-select` (+ `multi-select.option`), `checkbox`, `radio`, `switch`,
 `slider`, `filter-chip` (+ `filter-chip.group`), `file`, `datepicker`, `date-range`,
 `wizard` (+ `wizard.step`).

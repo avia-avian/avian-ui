@@ -8,6 +8,8 @@
         ['min-height', 'int|string|null', 'null', 'Height of the writing area (160px by default). A number is in pixels.'],
         ['colors', 'array', '10 colours', 'Swatches offered by the color button, any CSS colour.'],
         ['font-sizes', 'array', "['12px' … '36px']", 'Sizes offered by the font-size select.'],
+        ['max', 'int|null', 'null', 'Character limit: typing stops there and a counter shows under the editor. It counts text, not HTML; validate on the server too.'],
+        ['counter', 'bool', 'false', 'Show the character counter without a limit.'],
         ['upload', 'string|null', 'null', 'Livewire method that stores the uploaded file and returns its URL (or [\'url\' => …, \'name\' => …]).'],
         ['upload-model', 'string', "'editorUpload'", 'The WithFileUploads property the file is uploaded into before `upload` runs.'],
         ['upload-url', 'string|null', 'null', 'Without Livewire: POST endpoint that receives the file as "file" and answers {"url": …}.'],
@@ -17,7 +19,7 @@
         ['error', 'string|null', 'null', 'Force an error message; otherwise read from $errors (and from upload-model with upload).'],
         ['error-bag', 'string|null', 'null', 'Named error bag to read from.'],
         ['required', 'bool', 'false', 'Asterisk on the label. Validate on the server: a hidden input is never checked by the browser.'],
-        ['disabled', 'bool', 'false', 'Read-only: the content shows but cannot be edited.'],
+        ['disabled', 'bool', 'false', 'Read-only: the content shows but cannot be edited. Follows a Livewire re-render.'],
         ['field', 'bool', 'true', 'Set :field="false" to render just the editor.'],
     ];
 
@@ -37,7 +39,7 @@
         ],
         [
             'title' => 'Pick the buttons',
-            'text' => 'List the toolbar items in order; "|" starts a new group. Items: paragraph, h1–h6, font-size, bold, italic, underline, strike, code, highlight, color, link, bullet-list, ordered-list, task-list, blockquote, code-block, horizontal-rule, table, image, file, align-left, align-center, align-right, align-justify, clear, undo, redo.',
+            'text' => 'List the toolbar items in order; "|" starts a new group. Items: paragraph, h1–h6, font-size, bold, italic, underline, strike, code, highlight, color, link, bullet-list, ordered-list, task-list, blockquote, details, code-block, horizontal-rule, hard-break, table, image, file, align-left, align-center, align-right, align-justify, clear, undo, redo.',
             'code' => <<<'BLADE'
                 <x-avian::editor name="note" toolbar="bold italic | bullet-list ordered-list | link" />
 
@@ -69,6 +71,29 @@
             'text' => 'The table button inserts a 3×3 table with a header row. While the cursor is in a table a bar appears to add or delete rows and columns, toggle the header row, merge or split selected cells, and delete the table.',
             'code' => <<<'BLADE'
                 <x-avian::editor name="specs" toolbar="bold italic | table | undo redo" />
+                BLADE,
+        ],
+        [
+            'title' => 'Collapsible sections and line breaks',
+            'text' => 'details wraps the selected blocks in a collapsible section with a title line; press it again inside one to unwrap it. It is saved as <details> with a <summary>, so it folds on the page that shows it too. hard-break adds a line break inside the paragraph, like Shift+Enter.',
+            'code' => <<<'BLADE'
+                <x-avian::editor name="faq" toolbar="bold italic | details | hard-break | undo redo" />
+                BLADE,
+        ],
+        [
+            'title' => 'Character limit',
+            'text' => 'max stops typing and pasting at that many characters and shows a counter, which turns red at the limit. counter shows the count without a limit. The count is of text, not HTML, so check it on the server as well.',
+            'code' => <<<'BLADE'
+                <x-avian::editor name="summary" toolbar="minimal" :max="280" />
+
+                <x-avian::editor name="body" counter />
+
+                // Server side
+                $request->validate(['summary' => ['required', 'string', function ($attribute, $value, $fail) {
+                    if (mb_strlen(html_entity_decode(strip_tags($value))) > 280) {
+                        $fail('The summary may not be longer than 280 characters.');
+                    }
+                }]]);
                 BLADE,
         ],
         [
@@ -239,7 +264,7 @@
             'code' => <<<'BLADE'
                 import { Editor } from '@tiptap/core';
                 import StarterKit from '@tiptap/starter-kit';
-                import { Placeholder } from '@tiptap/extensions';
+                import { Placeholder, CharacterCount } from '@tiptap/extensions';
                 import Highlight from '@tiptap/extension-highlight';
                 import { TaskList, TaskItem } from '@tiptap/extension-list';
                 import Image from '@tiptap/extension-image';
@@ -247,10 +272,12 @@
                 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
                 import { TextStyle, Color, FontSize } from '@tiptap/extension-text-style';
                 import FileHandler from '@tiptap/extension-file-handler';
+                import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details';
 
                 window.AvianUITiptap = {
-                    Editor, StarterKit, Placeholder, Highlight, TaskList, TaskItem, Image, TextAlign,
+                    Editor, StarterKit, Placeholder, CharacterCount, Highlight, TaskList, TaskItem, Image, TextAlign,
                     Table, TableRow, TableHeader, TableCell, TextStyle, Color, FontSize, FileHandler,
+                    Details, DetailsSummary, DetailsContent,
                 };
                 BLADE,
         ],
@@ -274,14 +301,14 @@
             hint="The default toolbar."
             value="<h2>Release notes</h2><p>This release adds a <strong>rich text editor</strong>. Select some text and try the toolbar, or type <code>## </code> for a heading.</p><ul><li><p>Pick the buttons you need</p></li><li><p>Everything else is stripped on paste</p></li></ul>"
         />
-        <x-avian::editor name="editor_comment" label="Comment" toolbar="minimal" placeholder="Leave a comment…" :min-height="100" />
+        <x-avian::editor name="editor_comment" label="Comment" toolbar="minimal" placeholder="Leave a comment…" :min-height="100" :max="280" />
         <x-avian::editor name="editor_error" label="Summary" toolbar="bold italic | bullet-list" :min-height="100" required error="Please write a summary." />
         <x-avian::editor
             class="aui-form-full"
             name="editor_full"
             label="Article"
             toolbar="full"
-            value="<h3>Everything on</h3><p style='text-align: center'>Centered, with <mark>highlight</mark>, <span style='color: #dc2626'>colour</span>, <span style='font-size: 20px'>size</span> and a <a href='https://tiptap.dev'>link</a>.</p><table><tbody><tr><th><p>Plan</p></th><th><p>Seats</p></th><th><p>Price</p></th></tr><tr><td><p>Starter</p></td><td><p>5</p></td><td><p>$9</p></td></tr><tr><td><p>Team</p></td><td><p>25</p></td><td><p>$29</p></td></tr></tbody></table><ul data-type='taskList'><li data-type='taskItem' data-checked='true'><p>Task lists</p></li><li data-type='taskItem' data-checked='false'><p>Images by URL or upload</p></li></ul><pre><code>composer require avia-avian/avian-ui</code></pre>"
+            value="<h3>Everything on</h3><p style='text-align: center'>Centered, with <mark>highlight</mark>, <span style='color: #dc2626'>colour</span>, <span style='font-size: 20px'>size</span> and a <a href='https://tiptap.dev'>link</a>.</p><table><tbody><tr><th><p>Plan</p></th><th><p>Seats</p></th><th><p>Price</p></th></tr><tr><td><p>Starter</p></td><td><p>5</p></td><td><p>$9</p></td></tr><tr><td><p>Team</p></td><td><p>25</p></td><td><p>$29</p></td></tr></tbody></table><ul data-type='taskList'><li data-type='taskItem' data-checked='true'><p>Task lists</p></li><li data-type='taskItem' data-checked='false'><p>Images by URL or upload</p></li></ul><details open><summary>A collapsible section</summary><div data-type='detailsContent'><p>Line one<br>and a line break.</p></div></details><pre><code>composer require avia-avian/avian-ui</code></pre>"
         />
     </div>
 

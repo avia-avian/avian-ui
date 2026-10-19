@@ -7,7 +7,7 @@
  */
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import { Placeholder } from '@tiptap/extensions';
+import { Placeholder, CharacterCount } from '@tiptap/extensions';
 import Highlight from '@tiptap/extension-highlight';
 import { TaskList, TaskItem } from '@tiptap/extension-list';
 import Image from '@tiptap/extension-image';
@@ -15,12 +15,14 @@ import TextAlign from '@tiptap/extension-text-align';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import { TextStyle, Color, FontSize } from '@tiptap/extension-text-style';
 import FileHandler from '@tiptap/extension-file-handler';
+import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details';
 
 if (! window.AvianUITiptap) {
     window.AvianUITiptap = {
         Editor,
         StarterKit,
         Placeholder,
+        CharacterCount,
         Highlight,
         TaskList,
         TaskItem,
@@ -34,5 +36,8 @@ if (! window.AvianUITiptap) {
         Color,
         FontSize,
         FileHandler,
+        Details,
+        DetailsSummary,
+        DetailsContent,
     };
 }

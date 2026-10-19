@@ -4979,6 +4979,89 @@ a.aui-tree-label:hover {
     border-top: 1px solid var(--aui-border);
 }
 
+/* Saved <details> shown in aui-editor-prose outside the editor. */
+.aui-editor-prose details {
+    padding: 6px 10px;
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-sm);
+}
+
+.aui-editor-prose details > summary {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.aui-editor-prose details[open] > summary {
+    margin-bottom: 0.4em;
+}
+
+/* Tiptap's Details node view: a toggle button beside the summary and content. */
+.aui-editor-prose [data-type="details"] {
+    display: flex;
+    gap: 6px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-sm);
+}
+
+.aui-editor-prose [data-type="details"] > button {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 0.15em;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    color: var(--aui-slate-500);
+    cursor: pointer;
+}
+
+.aui-editor-prose [data-type="details"] > button::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid currentColor;
+    transition: transform var(--aui-transition-fast);
+}
+
+.aui-editor-prose [data-type="details"].is-open > button::before {
+    transform: rotate(90deg);
+}
+
+.aui-editor-prose [data-type="details"] > button:hover {
+    background: var(--aui-slate-100);
+    color: var(--aui-slate-900);
+}
+
+.aui-editor-prose [data-type="details"] > div {
+    flex: 1;
+    min-width: 0;
+}
+
+.aui-editor-prose [data-type="details"] summary {
+    display: block;
+    font-weight: 600;
+    list-style: none;
+}
+
+.aui-editor-prose [data-type="details"] summary::-webkit-details-marker {
+    display: none;
+}
+
+.aui-editor-prose [data-type="detailsContent"] > * + * {
+    margin-top: 0.65em;
+}
+
+.aui-editor-prose [data-type="detailsContent"]:not([hidden]) {
+    margin-top: 0.4em;
+}
+
 .aui-editor-prose img {
     max-width: 100%;
     height: auto;
@@ -5144,6 +5227,19 @@ a.aui-tree-label:hover {
     border: 0;
     color: inherit;
     cursor: pointer;
+}
+
+.aui-editor-count {
+    padding: 4px 12px;
+    border-top: 1px solid var(--aui-border);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--aui-text-muted);
+}
+
+.aui-editor-count.is-full {
+    color: var(--aui-danger);
 }
 
 .aui-editor-prose table {

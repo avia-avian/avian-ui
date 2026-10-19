@@ -25,6 +25,12 @@
     Tiptap comes from <x-avian::scripts editor />, or from the host app's own
     `window.AvianUITiptap = { Editor, StarterKit, ... }`.
 
+    `max` caps the text at that many characters and shows a counter under the
+    editor; `counter` shows the counter without a cap. Validate the length on
+    the server as well:
+
+        <x-avian::editor name="summary" toolbar="minimal" :max="500" />
+
     `aui-editor-set` (replace everything) and `aui-editor-insert` (add at the
     cursor) browser events change the content from outside, aimed at the editor
     by its `name` or its wire:model property:
@@ -53,6 +59,8 @@
     'uploadModel' => 'editorUpload',
     'uploadUrl' => null,
     'accept' => 'image/png, image/jpeg, image/gif, image/webp',
+    'max' => null,
+    'counter' => false,
     'disabled' => false,
     'field' => true,
 ])
@@ -104,6 +112,8 @@
         'blockquote' => ['icon' => 'fas fa-quote-right', 'node' => 'blockquote'],
         'code-block' => ['icon' => 'fas fa-file-code', 'node' => 'code-block'],
         'horizontal-rule' => ['icon' => 'fas fa-minus', 'node' => 'horizontal-rule'],
+        'hard-break' => ['icon' => 'fas fa-arrow-turn-down', 'node' => null],
+        'details' => ['icon' => 'fas fa-square-caret-down', 'node' => 'details'],
         'table' => ['icon' => 'fas fa-table', 'node' => 'table'],
         'image' => ['icon' => 'fas fa-image', 'node' => 'image'],
         'file' => ['icon' => 'fas fa-paperclip', 'node' => null],
@@ -117,7 +127,7 @@
     ];
 
     // Toggles report their state with aria-pressed; actions do not.
-    $actions = ['horizontal-rule', 'table', 'image', 'file', 'clear', 'undo', 'redo'];
+    $actions = ['horizontal-rule', 'hard-break', 'table', 'image', 'file', 'clear', 'undo', 'redo'];
 
     // The bar that edits the table the cursor is in.
     $tableActions = [
@@ -135,7 +145,7 @@
     $presets = [
         'default' => 'h2 h3 | bold italic underline strike | bullet-list ordered-list blockquote | link | undo redo',
         'minimal' => 'bold italic underline | bullet-list ordered-list | link',
-        'full' => 'paragraph h1 h2 h3 | font-size | bold italic underline strike code highlight color | align-left align-center align-right | bullet-list ordered-list task-list | blockquote code-block horizontal-rule table | link image file | clear | undo redo',
+        'full' => 'paragraph h1 h2 h3 | font-size | bold italic underline strike code highlight color | align-left align-center align-right | bullet-list ordered-list task-list | blockquote details code-block horizontal-rule hard-break table | link image file | clear | undo redo',
     ];
 
     $words = fn (mixed $list): array => match (true) {
@@ -186,22 +196,28 @@
         ? __('avian-ui::messages.editor.heading', ['level' => $level[1]])
         : __('avian-ui::messages.editor.'.str_replace('-', '_', $item));
 
+    $max = is_numeric($max) && (int) $max > 0 ? (int) $max : null;
+    $counting = $max !== null || (bool) $counter;
+
     $config = [
         'name' => $fieldName,
         'nodes' => $schema,
         'headings' => $headings,
         'placeholder' => $placeholder,
-        'disabled' => (bool) $disabled,
+        'max' => $max,
+        'counter' => $counting,
         'uploads' => $uploading ? [
             'method' => filled($upload) ? (string) $upload : null,
             'model' => (string) $uploadModel,
             'url' => filled($upload) ? null : (string) $uploadUrl,
             'accept' => $words($accept),
         ] : null,
-        'messages' => $uploading ? [
-            'failed' => __('avian-ui::messages.editor.upload_failed'),
-            'rejected' => __('avian-ui::messages.editor.upload_rejected'),
-        ] : null,
+        'messages' => array_filter([
+            'failed' => $uploading ? __('avian-ui::messages.editor.upload_failed') : null,
+            'rejected' => $uploading ? __('avian-ui::messages.editor.upload_rejected') : null,
+            'expand' => in_array('details', $schema, true) ? __('avian-ui::messages.editor.details_expand') : null,
+            'collapse' => in_array('details', $schema, true) ? __('avian-ui::messages.editor.details_collapse') : null,
+        ]) ?: null,
     ];
 @endphp
 
@@ -213,6 +229,7 @@
         x-modelable="value"
         {{ $modelAttributes }}
         data-aui-value="{{ json_encode($current) }}"
+        data-aui-disabled="{{ $disabled ? 'true' : 'false' }}"
         {{ $rootAttributes->class([
             'aui-editor',
             'aui-editor-invalid' => filled($inputError),
@@ -368,6 +385,16 @@
                         <i class="fas fa-xmark" aria-hidden="true"></i>
                     </button>
                 </span>
+            </div>
+        @endif
+
+        @if ($counting)
+            <div
+                class="aui-editor-count"
+                x-bind:class="{ 'is-full': atLimit() }"
+                @if ($max !== null) title="{{ __('avian-ui::messages.editor.max_characters', ['max' => $max]) }}" @endif
+            >
+                <span x-text="characters()">0</span>@if ($max !== null) / {{ $max }}@else {{ __('avian-ui::messages.editor.characters') }}@endif
             </div>
         @endif
 

@@ -54,7 +54,8 @@ it('renders an editor with the default toolbar, a label and a hidden input', fun
         'nodes' => ['bold', 'italic', 'underline', 'strike', 'bullet-list', 'ordered-list', 'blockquote', 'link'],
         'headings' => [2, 3],
         'placeholder' => 'Write…',
-        'disabled' => false,
+        'max' => null,
+        'counter' => false,
         'uploads' => null,
         'messages' => null,
     ]);
@@ -146,8 +147,50 @@ it('renders a disabled editor with a minimum height', function () {
     $html = Blade::render('<x-avian::editor name="body" disabled :min-height="300" />');
 
     expect($html)->toContain('aui-editor is-disabled')
-        ->toContain('--aui-editor-min-height: 300px')
-        ->and(editorConfig($html)['disabled'])->toBeTrue();
+        ->toContain('data-aui-disabled="true"')
+        ->toContain('--aui-editor-min-height: 300px');
+});
+
+it('keeps the disabled state out of x-data so a livewire morph can change it', function () {
+    $html = Blade::render('<x-avian::editor name="body" />');
+
+    expect($html)->toContain('data-aui-disabled="false"')
+        ->and(editorConfig($html))->not->toHaveKey('disabled');
+});
+
+it('offers collapsible sections and line breaks', function () {
+    $html = Blade::render('<x-avian::editor name="faq" toolbar="bold | details hard-break" />');
+
+    expect(editorToolbar($html))->toBe(['bold', '|', 'details', 'hard-break'])
+        ->and(editorConfig($html)['nodes'])->toBe(['bold', 'details'])
+        ->and(editorConfig($html)['messages'])->toBe(['expand' => 'Expand section', 'collapse' => 'Collapse section'])
+        ->and($html)->toContain('aria-label="Collapsible section"')
+        ->toContain('aria-label="Line break"')
+        ->toContain("x-bind:aria-pressed=\"isActive('details')")
+        ->not->toContain("x-bind:aria-pressed=\"isActive('hard-break')");
+
+    expect(editorToolbar(Blade::render('<x-avian::editor name="a" toolbar="full" />')))->toContain('details', 'hard-break')
+        ->and(editorConfig(Blade::render('<x-avian::editor name="b" toolbar="bold" nodes="details" />'))['nodes'])->toBe(['bold', 'details']);
+});
+
+it('limits the characters and shows a counter', function () {
+    $html = Blade::render('<x-avian::editor name="summary" :max="280" />');
+
+    expect(editorConfig($html))->toMatchArray(['max' => 280, 'counter' => true])
+        ->and($html)->toContain('class="aui-editor-count"')
+        ->toContain('x-text="characters()"')
+        ->toContain('/ 280')
+        ->toContain('title="Up to 280 characters"');
+
+    $counter = Blade::render('<x-avian::editor name="body" counter />');
+
+    expect(editorConfig($counter))->toMatchArray(['max' => null, 'counter' => true])
+        ->and($counter)->toContain('aui-editor-count')
+        ->toContain('characters')
+        ->not->toContain('/ ');
+
+    expect(Blade::render('<x-avian::editor name="body" />'))->not->toContain('aui-editor-count')
+        ->and(editorConfig(Blade::render('<x-avian::editor name="body" max="0" />'))['counter'])->toBeFalse();
 });
 
 it('renders just the editor without the field wrapper', function () {

@@ -525,7 +525,7 @@
 
     /*
      * What each toolbar item runs on a Tiptap chain, the command it needs and
-     * how it reads as active. Only some items ask Tiptap whether they can run
+     * how it reads as active. `run` gets the chain and the editor. Only some items ask Tiptap whether they can run
      * (`dryRun`): a dry run of a toggle chain skips its own clearNodes step,
      * so it reports a list or heading toggle as impossible when it is not.
      */
@@ -545,6 +545,8 @@
         blockquote: { needs: 'toggleBlockquote', run: function (c) { return c.toggleBlockquote(); }, active: ['blockquote'] },
         'code-block': { needs: 'toggleCodeBlock', run: function (c) { return c.toggleCodeBlock(); }, active: ['codeBlock'] },
         'horizontal-rule': { needs: 'setHorizontalRule', run: function (c) { return c.setHorizontalRule(); } },
+        'hard-break': { needs: 'setHardBreak', run: function (c) { return c.setHardBreak(); } },
+        details: { needs: 'setDetails', run: function (c, editor) { return editor.isActive('details') ? c.unsetDetails() : c.setDetails(); }, active: ['details'] },
         'align-left': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('left'); }, active: [{ textAlign: 'left' }] },
         'align-center': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('center'); }, active: [{ textAlign: 'center' }] },
         'align-right': { needs: 'setTextAlign', run: function (c) { return c.setTextAlign('right'); }, active: [{ textAlign: 'right' }] },
@@ -621,11 +623,28 @@
             ['font-size', ['TextStyle', 'FontSize'], function () { return [kit.TextStyle, kit.FontSize]; }],
             ['task-list', ['TaskList', 'TaskItem'], function () { return [kit.TaskList, kit.TaskItem.configure({ nested: true })]; }],
             ['image', ['Image'], function () { return [kit.Image]; }],
+            ['details', ['Details', 'DetailsSummary', 'DetailsContent'], function () {
+                var messages = config.messages || {};
+
+                return [kit.Details.configure({
+                    persist: true,
+                    renderToggleButton: function (options) {
+                        options.element.setAttribute('aria-label', (options.isOpen ? messages.collapse : messages.expand) || '');
+                        options.element.setAttribute('aria-expanded', options.isOpen ? 'true' : 'false');
+                    },
+                }), kit.DetailsSummary, kit.DetailsContent];
+            }],
             ['text-align', ['TextAlign'], function () { return [kit.TextAlign.configure({ types: ['heading', 'paragraph'] })]; }],
             ['table', ['Table', 'TableRow', 'TableHeader', 'TableCell'], function () {
                 return [kit.Table.configure({ resizable: false }), kit.TableRow, kit.TableHeader, kit.TableCell];
             }],
         ];
+
+        if (config.counter) {
+            extras.push(['counter', ['CharacterCount'], function () {
+                return [kit.CharacterCount.configure({ limit: config.max || null })];
+            }]);
+        }
 
         if (config.uploads) {
             extras.push(['uploads', ['FileHandler'], function () {
@@ -641,7 +660,7 @@
         }
 
         extras.forEach(function (extra) {
-            if (extra[0] !== 'uploads' && ! has(extra[0])) {
+            if (extra[0] !== 'uploads' && extra[0] !== 'counter' && ! has(extra[0])) {
                 return;
             }
 
@@ -762,6 +781,12 @@
             /* Where each pending upload goes, kept in step with the edits made meanwhile. */
             var pending = [];
 
+            /* Livewire uploads take turns: they all go through the one upload property. */
+            var wireQueue = Promise.resolve();
+
+            /* Watches data-aui-disabled, which a Livewire morph can change. */
+            var observer = null;
+
             /* data-aui-* on the content element → attributes of the editable. */
             var ATTRIBUTES = {
                 auiId: 'id',
@@ -788,6 +813,15 @@
                     try {
                         this.value = JSON.parse(this.$el.dataset.auiValue || '""') || '';
                     } catch (e) {}
+
+                    observer = new MutationObserver(function () {
+                        if (editor && editor.isEditable === self.disabled()) {
+                            editor.setEditable(! self.disabled());
+                            self.tick++;
+                        }
+                    });
+
+                    observer.observe(this.$el, { attributes: true, attributeFilter: ['data-aui-disabled'] });
 
                     withTiptap(function (kit) {
                         if (! destroyed) {
@@ -826,6 +860,11 @@
                     destroyed = true;
                     pending.length = 0;
 
+                    if (observer) {
+                        observer.disconnect();
+                        observer = null;
+                    }
+
                     window.removeEventListener('aui-editor-set', this.onSet);
                     window.removeEventListener('aui-editor-insert', this.onInsert);
 
@@ -856,7 +895,7 @@
                             self.uploadFiles(files, pos);
                         }),
                         content: this.value || '',
-                        editable: ! config.disabled,
+                        editable: ! this.disabled(),
                         editorProps: { attributes: attributes },
                         onUpdate: function () {
                             self.value = self.html();
@@ -914,6 +953,23 @@
                     editor.chain().focus().insertContent(html).run();
                 },
 
+                disabled: function () {
+                    return this.$el.dataset.auiDisabled === 'true';
+                },
+
+                /* What the counter shows: the characters typed so far. */
+                characters: function () {
+                    if (this.tick < 0 || ! editor || ! editor.storage.characterCount) {
+                        return 0;
+                    }
+
+                    return editor.storage.characterCount.characters();
+                },
+
+                atLimit: function () {
+                    return !! config.max && this.characters() >= config.max;
+                },
+
                 /* An empty document submits as '' rather than '<p></p>'. */
                 html: function () {
                     return ! editor || editor.isEmpty ? '' : editor.getHTML();
@@ -945,7 +1001,7 @@
                         return false;
                     }
 
-                    return ! command.dryRun || command.run(editor.can().chain()).run();
+                    return ! command.dryRun || command.run(editor.can().chain(), editor).run();
                 },
 
                 run: function (item) {
@@ -970,7 +1026,7 @@
                     var command = editorCommand(item);
 
                     if (command && this.can(item)) {
-                        command.run(editor.chain().focus()).run();
+                        command.run(editor.chain().focus(), editor).run();
                     }
                 },
 
@@ -1166,13 +1222,21 @@
                     if (uploads.method) {
                         var wire = this.$wire;
 
-                        return new Promise(function (resolve, reject) {
-                            wire.upload(uploads.model, file, function () {
-                                Promise.resolve(wire[uploads.method]()).then(resolve, reject);
-                            }, function () {
-                                reject(new Error(message('failed', file.name)));
+                        /* One at a time, or a second file would replace the
+                           first on the property before its method has run. */
+                        var turn = wireQueue.then(function () {
+                            return new Promise(function (resolve, reject) {
+                                wire.upload(uploads.model, file, function () {
+                                    Promise.resolve(wire[uploads.method]()).then(resolve, reject);
+                                }, function () {
+                                    reject(new Error(message('failed', file.name)));
+                                });
                             });
                         });
+
+                        wireQueue = turn.catch(function () {});
+
+                        return turn;
                     }
 
                     var body = new FormData();

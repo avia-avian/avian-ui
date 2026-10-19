@@ -534,11 +534,21 @@ text; `nodes` allows more without a button. An empty editor submits `''`, and
 
 Toolbar items: `paragraph`, `h1`–`h6`, `font-size`, `bold`, `italic`,
 `underline`, `strike`, `code`, `highlight`, `color`, `link`, `bullet-list`,
-`ordered-list`, `task-list`, `blockquote`, `code-block`, `horizontal-rule`,
-`table`, `image`, `file`, `align-left`, `align-center`, `align-right`,
-`align-justify`, `clear`, `undo`, `redo`. While the cursor is in a table, a bar
-offers row, column, header, merge/split and delete actions. `colors` and
-`font-sizes` set the palette and the size list.
+`ordered-list`, `task-list`, `blockquote`, `details`, `code-block`,
+`horizontal-rule`, `hard-break`, `table`, `image`, `file`, `align-left`,
+`align-center`, `align-right`, `align-justify`, `clear`, `undo`, `redo`.
+`details` wraps the selected blocks in a collapsible section (`<details>` with a
+`<summary>`). While the cursor is in a table, a bar offers row, column, header,
+merge/split and delete actions. `colors` and `font-sizes` set the palette and
+the size list.
+
+`max` caps the text at that many characters and shows a counter under the
+editor; `counter` shows the counter without a cap. It counts text, not HTML,
+so validate the length on the server too (for example on `strip_tags()`):
+
+```blade
+<x-avian::editor name="summary" toolbar="minimal" :max="500" />
+```
 
 Images and files are uploaded as soon as they are picked, dropped or pasted,
 and inserted once the server returns their URL: images as images, other files

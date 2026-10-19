@@ -18,11 +18,11 @@
         {{ $slot }}
 
         @if (filled($hint))
-            <span class="aui-hint">{{ $hint }}</span>
+            <span class="aui-hint"@if (filled($for)) id="{{ $for }}-hint"@endif>{{ $hint }}</span>
         @endif
 
         @if (filled($error))
-            <span class="aui-error">{{ $error }}</span>
+            <span class="aui-error"@if (filled($for)) id="{{ $for }}-error"@endif>{{ $error }}</span>
         @endif
     </div>
 @endif

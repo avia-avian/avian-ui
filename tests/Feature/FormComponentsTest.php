@@ -22,7 +22,7 @@ it('renders an input with its label, hint and generated id', function () {
         ->toContain('class="aui-input"')
         ->toContain('name="email"')
         ->toContain('id="aui-email"')
-        ->toContain('<span class="aui-hint">We never share it.</span>');
+        ->toContain('<span class="aui-hint" id="aui-email-hint">We never share it.</span>');
 });
 
 it('marks required inputs on both the label and the control', function () {
@@ -56,7 +56,7 @@ it('pulls the validation message for the field out of the error bag', function (
 
     expect($html)->toContain('aui-input-invalid')
         ->toContain('aria-invalid="true"')
-        ->toContain('<span class="aui-error">The email field is required.</span>');
+        ->toContain('<span class="aui-error" id="aui-email-error">The email field is required.</span>');
 });
 
 it('resolves bracket names against dotted validation keys', function () {
@@ -501,7 +501,7 @@ it('pulls the validation message for the datepicker out of the error bag', funct
 
     expect($html)->toContain('aui-input-invalid')
         ->toContain('aria-invalid="true"')
-        ->toContain('<span class="aui-error">The start date field is required.</span>');
+        ->toContain('<span class="aui-error" id="aui-start-date-error">The start date field is required.</span>');
 });
 
 it('repopulates a datepicker from old input', function () {

@@ -633,6 +633,30 @@ it('only adds the bundled editor script when asked', function () {
         ->and(preg_match_all('/<script [^>]*defer/', $html))->toBe(2);
 });
 
+it('adds the editor add-on scripts after the editor bundle', function () {
+    $html = Blade::render('<x-avian::scripts editor="emoji code bogus" />');
+
+    expect($html)->toMatch('/avian-ui-editor\.js\?id=.*avian-ui-editor-code\.js\?id=.*avian-ui-editor-emoji\.js\?id=/s')
+        ->not->toContain('bogus')
+        ->and(preg_match_all('/<script [^>]*defer/', $html))->toBe(4);
+
+    expect(Blade::render('<x-avian::scripts :editor="[\'code\']" />'))->toContain('avian-ui-editor-code.js')
+        ->not->toContain('avian-ui-editor-emoji.js')
+        ->and(Blade::render('<x-avian::scripts editor />'))->not->toContain('avian-ui-editor-code.js');
+});
+
+it('ships the editor add-ons on the editor bundle\'s Tiptap', function () {
+    $avianUi = app(AvianUi\AvianUi\AvianUi::class);
+
+    expect(file_get_contents($avianUi->assetPath('js/avian-ui-editor.js') ?? ''))->toContain('AvianUITiptapModules');
+
+    foreach (['code' => 'CodeBlockLowlight', 'emoji' => 'Emoji'] as $addon => $key) {
+        $this->get('/avian-ui/js/avian-ui-editor-'.$addon.'.js')->assertOk();
+
+        expect(file_get_contents($avianUi->assetPath('js/avian-ui-editor-'.$addon.'.js') ?? ''))->toContain('AvianUITiptapModules', $key);
+    }
+});
+
 it('serves the bundled editor script with Tiptap in it', function () {
     $response = $this->get('/avian-ui/js/avian-ui-editor.js')->assertOk();
 

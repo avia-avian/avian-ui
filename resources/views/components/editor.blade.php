@@ -31,6 +31,12 @@
 
         <x-avian::editor name="summary" toolbar="minimal" :max="500" />
 
+    `code-highlight` colours code blocks and `emoji` adds an emoji picker (with
+    `:smile:` shortcodes); each needs its add-on script next to the editor's:
+
+        <x-avian::scripts editor="code emoji" />
+        <x-avian::editor name="post" toolbar="bold italic | code-block emoji" code-highlight />
+
     `aui-editor-set` (replace everything) and `aui-editor-insert` (add at the
     cursor) browser events change the content from outside, aimed at the editor
     by its `name` or its wire:model property:
@@ -61,6 +67,8 @@
     'accept' => 'image/png, image/jpeg, image/gif, image/webp',
     'max' => null,
     'counter' => false,
+    'codeHighlight' => false,
+    'tableResizable' => false,
     'disabled' => false,
     'field' => true,
 ])
@@ -102,6 +110,8 @@
         'underline' => ['icon' => 'fas fa-underline', 'node' => 'underline'],
         'strike' => ['icon' => 'fas fa-strikethrough', 'node' => 'strike'],
         'code' => ['icon' => 'fas fa-code', 'node' => 'code'],
+        'subscript' => ['icon' => 'fas fa-subscript', 'node' => 'subscript'],
+        'superscript' => ['icon' => 'fas fa-superscript', 'node' => 'superscript'],
         'highlight' => ['icon' => 'fas fa-highlighter', 'node' => 'highlight'],
         'color' => ['icon' => 'fas fa-font', 'node' => 'color'],
         'font-size' => ['node' => 'font-size'],
@@ -117,6 +127,7 @@
         'table' => ['icon' => 'fas fa-table', 'node' => 'table'],
         'image' => ['icon' => 'fas fa-image', 'node' => 'image'],
         'file' => ['icon' => 'fas fa-paperclip', 'node' => null],
+        'emoji' => ['icon' => 'far fa-face-smile', 'node' => 'emoji'],
         'align-left' => ['icon' => 'fas fa-align-left', 'node' => 'text-align'],
         'align-center' => ['icon' => 'fas fa-align-center', 'node' => 'text-align'],
         'align-right' => ['icon' => 'fas fa-align-right', 'node' => 'text-align'],
@@ -127,7 +138,10 @@
     ];
 
     // Toggles report their state with aria-pressed; actions do not.
-    $actions = ['horizontal-rule', 'hard-break', 'table', 'image', 'file', 'clear', 'undo', 'redo'];
+    $actions = ['horizontal-rule', 'hard-break', 'table', 'image', 'file', 'emoji', 'clear', 'undo', 'redo'];
+
+    // Buttons that open a menu under themselves.
+    $menus = ['color', 'table', 'emoji'];
 
     // The bar that edits the table the cursor is in.
     $tableActions = [
@@ -135,8 +149,8 @@
         'table-row-after' => 'fas fa-arrow-down',
         'table-column-before' => 'fas fa-arrow-left',
         'table-column-after' => 'fas fa-arrow-right',
-        'table-delete-row' => 'fas fa-minus',
-        'table-delete-column' => 'fas fa-minus',
+        'table-delete-row' => 'fas fa-grip-lines',
+        'table-delete-column' => 'fas fa-grip-lines-vertical',
         'table-header-row' => 'fas fa-heading',
         'table-merge' => 'fas fa-object-group',
         'table-delete' => 'fas fa-trash-can',
@@ -145,7 +159,7 @@
     $presets = [
         'default' => 'h2 h3 | bold italic underline strike | bullet-list ordered-list blockquote | link | undo redo',
         'minimal' => 'bold italic underline | bullet-list ordered-list | link',
-        'full' => 'paragraph h1 h2 h3 | font-size | bold italic underline strike code highlight color | align-left align-center align-right | bullet-list ordered-list task-list | blockquote details code-block horizontal-rule hard-break table | link image file | clear | undo redo',
+        'full' => 'paragraph h1 h2 h3 | font-size | bold italic underline strike code subscript superscript highlight color | align-left align-center align-right | bullet-list ordered-list task-list | blockquote details code-block horizontal-rule hard-break table | link image file | clear | undo redo',
     ];
 
     $words = fn (mixed $list): array => match (true) {
@@ -206,6 +220,8 @@
         'placeholder' => $placeholder,
         'max' => $max,
         'counter' => $counting,
+        'codeHighlight' => (bool) $codeHighlight,
+        'tableResizable' => (bool) $tableResizable,
         'uploads' => $uploading ? [
             'method' => filled($upload) ? (string) $upload : null,
             'model' => (string) $uploadModel,
@@ -215,10 +231,16 @@
         'messages' => array_filter([
             'failed' => $uploading ? __('avian-ui::messages.editor.upload_failed') : null,
             'rejected' => $uploading ? __('avian-ui::messages.editor.upload_rejected') : null,
+            'rejectedMany' => $uploading ? __('avian-ui::messages.editor.upload_rejected_many') : null,
             'expand' => in_array('details', $schema, true) ? __('avian-ui::messages.editor.details_expand') : null,
             'collapse' => in_array('details', $schema, true) ? __('avian-ui::messages.editor.details_collapse') : null,
         ]) ?: null,
     ];
+
+    // The hint and error the field renders, for aria-describedby.
+    $describedBy = $field && filled($inputId)
+        ? implode(' ', array_filter([filled($hint) ? $inputId.'-hint' : null, filled($inputError) ? $inputId.'-error' : null]))
+        : '';
 @endphp
 
 <x-avian-ui::field :bare="! $field" :label="$label" :for="$inputId" :hint="$hint" :error="$inputError" :required="$required">
@@ -238,7 +260,14 @@
         @if (filled($minHeight)) style="--aui-editor-min-height: {{ is_numeric($minHeight) ? $minHeight.'px' : $minHeight }}" @endif
     >
         @if ($groups !== [])
-            <div class="aui-editor-toolbar" role="toolbar" aria-label="{{ __('avian-ui::messages.editor.toolbar') }}">
+            <div
+                class="aui-editor-toolbar"
+                role="toolbar"
+                aria-label="{{ __('avian-ui::messages.editor.toolbar') }}"
+                x-ref="toolbar"
+                x-on:keydown="toolbarKey($event)"
+                x-on:focusin="syncTabStops($event.target.closest('[data-aui-toolbar-item]'))"
+            >
                 @foreach ($groups as $group)
                     <div class="aui-editor-group">
                         @foreach ($group as $item)
@@ -246,6 +275,8 @@
                                 <select
                                     class="aui-editor-select"
                                     data-aui-command="font-size"
+                                    data-aui-toolbar-item
+                                    tabindex="-1"
                                     aria-label="{{ $itemLabel($item) }}"
                                     title="{{ $itemLabel($item) }}"
                                     x-bind:value="textStyle('fontSize')"
@@ -261,22 +292,25 @@
                                 @continue
                             @endif
 
-                            @if ($item === 'color')
-                                <div class="aui-editor-color" x-on:click.outside="colorOpen = false" x-on:keydown.escape.stop="colorOpen = false">
+                            @if (in_array($item, $menus, true))
+                                <div class="aui-editor-dropdown aui-editor-{{ $item }}" x-on:click.outside="{{ $item }}Open = false" x-on:keydown.escape.stop="closeMenus(true)">
                             @endif
 
                             <button
                                 type="button"
                                 class="aui-editor-btn"
                                 data-aui-command="{{ $item }}"
+                                data-aui-toolbar-item
+                                tabindex="-1"
                                 title="{{ $itemLabel($item) }}"
                                 aria-label="{{ $itemLabel($item) }}"
                                 x-on:mousedown.prevent
                                 x-on:click="run('{{ $item }}')"
-                                @if ($item === 'color')
+                                @if (in_array($item, $menus, true))
                                     aria-haspopup="true"
-                                    x-bind:aria-expanded="colorOpen ? 'true' : 'false'"
-                                @else
+                                    x-bind:aria-expanded="{{ $item }}Open ? 'true' : 'false'"
+                                @endif
+                                @if ($item !== 'color')
                                     x-bind:class="{ 'is-active': isActive('{{ $item }}') }"
                                     @unless (in_array($item, $actions, true)) x-bind:aria-pressed="isActive('{{ $item }}') ? 'true' : 'false'" @endunless
                                 @endif
@@ -295,7 +329,7 @@
                             </button>
 
                             @if ($item === 'color')
-                                    <div class="aui-editor-color-menu" x-show="colorOpen" x-cloak x-transition.opacity>
+                                    <div class="aui-editor-menu aui-editor-color-menu" x-show="colorOpen" x-cloak x-transition.opacity>
                                         @foreach ((array) $colors as $color)
                                             <button
                                                 type="button"
@@ -311,6 +345,60 @@
                                         <button type="button" class="aui-editor-swatch-reset" x-on:mousedown.prevent x-on:click="setColor(null)">
                                             {{ __('avian-ui::messages.editor.default_color') }}
                                         </button>
+                                    </div>
+                                </div>
+                            @elseif ($item === 'table')
+                                    {{-- One focus stop: arrows grow or shrink the table, Enter inserts it. --}}
+                                    <div class="aui-editor-menu aui-editor-table-menu" x-show="tableOpen" x-cloak x-transition.opacity>
+                                        <div
+                                            class="aui-editor-table-grid"
+                                            tabindex="0"
+                                            role="application"
+                                            aria-roledescription="{{ __('avian-ui::messages.editor.table_size') }}"
+                                            x-bind:aria-label="tableRows + ' × ' + tableCols"
+                                            x-ref="tableGrid"
+                                            x-on:keydown="tableKey($event)"
+                                        >
+                                            @for ($row = 1; $row <= 8; $row++)
+                                                @for ($col = 1; $col <= 8; $col++)
+                                                    <span
+                                                        class="aui-editor-table-cell"
+                                                        x-bind:class="{ 'is-on': {{ $row }} <= tableRows && {{ $col }} <= tableCols }"
+                                                        x-on:mouseenter="tableSize({{ $row }}, {{ $col }})"
+                                                        x-on:mousedown.prevent
+                                                        x-on:click="insertTable({{ $row }}, {{ $col }})"
+                                                    ></span>
+                                                @endfor
+                                            @endfor
+                                        </div>
+                                        <div class="aui-editor-table-size" aria-hidden="true" x-text="tableRows + ' × ' + tableCols"></div>
+                                    </div>
+                                </div>
+                            @elseif ($item === 'emoji')
+                                    <div class="aui-editor-menu aui-editor-emoji-menu" x-show="emojiOpen" x-cloak x-transition.opacity>
+                                        <input
+                                            type="search"
+                                            class="aui-input aui-input-sm"
+                                            x-ref="emojiSearch"
+                                            x-model="emojiQuery"
+                                            x-on:keydown.enter.prevent="emojiResults()[0] && pickEmoji(emojiResults()[0].name)"
+                                            placeholder="{{ __('avian-ui::messages.editor.emoji_search') }}"
+                                            aria-label="{{ __('avian-ui::messages.editor.emoji_search') }}"
+                                        >
+                                        <div class="aui-editor-emoji-grid">
+                                            <template x-for="item in emojiResults()" x-bind:key="item.name">
+                                                <button
+                                                    type="button"
+                                                    class="aui-editor-emoji-option"
+                                                    x-bind:title="item.label"
+                                                    x-bind:aria-label="item.label"
+                                                    x-text="item.emoji"
+                                                    x-on:mousedown.prevent
+                                                    x-on:click="pickEmoji(item.name)"
+                                                ></button>
+                                            </template>
+                                        </div>
+                                        <p class="aui-editor-emoji-empty" x-show="emojiResults().length === 0">{{ __('avian-ui::messages.no_results') }}</p>
                                     </div>
                                 </div>
                             @endif
@@ -331,6 +419,17 @@
                         x-bind:aria-label="panel === 'image' ? @js(__('avian-ui::messages.editor.image_url')) : @js(__('avian-ui::messages.editor.link_url'))"
                         placeholder="https://"
                     >
+                    @if (in_array('image', $buttons, true))
+                        <input
+                            type="text"
+                            class="aui-input aui-input-sm aui-editor-panel-alt"
+                            x-show="panel === 'image'"
+                            x-model="panelAlt"
+                            x-on:keydown.enter.prevent="applyPanel()"
+                            aria-label="{{ __('avian-ui::messages.editor.image_alt') }}"
+                            placeholder="{{ __('avian-ui::messages.editor.image_alt') }}"
+                        >
+                    @endif
                     <button type="button" class="aui-btn aui-btn-sm aui-btn-solid aui-tone-primary" x-on:click="applyPanel()">{{ __('avian-ui::messages.editor.apply') }}</button>
                     @if ($uploading)
                         <button type="button" class="aui-btn aui-btn-sm aui-btn-outline aui-tone-secondary" x-show="panel === 'image'" x-on:click="pickFile('image')">
@@ -368,6 +467,8 @@
             @if (filled($inputId)) data-aui-id="{{ $inputId }}" @endif
             @if (filled($label)) data-aui-label="{{ $label }}" @endif
             @if (filled($inputError)) data-aui-invalid="true" @endif
+            @if ($describedBy !== '') data-aui-describedby="{{ $describedBy }}" @endif
+            @if ($required) data-aui-required="true" @endif
         ></div>
 
         @if ($uploading)

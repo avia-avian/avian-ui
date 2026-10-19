@@ -65,7 +65,7 @@ it('reads a range slider error from either bound', function () {
     expect(Blade::render('<x-avian::slider name="price" range />'))
         ->toContain('aui-slider-invalid')
         ->toContain('aria-invalid="true"')
-        ->toContain('<span class="aui-error">The maximum is too high.</span>');
+        ->toContain('<span class="aui-error" id="aui-price-error">The maximum is too high.</span>');
 });
 
 it('registers the slider behaviour and ships its styles', function () {
@@ -96,7 +96,7 @@ it('renders a slider with its defaults', function () {
 
 it('renders a slider hint under the control', function () {
     expect(Blade::render('<x-avian::slider name="volume" hint="Drag to adjust." />'))
-        ->toContain('<span class="aui-hint">Drag to adjust.</span>');
+        ->toContain('<span class="aui-hint" id="aui-volume-hint">Drag to adjust.</span>');
 });
 
 it('marks a required slider and its label', function () {
@@ -150,14 +150,14 @@ it('shows a forced slider error message', function () {
     expect(Blade::render('<x-avian::slider name="volume" error="Too loud." />'))
         ->toContain('aui-slider-invalid')
         ->toContain('aria-invalid="true"')
-        ->toContain('<span class="aui-error">Too loud.</span>');
+        ->toContain('<span class="aui-error" id="aui-volume-error">Too loud.</span>');
 });
 
 it('reads a slider error from the shared error bag', function () {
     View::share('errors', (new ViewErrorBag)->put('default', new MessageBag(['volume' => 'The volume is too high.'])));
 
     expect(Blade::render('<x-avian::slider name="volume" />'))
-        ->toContain('<span class="aui-error">The volume is too high.</span>');
+        ->toContain('<span class="aui-error" id="aui-volume-error">The volume is too high.</span>');
 });
 
 it('reads a slider error from a named error bag', function () {
@@ -171,7 +171,7 @@ it('reads a range slider error from its lower bound', function () {
     View::share('errors', (new ViewErrorBag)->put('default', new MessageBag(['price.min' => 'The minimum is too low.'])));
 
     expect(Blade::render('<x-avian::slider name="price" range />'))
-        ->toContain('<span class="aui-error">The minimum is too low.</span>')
+        ->toContain('<span class="aui-error" id="aui-price-error">The minimum is too low.</span>')
         ->and(Blade::render('<x-avian::slider name="price" />'))->not->toContain('aui-error');
 });
 

@@ -3,21 +3,27 @@
     "name": "avian-ui-assets",
     "description": "Builds the bundled Tiptap script for <x-avian::editor>. The package itself needs no build step.",
     "scripts": {
-        "build:editor": "esbuild resources/js/editor.js --bundle --minify --format=iife --target=es2019 --legal-comments=eof --banner:js=\"/*! Avian UI editor bundle: Tiptap (MIT, überdosis GbR), ProseMirror (MIT, Marijn Haverbeke and others), linkifyjs (MIT, Hypercontext). Built from resources/js/editor.js. */\" --outfile=public/js/avian-ui-editor.js"
+        "build:editor": "node resources/js/build-editor.mjs"
     },
     "devDependencies": {
         "@tiptap/core": "3.32.0",
+        "@tiptap/extension-code-block-lowlight": "3.32.0",
         "@tiptap/extension-details": "3.32.0",
+        "@tiptap/extension-emoji": "3.32.0",
         "@tiptap/extension-file-handler": "3.32.0",
         "@tiptap/extension-highlight": "3.32.0",
         "@tiptap/extension-image": "3.32.0",
         "@tiptap/extension-list": "3.32.0",
+        "@tiptap/extension-subscript": "3.32.0",
+        "@tiptap/extension-superscript": "3.32.0",
         "@tiptap/extension-table": "3.32.0",
         "@tiptap/extension-text-align": "3.32.0",
         "@tiptap/extension-text-style": "3.32.0",
         "@tiptap/extensions": "3.32.0",
         "@tiptap/pm": "3.32.0",
         "@tiptap/starter-kit": "3.32.0",
-        "esbuild": "0.28.2"
+        "@tiptap/suggestion": "3.32.0",
+        "esbuild": "0.28.2",
+        "lowlight": "3.3.0"
     }
 }

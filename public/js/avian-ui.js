@@ -491,9 +491,29 @@
      * either the bundled avian-ui-editor.js (<x-avian::scripts editor />) or
      * the host app's own Tiptap. Editors that start before it is there wait
      * for the assignment, so the order of the script tags does not matter.
+     * An editor that needs an add-on (code, emoji) also waits for its keys,
+     * until the page has loaded: then it starts without them.
      */
     var tiptapKit = window.AvianUITiptap || null;
     var tiptapWaiting = [];
+
+    function tiptapReady(keys) {
+        return !! (tiptapKit && tiptapKit.Editor) && keys.every(function (key) {
+            return !! tiptapKit[key];
+        });
+    }
+
+    function tiptapFlush(force) {
+        tiptapWaiting = tiptapWaiting.filter(function (waiting) {
+            if (! tiptapReady(force ? [] : waiting.keys)) {
+                return true;
+            }
+
+            waiting.callback(tiptapKit);
+
+            return false;
+        });
+    }
 
     try {
         Object.defineProperty(window, 'AvianUITiptap', {
@@ -503,24 +523,40 @@
             },
             set: function (kit) {
                 tiptapKit = kit;
-
-                if (kit && kit.Editor) {
-                    tiptapWaiting.splice(0).forEach(function (callback) {
-                        callback(kit);
-                    });
-                }
+                tiptapFlush(false);
             },
         });
     } catch (e) {}
 
-    function withTiptap(callback) {
-        if (tiptapKit && tiptapKit.Editor) {
+    window.addEventListener('load', function () {
+        tiptapFlush(true);
+    });
+
+    function withTiptap(callback, keys) {
+        keys = keys || [];
+
+        if (tiptapReady(keys) || (document.readyState === 'complete' && tiptapReady([]))) {
             callback(tiptapKit);
 
             return;
         }
 
-        tiptapWaiting.push(callback);
+        tiptapWaiting.push({ callback: callback, keys: keys });
+    }
+
+    /* The window.AvianUITiptap keys an editor's add-on items need. */
+    function editorAddonKeys(config) {
+        var keys = [];
+
+        if (config.codeHighlight) {
+            keys.push('CodeBlockLowlight', 'lowlight');
+        }
+
+        if ((config.nodes || []).indexOf('emoji') !== -1) {
+            keys.push('Emoji', 'emojis');
+        }
+
+        return keys;
     }
 
     /*
@@ -537,6 +573,9 @@
         strike: { needs: 'toggleStrike', run: function (c) { return c.toggleStrike(); }, active: ['strike'] },
         code: { needs: 'toggleCode', run: function (c) { return c.toggleCode(); }, active: ['code'] },
         highlight: { needs: 'toggleHighlight', run: function (c) { return c.toggleHighlight(); }, active: ['highlight'] },
+        subscript: { needs: 'toggleSubscript', run: function (c) { return c.toggleSubscript(); }, active: ['subscript'] },
+        superscript: { needs: 'toggleSuperscript', run: function (c) { return c.toggleSuperscript(); }, active: ['superscript'] },
+        emoji: { needs: 'setEmoji' },
         color: { needs: 'setColor' },
         'font-size': { needs: 'setFontSize' },
         'bullet-list': { needs: 'toggleBulletList', run: function (c) { return c.toggleBulletList(); }, active: ['bulletList'] },
@@ -554,7 +593,7 @@
         link: { needs: 'setLink', active: ['link'] },
         image: { needs: 'setImage', active: ['image'] },
         file: { needs: 'insertContentAt' },
-        table: { needs: 'insertTable', run: function (c) { return c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }); }, active: ['table'] },
+        table: { needs: 'insertTable', active: ['table'] },
         'table-row-before': { needs: 'addRowBefore', dryRun: true, run: function (c) { return c.addRowBefore(); } },
         'table-row-after': { needs: 'addRowAfter', dryRun: true, run: function (c) { return c.addRowAfter(); } },
         'table-column-before': { needs: 'addColumnBefore', dryRun: true, run: function (c) { return c.addColumnBefore(); } },
@@ -588,6 +627,9 @@
     /* The Tiptap extensions holding exactly the nodes and marks asked for:
        StarterKit with everything else switched off, plus the optional extras.
        `onFiles` receives dropped and pasted files when uploads are on. */
+    /* The add-on script (<x-avian::scripts editor="...">) behind an extra. */
+    var ADDONS = { 'code-highlight': 'code', emoji: 'emoji' };
+
     function editorExtensions(kit, config, onFiles) {
         var nodes = config.nodes || [];
         var has = function (node) {
@@ -599,6 +641,7 @@
         var lists = has('bullet-list') || has('ordered-list');
         var extensions = [];
         var missing = [];
+        var addons = [];
 
         extensions.push(kit.StarterKit.configure({
             heading: config.headings && config.headings.length ? { levels: config.headings } : false,
@@ -613,12 +656,14 @@
             listItem: lists ? {} : false,
             listKeymap: lists ? {} : false,
             blockquote: on('blockquote'),
-            codeBlock: on('code-block'),
+            codeBlock: config.codeHighlight && kit.CodeBlockLowlight ? false : on('code-block'),
             horizontalRule: on('horizontal-rule'),
         }));
 
         var extras = [
             ['highlight', ['Highlight'], function () { return [kit.Highlight]; }],
+            ['subscript', ['Subscript'], function () { return [kit.Subscript]; }],
+            ['superscript', ['Superscript'], function () { return [kit.Superscript]; }],
             ['color', ['TextStyle', 'Color'], function () { return [kit.TextStyle, kit.Color]; }],
             ['font-size', ['TextStyle', 'FontSize'], function () { return [kit.TextStyle, kit.FontSize]; }],
             ['task-list', ['TaskList', 'TaskItem'], function () { return [kit.TaskList, kit.TaskItem.configure({ nested: true })]; }],
@@ -636,9 +681,23 @@
             }],
             ['text-align', ['TextAlign'], function () { return [kit.TextAlign.configure({ types: ['heading', 'paragraph'] })]; }],
             ['table', ['Table', 'TableRow', 'TableHeader', 'TableCell'], function () {
-                return [kit.Table.configure({ resizable: false }), kit.TableRow, kit.TableHeader, kit.TableCell];
+                return [kit.Table.configure({ resizable: !! config.tableResizable }), kit.TableRow, kit.TableHeader, kit.TableCell];
+            }],
+            ['emoji', ['Emoji', 'emojis'], function () {
+                return [kit.Emoji.configure({
+                    emojis: kit.emojis,
+                    enableEmoticons: true,
+                    suggestion: emojiSuggestion(kit.emojis),
+                })];
             }],
         ];
+
+        /* Syntax highlighting replaces StarterKit's code block. */
+        if (config.codeHighlight && has('code-block')) {
+            extras.push(['code-highlight', ['CodeBlockLowlight', 'lowlight'], function () {
+                return [kit.CodeBlockLowlight.configure({ lowlight: kit.lowlight, defaultLanguage: null })];
+            }]);
+        }
 
         if (config.counter) {
             extras.push(['counter', ['CharacterCount'], function () {
@@ -660,7 +719,7 @@
         }
 
         extras.forEach(function (extra) {
-            if (extra[0] !== 'uploads' && extra[0] !== 'counter' && ! has(extra[0])) {
+            if (['uploads', 'counter', 'code-highlight'].indexOf(extra[0]) === -1 && ! has(extra[0])) {
                 return;
             }
 
@@ -670,6 +729,10 @@
 
             if (absent.length) {
                 missing = missing.concat(absent);
+
+                if (ADDONS[extra[0]]) {
+                    addons.push(ADDONS[extra[0]]);
+                }
 
                 return;
             }
@@ -687,10 +750,143 @@
         }
 
         if (missing.length) {
-            console.warn('[Avian UI] The editor needs ' + missing.join(', ') + ' in window.AvianUITiptap. Load <x-avian::scripts editor /> or add them to your own Tiptap.');
+            console.warn('[Avian UI] The editor needs ' + missing.join(', ') + ' in window.AvianUITiptap. Load <x-avian::scripts editor'
+                + (addons.length ? '="' + addons.join(' ') + '"' : '') + ' /> or add them to your own Tiptap.');
         }
 
         return extensions;
+    }
+
+    /* Emoji whose shortcode starts with the query, then those tagged with it,
+       as { name, emoji, code }: `code` is the shortcode that matched. */
+    function findEmojis(emojis, query, limit) {
+        query = (query || '').toLowerCase().replace(/^:/, '');
+
+        var starts = [];
+        var tagged = [];
+
+        for (var i = 0; i < emojis.length && starts.length < limit; i++) {
+            var item = emojis[i];
+
+            /* The letter tiles (regional indicators) only make sense as flags. */
+            if (! item.emoji || item.name.indexOf('regional_indicator_') === 0) {
+                continue;
+            }
+
+            var code = item.shortcodes.filter(function (shortcode) { return shortcode.indexOf(query) === 0; })[0];
+
+            if (code !== undefined) {
+                starts.push({ name: item.name, emoji: item.emoji, code: code });
+            } else if (tagged.length < limit && (item.tags || []).some(function (tag) { return tag.indexOf(query) === 0; })) {
+                tagged.push({ name: item.name, emoji: item.emoji, code: item.shortcodes[0] });
+            }
+        }
+
+        return starts.concat(tagged).slice(0, limit);
+    }
+
+    /*
+     * The list that opens on ":smi" while typing: arrows move, Enter or Tab
+     * picks, Escape closes. Plain DOM, placed under the cursor.
+     */
+    function emojiSuggestion(emojis) {
+        return {
+            items: function (props) {
+                return props.query ? findEmojis(emojis, props.query, 8) : [];
+            },
+            render: function () {
+                var list = null;
+                var items = [];
+                var active = 0;
+                var pick = null;
+
+                function draw() {
+                    list.innerHTML = '';
+                    list.hidden = items.length === 0;
+
+                    items.forEach(function (item, index) {
+                        var option = document.createElement('button');
+
+                        option.type = 'button';
+                        option.tabIndex = -1;
+                        option.className = 'aui-editor-suggest-item' + (index === active ? ' is-active' : '');
+                        option.setAttribute('role', 'option');
+                        option.setAttribute('aria-selected', index === active ? 'true' : 'false');
+                        option.textContent = item.emoji + ' :' + item.code + ':';
+                        option.addEventListener('mousedown', function (event) {
+                            event.preventDefault();
+                            pick(item);
+                        });
+                        list.appendChild(option);
+                    });
+                }
+
+                function place(rect) {
+                    if (! rect) {
+                        return;
+                    }
+
+                    list.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - list.offsetWidth - 8)) + 'px';
+                    list.style.top = (rect.bottom + 4) + 'px';
+                }
+
+                function update(props) {
+                    items = props.items;
+                    active = 0;
+                    pick = function (item) {
+                        props.command({ name: item.name });
+                    };
+                    draw();
+                    place(props.clientRect && props.clientRect());
+                }
+
+                return {
+                    onStart: function (props) {
+                        list = document.createElement('div');
+                        list.className = 'aui-editor-suggest';
+                        list.setAttribute('role', 'listbox');
+                        document.body.appendChild(list);
+                        update(props);
+                    },
+                    onUpdate: update,
+                    onKeyDown: function (props) {
+                        var key = props.event.key;
+
+                        if (! items.length) {
+                            return false;
+                        }
+
+                        if (key === 'ArrowDown' || key === 'ArrowUp') {
+                            active = (active + (key === 'ArrowDown' ? 1 : items.length - 1)) % items.length;
+                            draw();
+
+                            return true;
+                        }
+
+                        if (key === 'Enter' || key === 'Tab') {
+                            pick(items[active]);
+
+                            return true;
+                        }
+
+                        if (key === 'Escape') {
+                            items = [];
+                            draw();
+
+                            return true;
+                        }
+
+                        return false;
+                    },
+                    onExit: function () {
+                        if (list) {
+                            list.remove();
+                            list = null;
+                        }
+                    },
+                };
+            },
+        };
     }
 
     /* Does a file match an accept list like "image/*, application/pdf, .docx"? */
@@ -792,7 +988,15 @@
                 auiId: 'id',
                 auiLabel: 'aria-label',
                 auiInvalid: 'aria-invalid',
+                auiDescribedby: 'aria-describedby',
+                auiRequired: 'aria-required',
             };
+
+            /* The emoji kept in the picker before anything is searched for. */
+            var EMOJI_LIMIT = 64;
+
+            /* The table picker's largest grid. */
+            var TABLE_MAX = 8;
 
             function message(key, name) {
                 return (messages[key] || key).replace(':name', name || '');
@@ -803,7 +1007,13 @@
                 tick: 0,
                 panel: null,
                 panelUrl: '',
+                panelAlt: '',
                 colorOpen: false,
+                tableOpen: false,
+                tableRows: 1,
+                tableCols: 1,
+                emojiOpen: false,
+                emojiQuery: '',
                 uploading: 0,
                 uploadError: '',
 
@@ -827,7 +1037,7 @@
                         if (! destroyed) {
                             self.mount(kit);
                         }
-                    });
+                    }, editorAddonKeys(config));
 
                     /* A server-side change arrives here through x-modelable. */
                     this.$watch('value', function (value) {
@@ -896,7 +1106,12 @@
                         }),
                         content: this.value || '',
                         editable: ! this.disabled(),
-                        editorProps: { attributes: attributes },
+                        editorProps: {
+                            attributes: attributes,
+                            handleKeyDown: function (view, event) {
+                                return self.shortcut(event);
+                            },
+                        },
                         onUpdate: function () {
                             self.value = self.html();
                         },
@@ -915,6 +1130,97 @@
                     });
 
                     refresh();
+
+                    this.$nextTick(function () {
+                        self.syncTabStops(null);
+                    });
+                },
+
+                /* Mod-K opens the link bar; Alt-F10 moves to the toolbar. */
+                shortcut: function (event) {
+                    var mod = IS_MAC ? event.metaKey : event.ctrlKey;
+
+                    if (mod && ! event.altKey && ! event.shiftKey && (event.key || '').toLowerCase() === 'k' && this.hasButton('link')) {
+                        event.preventDefault();
+                        this.openPanel('link');
+
+                        return true;
+                    }
+
+                    if (event.altKey && event.key === 'F10' && this.$refs.toolbar) {
+                        event.preventDefault();
+                        this.focusToolbar();
+
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                hasButton: function (item) {
+                    return !! (this.$refs.toolbar && this.$refs.toolbar.querySelector('[data-aui-command="' + item + '"]'));
+                },
+
+                /* Toolbar keyboard: one Tab stop, arrows (and Home / End) move
+                   between the buttons, Escape goes back to the text. */
+                toolbarItems: function () {
+                    return this.$refs.toolbar
+                        ? Array.prototype.slice.call(this.$refs.toolbar.querySelectorAll('[data-aui-toolbar-item]'))
+                        : [];
+                },
+
+                syncTabStops: function (current) {
+                    var items = this.toolbarItems();
+
+                    if (! current || items.indexOf(current) === -1) {
+                        current = items.filter(function (item) {
+                            return item.getAttribute('tabindex') === '0' && ! item.disabled;
+                        })[0] || items.filter(function (item) {
+                            return ! item.disabled;
+                        })[0] || items[0];
+                    }
+
+                    items.forEach(function (item) {
+                        item.setAttribute('tabindex', item === current ? '0' : '-1');
+                    });
+                },
+
+                focusToolbar: function () {
+                    this.syncTabStops(null);
+
+                    var current = this.toolbarItems().filter(function (item) {
+                        return item.getAttribute('tabindex') === '0';
+                    })[0];
+
+                    if (current) {
+                        current.focus();
+                    }
+                },
+
+                toolbarKey: function (event) {
+                    var items = this.toolbarItems().filter(function (item) {
+                        return ! item.disabled;
+                    });
+                    var index = items.indexOf(event.target);
+
+                    if (index === -1) {
+                        return;
+                    }
+
+                    var next = {
+                        ArrowRight: items[(index + 1) % items.length],
+                        ArrowLeft: items[(index - 1 + items.length) % items.length],
+                        Home: items[0],
+                        End: items[items.length - 1],
+                    }[event.key];
+
+                    if (next) {
+                        event.preventDefault();
+                        this.syncTabStops(next);
+                        next.focus();
+                    } else if (event.key === 'Escape' && editor) {
+                        editor.commands.focus();
+                    }
                 },
 
                 /* Replace the whole document. Before Tiptap has loaded, the
@@ -1011,8 +1317,8 @@
                         return;
                     }
 
-                    if (item === 'color') {
-                        this.colorOpen = ! this.colorOpen && this.can('color');
+                    if (item === 'color' || item === 'table' || item === 'emoji') {
+                        this.toggleMenu(item);
 
                         return;
                     }
@@ -1027,6 +1333,101 @@
 
                     if (command && this.can(item)) {
                         command.run(editor.chain().focus(), editor).run();
+                    }
+                },
+
+                /* The color, table and emoji menus: one open at a time. */
+                toggleMenu: function (item) {
+                    var self = this;
+                    var open = ! this[item + 'Open'] && this.can(item);
+
+                    this.colorOpen = false;
+                    this.tableOpen = false;
+                    this.emojiOpen = false;
+                    this[item + 'Open'] = open;
+
+                    if (! open) {
+                        return;
+                    }
+
+                    if (item === 'table') {
+                        this.tableRows = 3;
+                        this.tableCols = 3;
+                    }
+
+                    if (item === 'emoji') {
+                        this.emojiQuery = '';
+                    }
+
+                    /* x-show's transition shows the menu a frame later. */
+                    this.$nextTick(function () {
+                        requestAnimationFrame(function () {
+                            var target = item === 'table' ? self.$refs.tableGrid : (item === 'emoji' ? self.$refs.emojiSearch : null);
+
+                            if (target) {
+                                target.focus();
+                            }
+                        });
+                    });
+                },
+
+                closeMenus: function (backToText) {
+                    this.colorOpen = false;
+                    this.tableOpen = false;
+                    this.emojiOpen = false;
+
+                    if (backToText && editor) {
+                        editor.commands.focus();
+                    }
+                },
+
+                /* The table picker: hover or arrow keys pick the size. */
+                tableSize: function (rows, cols) {
+                    this.tableRows = Math.min(TABLE_MAX, Math.max(1, rows));
+                    this.tableCols = Math.min(TABLE_MAX, Math.max(1, cols));
+                },
+
+                tableKey: function (event) {
+                    var moves = {
+                        ArrowDown: [1, 0],
+                        ArrowUp: [-1, 0],
+                        ArrowRight: [0, 1],
+                        ArrowLeft: [0, -1],
+                    };
+
+                    if (moves[event.key]) {
+                        event.preventDefault();
+                        this.tableSize(this.tableRows + moves[event.key][0], this.tableCols + moves[event.key][1]);
+                    } else if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        this.insertTable(this.tableRows, this.tableCols);
+                    }
+                },
+
+                insertTable: function (rows, cols) {
+                    this.tableOpen = false;
+
+                    if (this.can('table')) {
+                        editor.chain().focus().insertTable({ rows: rows, cols: cols, withHeaderRow: true }).run();
+                    }
+                },
+
+                /* The emoji picker: the first matches for the search. */
+                emojiResults: function () {
+                    if (this.tick < 0 || ! editor || ! editor.storage.emoji) {
+                        return [];
+                    }
+
+                    return findEmojis(editor.storage.emoji.emojis, this.emojiQuery.trim(), EMOJI_LIMIT).map(function (item) {
+                        return { name: item.name, emoji: item.emoji, label: ':' + item.code + ':' };
+                    });
+                },
+
+                pickEmoji: function (name) {
+                    this.emojiOpen = false;
+
+                    if (this.can('emoji')) {
+                        editor.chain().focus().setEmoji(name).run();
                     }
                 },
 
@@ -1069,8 +1470,13 @@
 
                     var self = this;
 
-                    this.panelUrl = kind === 'link' ? (editor.getAttributes('link').href || '') : '';
+                    /* A selected image is edited in place. */
+                    var current = editor.getAttributes(kind);
+
+                    this.panelUrl = (kind === 'link' ? current.href : current.src) || '';
+                    this.panelAlt = kind === 'image' ? (current.alt || '') : '';
                     this.panel = kind;
+                    this.closeMenus(false);
 
                     this.$nextTick(function () {
                         self.$refs.panelInput.focus();
@@ -1081,6 +1487,7 @@
                 closePanel: function () {
                     this.panel = null;
                     this.panelUrl = '';
+                    this.panelAlt = '';
 
                     if (editor) {
                         editor.commands.focus();
@@ -1104,7 +1511,7 @@
                     if (this.panel === 'link') {
                         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
                     } else if (url !== '') {
-                        editor.chain().focus().setImage({ src: url }).run();
+                        editor.chain().focus().setImage({ src: url, alt: this.panelAlt.trim() || null }).run();
                     }
 
                     this.closePanel();
@@ -1154,17 +1561,21 @@
                         return;
                     }
 
+                    var rejected = [];
+
                     this.uploadError = '';
 
                     files.forEach(function (file) {
-                        if (! acceptsFile(file, uploads.accept)) {
-                            self.uploadError = message('rejected', file.name);
-
-                            return;
+                        if (acceptsFile(file, uploads.accept)) {
+                            self.uploadFile(file, pos);
+                        } else {
+                            rejected.push(file.name);
                         }
-
-                        self.uploadFile(file, pos);
                     });
+
+                    if (rejected.length) {
+                        this.uploadError = message(rejected.length > 1 ? 'rejectedMany' : 'rejected', rejected.join(', '));
+                    }
                 },
 
                 uploadFile: function (file, pos) {
@@ -1214,7 +1625,8 @@
 
                     pos = Math.min(Math.max(0, pos), editor.state.doc.content.size);
 
-                    editor.chain().focus().insertContentAt(pos, content).run();
+                    /* Focus stays wherever the user went while the file uploaded. */
+                    editor.commands.insertContentAt(pos, content);
                 },
 
                 /* Resolves with the file's URL, or { url, name }. */

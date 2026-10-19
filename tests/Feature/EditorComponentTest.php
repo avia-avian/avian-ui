@@ -56,6 +56,8 @@ it('renders an editor with the default toolbar, a label and a hidden input', fun
         'placeholder' => 'Write…',
         'max' => null,
         'counter' => false,
+        'codeHighlight' => false,
+        'tableResizable' => false,
         'uploads' => null,
         'messages' => null,
     ]);
@@ -240,7 +242,7 @@ it('configures uploads to a livewire method', function () {
         'url' => null,
         'accept' => ['image/*', '.pdf'],
     ])
-        ->and(editorConfig($html)['messages'])->toHaveKeys(['failed', 'rejected'])
+        ->and(editorConfig($html)['messages'])->toHaveKeys(['failed', 'rejected', 'rejectedMany'])
         ->and($html)->toContain('type="file"')
         ->toContain('x-on:change="picked($event)"')
         ->toContain('aui-editor-status')
@@ -272,4 +274,82 @@ it('names the editor for the set and insert events by its name or wire:model pro
     expect(editorConfig(Blade::render('<x-avian::editor name="letter" />'))['name'])->toBe('letter')
         ->and(editorConfig(Blade::render('<x-avian::editor wire:model.live="form.body" />'))['name'])->toBe('form.body')
         ->and(editorConfig(Blade::render('<x-avian::editor />'))['name'])->toBeNull();
+});
+
+it('offers subscript and superscript', function () {
+    $html = Blade::render('<x-avian::editor name="formula" toolbar="subscript superscript" />');
+
+    expect(editorToolbar($html))->toBe(['subscript', 'superscript'])
+        ->and(editorConfig($html)['nodes'])->toBe(['subscript', 'superscript'])
+        ->and($html)->toContain('aria-label="Subscript"')
+        ->toContain('fa-superscript')
+        ->and(editorToolbar(Blade::render('<x-avian::editor name="a" toolbar="full" />')))->toContain('subscript', 'superscript');
+});
+
+it('picks the table size from a grid and can make columns resizable', function () {
+    $html = Blade::render('<x-avian::editor name="specs" toolbar="table" table-resizable />');
+
+    expect($html)->toContain('aui-editor-table-menu')
+        ->toContain('x-ref="tableGrid"')
+        ->toContain('x-on:keydown="tableKey($event)"')
+        ->toContain('x-on:click="insertTable(8, 8)"')
+        ->toContain("x-bind:aria-expanded=\"tableOpen ? 'true' : 'false'\"")
+        ->and(substr_count($html, 'class="aui-editor-table-cell"'))->toBe(64)
+        ->and(editorConfig($html)['tableResizable'])->toBeTrue()
+        ->and(editorConfig(Blade::render('<x-avian::editor name="b" toolbar="table" />'))['tableResizable'])->toBeFalse();
+});
+
+it('tells the delete row and delete column buttons apart', function () {
+    $html = Blade::render('<x-avian::editor name="specs" toolbar="table" />');
+
+    expect($html)->toMatch('/data-aui-command="table-delete-row"[^>]*>\s*<i class="fas fa-grip-lines"/')
+        ->toMatch('/data-aui-command="table-delete-column"[^>]*>\s*<i class="fas fa-grip-lines-vertical"/');
+});
+
+it('adds an emoji picker that needs the emoji add-on', function () {
+    $html = Blade::render('<x-avian::editor name="chat" toolbar="bold emoji" />');
+
+    expect(editorToolbar($html))->toBe(['bold', 'emoji'])
+        ->and(editorConfig($html)['nodes'])->toBe(['bold', 'emoji'])
+        ->and($html)->toContain('aui-editor-emoji-menu')
+        ->toContain('x-ref="emojiSearch"')
+        ->toContain('x-for="item in emojiResults()"')
+        ->toContain('aria-label="Search emoji"')
+        ->not->toContain("x-bind:aria-pressed=\"isActive('emoji')");
+
+    expect(editorToolbar(Blade::render('<x-avian::editor name="a" toolbar="full" />')))->not->toContain('emoji');
+});
+
+it('turns on code highlighting for the code add-on', function () {
+    expect(editorConfig(Blade::render('<x-avian::editor name="a" toolbar="code-block" code-highlight />'))['codeHighlight'])->toBeTrue()
+        ->and(editorConfig(Blade::render('<x-avian::editor name="b" toolbar="code-block" />'))['codeHighlight'])->toBeFalse();
+});
+
+it('asks for alt text next to the image url', function () {
+    expect(Blade::render('<x-avian::editor name="a" toolbar="image" />'))->toContain('x-model="panelAlt"')
+        ->toContain('aria-label="Alt text"')
+        ->and(Blade::render('<x-avian::editor name="b" toolbar="link" />'))->not->toContain('panelAlt');
+});
+
+it('gives the toolbar a single tab stop that arrow keys move', function () {
+    $html = Blade::render('<x-avian::editor name="body" toolbar="font-size | bold color" />');
+
+    expect($html)->toContain('x-ref="toolbar"')
+        ->toContain('x-on:keydown="toolbarKey($event)"')
+        ->and(preg_match_all('/data-aui-toolbar-item\s+tabindex="-1"/', $html))->toBe(3);
+});
+
+it('describes the editor by its hint and error and marks it required', function () {
+    view()->share('errors', (new ViewErrorBag)->put('default', new MessageBag(['body' => ['The body is required.']])));
+
+    $html = Blade::render('<x-avian::editor name="body" label="Body" hint="Markdown works too." required />');
+
+    expect($html)->toContain('<span class="aui-hint" id="aui-body-hint">Markdown works too.</span>')
+        ->toContain('<span class="aui-error" id="aui-body-error">The body is required.</span>')
+        ->toContain('data-aui-describedby="aui-body-hint aui-body-error"')
+        ->toContain('data-aui-required="true"');
+
+    expect(Blade::render('<x-avian::editor name="body" hint="Hidden" :field="false" />'))->not->toContain('data-aui-describedby')
+        ->and(Blade::render('<x-avian::editor name="note" />'))->not->toContain('data-aui-describedby')
+        ->not->toContain('data-aui-required');
 });

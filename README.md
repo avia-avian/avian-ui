@@ -533,14 +533,32 @@ text; `nodes` allows more without a button. An empty editor submits `''`, and
 ```
 
 Toolbar items: `paragraph`, `h1`–`h6`, `font-size`, `bold`, `italic`,
-`underline`, `strike`, `code`, `highlight`, `color`, `link`, `bullet-list`,
-`ordered-list`, `task-list`, `blockquote`, `details`, `code-block`,
-`horizontal-rule`, `hard-break`, `table`, `image`, `file`, `align-left`,
-`align-center`, `align-right`, `align-justify`, `clear`, `undo`, `redo`.
-`details` wraps the selected blocks in a collapsible section (`<details>` with a
-`<summary>`). While the cursor is in a table, a bar offers row, column, header,
-merge/split and delete actions. `colors` and `font-sizes` set the palette and
-the size list.
+`underline`, `strike`, `code`, `subscript`, `superscript`, `highlight`,
+`color`, `link`, `bullet-list`, `ordered-list`, `task-list`, `blockquote`,
+`details`, `code-block`, `horizontal-rule`, `hard-break`, `table`, `image`,
+`file`, `emoji`, `align-left`, `align-center`, `align-right`, `align-justify`,
+`clear`, `undo`, `redo`. `details` wraps the selected blocks in a collapsible
+section (`<details>` with a `<summary>`). `table` opens a grid to pick the size
+(arrow keys work too); while the cursor is in a table, a bar offers row,
+column, header, merge/split and delete actions, and `table-resizable` lets
+columns be dragged wider. `colors` and `font-sizes` set the palette and the
+size list. The image bar asks for alt text next to the URL.
+
+The toolbar is one Tab stop: arrow keys move between its buttons, Escape goes
+back to the text, and Alt+F10 jumps from the text to the toolbar. Ctrl/Cmd+K
+opens the link bar.
+
+Syntax highlighting and emoji are heavy, so they come as add-on scripts loaded
+after the editor's: `code-highlight` colours code blocks (type ```` ```php ````
+to pick the language, or let it guess), and the `emoji` button opens a
+searchable picker; `:smile:` and `:)` also turn into emoji, and typing `:smi`
+lists matches:
+
+```blade
+<x-avian::scripts editor="code emoji" />
+
+<x-avian::editor name="post" toolbar="bold italic | code-block emoji" code-highlight />
+```
 
 `max` caps the text at that many characters and shows a counter under the
 editor; `counter` shows the counter without a cap. It counts text, not HTML,
@@ -603,11 +621,11 @@ scheduler code.
 
 An app that already bundles Tiptap can skip the editor script and assign its
 own `window.AvianUITiptap = { Editor, StarterKit, ... }` instead (see the
-documentation page for the full list). The HTML is user input: sanitize it on
+documentation page for the full list, add-ons included). The HTML is user input: sanitize it on
 the server before echoing it unescaped, and wrap it in `aui-editor-prose` to
 display it with the editor's typography.
 
-To rebuild the bundled script after changing `resources/js/editor.js` or the
+To rebuild the bundled scripts after changing `resources/js/editor/` or the
 Tiptap version in `package.json`, run `npm install` and `npm run build:editor`.
 
 `<x-avian::filter-chip>` is a toggleable pill for narrowing a list. It is a

@@ -46,11 +46,19 @@ class AvianUi
     }
 
     /**
-     * Get the absolute URL for the bundled Tiptap script the editor runs on.
+     * The editor's optional add-on scripts, loaded after its Tiptap bundle.
+     *
+     * @var list<string>
      */
-    public function editorScriptUrl(): string
+    public const array EDITOR_ADDONS = ['code', 'emoji'];
+
+    /**
+     * Get the absolute URL for the bundled Tiptap script the editor runs on,
+     * or for one of its add-ons (see EDITOR_ADDONS).
+     */
+    public function editorScriptUrl(?string $addon = null): string
     {
-        return $this->assetUrl('js/avian-ui-editor.js');
+        return $this->assetUrl($addon === null ? 'js/avian-ui-editor.js' : 'js/avian-ui-editor-'.$addon.'.js');
     }
 
     /**
@@ -120,7 +128,13 @@ class AvianUi
 
         $stamp = '';
 
-        foreach (['css/avian-ui.css', 'css/avian-ui-themes.css', 'js/avian-ui.js', 'js/avian-ui-editor.js'] as $file) {
+        $files = ['css/avian-ui.css', 'css/avian-ui-themes.css', 'js/avian-ui.js', 'js/avian-ui-editor.js'];
+
+        foreach (self::EDITOR_ADDONS as $addon) {
+            $files[] = 'js/avian-ui-editor-'.$addon.'.js';
+        }
+
+        foreach ($files as $file) {
             $path = $this->assetPath($file);
 
             $stamp .= $path === null ? '0' : (string) filemtime($path);

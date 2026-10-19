@@ -8,6 +8,8 @@
         ['min-height', 'int|string|null', 'null', 'Height of the writing area (160px by default). A number is in pixels.'],
         ['colors', 'array', '10 colours', 'Swatches offered by the color button, any CSS colour.'],
         ['font-sizes', 'array', "['12px' … '36px']", 'Sizes offered by the font-size select.'],
+        ['code-highlight', 'bool', 'false', 'Colour code blocks by language. Needs the code add-on: <x-avian::scripts editor="code" />.'],
+        ['table-resizable', 'bool', 'false', 'Let table columns be dragged wider or narrower.'],
         ['max', 'int|null', 'null', 'Character limit: typing stops there and a counter shows under the editor. It counts text, not HTML; validate on the server too.'],
         ['counter', 'bool', 'false', 'Show the character counter without a limit.'],
         ['upload', 'string|null', 'null', 'Livewire method that stores the uploaded file and returns its URL (or [\'url\' => …, \'name\' => …]).'],
@@ -26,9 +28,11 @@
     $examples = [
         [
             'title' => '1. Load the editor script in your layout (once)',
-            'text' => 'Tiptap and every extension the editor uses come bundled in a separate file, so pages without an editor never download it. No npm install needed.',
+            'text' => 'Tiptap and every extension the editor uses come bundled in a separate file, so pages without an editor never download it. No npm install needed. Syntax highlighting (about 200 KB) and emoji (about 540 KB) are add-ons: name them to load them too.',
             'code' => <<<'BLADE'
                 <x-avian::scripts editor />
+
+                <x-avian::scripts editor="code emoji" />
                 BLADE,
         ],
         [
@@ -39,7 +43,7 @@
         ],
         [
             'title' => 'Pick the buttons',
-            'text' => 'List the toolbar items in order; "|" starts a new group. Items: paragraph, h1–h6, font-size, bold, italic, underline, strike, code, highlight, color, link, bullet-list, ordered-list, task-list, blockquote, details, code-block, horizontal-rule, hard-break, table, image, file, align-left, align-center, align-right, align-justify, clear, undo, redo.',
+            'text' => 'List the toolbar items in order; "|" starts a new group. Items: paragraph, h1–h6, font-size, bold, italic, underline, strike, code, subscript, superscript, highlight, color, link, bullet-list, ordered-list, task-list, blockquote, details, code-block, horizontal-rule, hard-break, table, image, file, emoji, align-left, align-center, align-right, align-justify, clear, undo, redo.',
             'code' => <<<'BLADE'
                 <x-avian::editor name="note" toolbar="bold italic | bullet-list ordered-list | link" />
 
@@ -68,9 +72,11 @@
         ],
         [
             'title' => 'Tables',
-            'text' => 'The table button inserts a 3×3 table with a header row. While the cursor is in a table a bar appears to add or delete rows and columns, toggle the header row, merge or split selected cells, and delete the table.',
+            'text' => 'The table button opens a grid: hover or use the arrow keys to pick up to 8×8, then click or press Enter. The table gets a header row. While the cursor is in a table a bar appears to add or delete rows and columns, toggle the header row, merge or split selected cells, and delete the table. table-resizable lets columns be dragged wider or narrower; the widths are saved on the table.',
             'code' => <<<'BLADE'
                 <x-avian::editor name="specs" toolbar="bold italic | table | undo redo" />
+
+                <x-avian::editor name="specs" toolbar="table" table-resizable />
                 BLADE,
         ],
         [
@@ -94,6 +100,24 @@
                         $fail('The summary may not be longer than 280 characters.');
                     }
                 }]]);
+                BLADE,
+        ],
+        [
+            'title' => 'Syntax highlighting',
+            'text' => 'code-highlight colours code blocks with lowlight (highlight.js), for the common languages. Type ```php (or js, sql, css…) and a space to start a block in that language; without one, the language is guessed. Load the code add-on after the editor bundle.',
+            'code' => <<<'BLADE'
+                <x-avian::scripts editor="code" />
+
+                <x-avian::editor name="snippet" toolbar="bold code | code-block" code-highlight />
+                BLADE,
+        ],
+        [
+            'title' => 'Emoji',
+            'text' => 'The emoji button opens a picker with a search. While typing, :smile: becomes 😄, :) becomes 🙂, and :smi lists matches to pick with the arrow keys and Enter. Emoji are saved as <span data-type="emoji" data-name="smile">😄</span>, so allow the data attributes through your sanitizer. Load the emoji add-on after the editor bundle.',
+            'code' => <<<'BLADE'
+                <x-avian::scripts editor="emoji" />
+
+                <x-avian::editor name="message" toolbar="bold italic | emoji" />
                 BLADE,
         ],
         [
@@ -266,6 +290,8 @@
                 import StarterKit from '@tiptap/starter-kit';
                 import { Placeholder, CharacterCount } from '@tiptap/extensions';
                 import Highlight from '@tiptap/extension-highlight';
+                import Subscript from '@tiptap/extension-subscript';
+                import Superscript from '@tiptap/extension-superscript';
                 import { TaskList, TaskItem } from '@tiptap/extension-list';
                 import Image from '@tiptap/extension-image';
                 import TextAlign from '@tiptap/extension-text-align';
@@ -274,10 +300,16 @@
                 import FileHandler from '@tiptap/extension-file-handler';
                 import { Details, DetailsSummary, DetailsContent } from '@tiptap/extension-details';
 
+                // Only for code-highlight and the emoji button:
+                import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+                import { createLowlight, common } from 'lowlight';
+                import { Emoji, emojis } from '@tiptap/extension-emoji';
+
                 window.AvianUITiptap = {
-                    Editor, StarterKit, Placeholder, CharacterCount, Highlight, TaskList, TaskItem, Image, TextAlign,
-                    Table, TableRow, TableHeader, TableCell, TextStyle, Color, FontSize, FileHandler,
-                    Details, DetailsSummary, DetailsContent,
+                    Editor, StarterKit, Placeholder, CharacterCount, Highlight, Subscript, Superscript,
+                    TaskList, TaskItem, Image, TextAlign, Table, TableRow, TableHeader, TableCell,
+                    TextStyle, Color, FontSize, FileHandler, Details, DetailsSummary, DetailsContent,
+                    CodeBlockLowlight, lowlight: createLowlight(common), Emoji, emojis,
                 };
                 BLADE,
         ],
@@ -323,10 +355,11 @@
     <ul class="aui-showcase-list">
         <li>The HTML goes to the server in a hidden input named after <code>name</code>. An empty editor submits an empty string, not <code>&lt;p&gt;&lt;/p&gt;</code>.</li>
         <li>The toolbar decides the schema: an editor with only bold and italic turns a pasted heading into a paragraph. Add more with <code>nodes</code>.</li>
-        <li>Link and image ask for their URL in a bar under the toolbar. Empty the link URL to remove the link. With an upload set, the image bar also offers an upload button.</li>
+        <li>Link and image ask for their URL (and the image for its alt text) in a bar under the toolbar. Empty the link URL to remove the link. With an upload set, the image bar also offers an upload button.</li>
         <li>Uploads happen as soon as a file is picked, dropped or pasted; the file is inserted where it was dropped once the server returns its URL.</li>
         <li>An upload is temporary until the content is saved: on save, move the files the HTML uses into the record's folder and delete the rest; prune the temporary folder on a schedule for editors closed without saving.</li>
         <li><code>aui-editor-set</code> and <code>aui-editor-insert</code> events replace the content or add to it at the cursor, from Livewire or JS. The buttons under the demo use them.</li>
+        <li>The toolbar is one Tab stop: Left and Right (or Home and End) move between its buttons and Escape goes back to the text. From the text, <kbd>Alt</kbd>+<kbd>F10</kbd> jumps to the toolbar and <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>K</kbd> opens the link bar. Screen readers announce the hint and error with the editor.</li>
         <li>Wrap stored HTML in <code>aui-editor-prose</code> to display it with the same typography as the editor.</li>
     </ul>
 </div>

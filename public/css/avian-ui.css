@@ -4851,6 +4851,11 @@ a.aui-tree-label:hover {
     width: auto;
 }
 
+.aui-editor-panel-alt {
+    flex: 1 1 140px;
+    width: auto;
+}
+
 .aui-editor-content {
     flex: 1;
     min-height: var(--aui-editor-min-height);
@@ -5099,8 +5104,21 @@ a.aui-tree-label:hover {
     cursor: not-allowed;
 }
 
-.aui-editor-color {
+/* A toolbar button with a menu under it: color, table, emoji. */
+.aui-editor-dropdown {
     position: relative;
+}
+
+.aui-editor-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 30;
+    padding: 8px;
+    background: var(--aui-surface);
+    border: 1px solid var(--aui-border);
+    border-radius: var(--aui-radius-md);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
 .aui-editor-btn[data-aui-command="color"] {
@@ -5116,18 +5134,114 @@ a.aui-tree-label:hover {
 }
 
 .aui-editor-color-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    z-index: 30;
     display: grid;
     grid-template-columns: repeat(5, 24px);
     gap: 6px;
-    padding: 8px;
+}
+
+.aui-editor-table-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 16px);
+    gap: 3px;
+    padding: 2px;
+    border-radius: var(--aui-radius-sm);
+    outline: none;
+}
+
+.aui-editor-table-grid:focus-visible {
+    box-shadow: 0 0 0 2px var(--aui-primary);
+}
+
+.aui-editor-table-cell {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--aui-slate-300);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.aui-editor-table-cell.is-on {
+    background: var(--aui-primary-light);
+    border-color: var(--aui-primary);
+}
+
+.aui-editor-table-size {
+    margin-top: 6px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--aui-text-muted);
+}
+
+.aui-editor-emoji-menu {
+    width: 288px;
+}
+
+.aui-editor-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    max-height: 200px;
+    margin-top: 6px;
+    overflow-y: auto;
+}
+
+.aui-editor-emoji-option {
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.aui-editor-emoji-option:hover,
+.aui-editor-emoji-option:focus-visible {
+    background: var(--aui-slate-100);
+    outline: none;
+}
+
+.aui-editor-emoji-empty {
+    margin: 8px 0 2px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--aui-text-muted);
+}
+
+/* The list under the cursor while typing ":smi". It lives on <body>. */
+.aui-editor-suggest {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    padding: 4px;
     background: var(--aui-surface);
     border: 1px solid var(--aui-border);
     border-radius: var(--aui-radius-md);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.aui-editor-suggest[hidden] {
+    display: none;
+}
+
+.aui-editor-suggest-item {
+    padding: 5px 8px;
+    background: none;
+    border: 0;
+    border-radius: var(--aui-radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    color: var(--aui-slate-700);
+    cursor: pointer;
+}
+
+.aui-editor-suggest-item.is-active {
+    background: var(--aui-primary-light);
+    color: var(--aui-primary-dark);
 }
 
 .aui-editor-swatch {
@@ -5280,6 +5394,91 @@ a.aui-tree-label:hover {
 
 .aui-editor-prose .tableWrapper {
     overflow-x: auto;
+}
+
+/* With table-resizable: drag a column edge. */
+.aui-editor-prose .column-resize-handle {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    bottom: -2px;
+    width: 4px;
+    background: var(--aui-primary);
+    pointer-events: none;
+}
+
+.aui-editor-prose.resize-cursor {
+    cursor: col-resize;
+}
+
+.aui-editor-prose sub,
+.aui-editor-prose sup {
+    font-size: 0.75em;
+    line-height: 0;
+}
+
+/* Code colours from the code add-on (highlight.js class names). */
+.aui-editor-prose pre .hljs-comment,
+.aui-editor-prose pre .hljs-quote {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.aui-editor-prose pre .hljs-keyword,
+.aui-editor-prose pre .hljs-selector-tag,
+.aui-editor-prose pre .hljs-literal,
+.aui-editor-prose pre .hljs-section,
+.aui-editor-prose pre .hljs-link {
+    color: #c084fc;
+}
+
+.aui-editor-prose pre .hljs-string,
+.aui-editor-prose pre .hljs-regexp,
+.aui-editor-prose pre .hljs-addition,
+.aui-editor-prose pre .hljs-attribute,
+.aui-editor-prose pre .hljs-meta .hljs-string {
+    color: #86efac;
+}
+
+.aui-editor-prose pre .hljs-number,
+.aui-editor-prose pre .hljs-symbol,
+.aui-editor-prose pre .hljs-bullet,
+.aui-editor-prose pre .hljs-variable,
+.aui-editor-prose pre .hljs-template-variable {
+    color: #fdba74;
+}
+
+.aui-editor-prose pre .hljs-title,
+.aui-editor-prose pre .hljs-title.function_,
+.aui-editor-prose pre .hljs-name,
+.aui-editor-prose pre .hljs-selector-id,
+.aui-editor-prose pre .hljs-selector-class {
+    color: #93c5fd;
+}
+
+.aui-editor-prose pre .hljs-type,
+.aui-editor-prose pre .hljs-built_in,
+.aui-editor-prose pre .hljs-class .hljs-title,
+.aui-editor-prose pre .hljs-attr,
+.aui-editor-prose pre .hljs-property {
+    color: #67e8f9;
+}
+
+.aui-editor-prose pre .hljs-meta,
+.aui-editor-prose pre .hljs-tag {
+    color: #cbd5e1;
+}
+
+.aui-editor-prose pre .hljs-deletion {
+    color: #fca5a5;
+}
+
+.aui-editor-prose pre .hljs-emphasis {
+    font-style: italic;
+}
+
+.aui-editor-prose pre .hljs-strong {
+    font-weight: 700;
 }
 
 /* Tiptap's Placeholder extension marks the empty first paragraph. */

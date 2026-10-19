@@ -6,7 +6,7 @@
     <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/v/avia-avian/avian-ui.svg?style=flat-square" alt="Packagist"></a>
     <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/php-v/avia-avian/avian-ui.svg?style=flat-square" alt="PHP from Packagist"></a>
     <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://badge.laravel.cloud/badge/avia-avian/avian-ui?style=flat" alt="Laravel versions"></a>
-    <a href="https://github.com/avia-avian/avian-ui/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/avia-avian/avian-ui/tests.yml?branch=main&label=Tests&style=flat-square"></a>
+    <a href="https://github.com/avia-avian/avian-ui/actions"><img alt="GitHub workflow status (master)" src="https://img.shields.io/github/actions/workflow/status/avia-avian/avian-ui/tests.yml?branch=master&label=Tests&style=flat-square"></a>
     <a href="https://packagist.org/packages/avia-avian/avian-ui"><img src="https://img.shields.io/packagist/dt/avia-avian/avian-ui.svg?style=flat-square" alt="Total Downloads"></a>
 </p>
 
@@ -27,11 +27,10 @@ point Composer at the GitHub repository first — add this to the application's
 ]
 ```
 
-Then require it (use a tag such as `^1.0` once one is released, or
-`dev-master` to track the main branch):
+Then require it (or use `dev-master` to track the master branch):
 
 ```bash
-composer require avia-avian/avian-ui:dev-master
+composer require avia-avian/avian-ui:^1.0
 ```
 
 To work on the package and an application side by side, use a path

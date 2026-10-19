@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [v1.0.0](https://github.com/avia-avian/avian-ui/compare/v0.1.0...v1.0.0) - 2026-10-19
+
 ### Added
 
 - `tooltip` and `popover` components, positioned with `position: fixed` so scrolling containers never clip them, flipping to the other side when there is no room.
@@ -23,6 +25,6 @@
 - The small badge (`size="sm"`) is now visibly smaller than the default one.
 - Checkbox, radio and filter chip ids generated from values with spaces or symbols are now valid HTML ids, so their labels toggle them.
 
-## [v0.1.0](https://github.com/avia-avian/avian-ui/compare/...v0.1.0) - 202x-xx-xx
+## [v0.1.0](https://github.com/avia-avian/avian-ui/releases/tag/v0.1.0) - 2026-09-24
 
 Initial pre-release.

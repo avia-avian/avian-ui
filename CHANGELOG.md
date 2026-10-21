@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [v1.1.0](https://github.com/avia-avian/avian-ui/compare/v1.0.0...v1.1.0) - 2026-10-21
+
+### Added
+
+- `multi-select` accepts `search-model` and `search-debounce` for server-side filtering (Livewire only), like `searchable-select`: the search box writes to the property and the component returns the matching `options`. Chips keep their labels after a search filters their option out, and a typed tag still goes back into the search box on Backspace.
+
 ## [v1.0.0](https://github.com/avia-avian/avian-ui/compare/v0.1.0...v1.0.0) - 2026-10-19
 
 ### Added

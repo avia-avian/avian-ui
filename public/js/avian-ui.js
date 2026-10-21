@@ -2873,7 +2873,12 @@
                 search: '',
                 values: [],
                 labels: {},
+                /* Values added by typing (taggable), so Backspace can tell
+                   them apart from picked options a server search has
+                   filtered out of the list. */
+                tags: {},
                 max: config.max || null,
+                searchProperty: config.searchProperty || null,
                 taggable: config.taggable === true,
                 createText: config.createText || 'Add ":term"',
 
@@ -3005,25 +3010,48 @@
                         return;
                     }
 
-                    this.search = '';
+                    this.tags[term] = true;
+                    this.setSearch('');
                     this.toggleValue(term, term);
-                    this.filter();
                 },
 
-                /* A typed tag (no option row carries its value) goes back
-                   into the search box so it can be edited and re-added. */
+                /* A typed tag goes back into the search box so it can be
+                   edited and re-added. Client-side, that is any pick no
+                   option row carries; with a server search the list only
+                   holds the current matches, so a pick counts as a tag when
+                   it was typed here or no option ever named it. */
                 removeLast: function () {
-                    var value = this.values[this.values.length - 1];
-                    var isTag = this.taggable && ! this.options().some(function (item) {
-                        return item.dataset.value === value;
-                    });
+                    var value = String(this.values[this.values.length - 1]);
+                    var isTag = this.taggable && (this.searchProperty
+                        ? this.tags[value] === true || ! (value in this.labels)
+                        : ! this.options().some(function (item) {
+                            return item.dataset.value === value;
+                        }));
 
                     this.remove(value);
 
                     if (isTag) {
-                        this.search = this.labelFor(value);
-                        this.filter();
+                        this.setSearch(this.labelFor(value));
                     }
+                },
+
+                /* Client-side this re-filters the rendered rows; with a
+                   server search the term is sent to the search property so
+                   the parent re-renders `options`. */
+                setSearch: function (term) {
+                    this.search = term;
+
+                    if (! this.searchProperty) {
+                        this.filter();
+
+                        return;
+                    }
+
+                    if (this.$refs.search) {
+                        this.$refs.search.value = term;
+                    }
+
+                    this.$wire.$set(this.searchProperty, term);
                 },
 
                 toggleValue: function (value, label) {
@@ -3091,6 +3119,10 @@
                 },
 
                 filter: function () {
+                    if (this.searchProperty) {
+                        return;
+                    }
+
                     var term = this.search.trim().toLowerCase();
                     var visible = 0;
 
@@ -3137,8 +3169,13 @@
 
                     this.reposition();
                     this.open = true;
-                    this.search = '';
-                    this.filter();
+
+                    /* A server search keeps its term (and its results)
+                       between opens, like searchable-select. */
+                    if (! this.searchProperty) {
+                        this.search = '';
+                        this.filter();
+                    }
 
                     this.$nextTick(function () {
                         self.watchSize();

@@ -251,6 +251,7 @@ bound property for its id and its error lookup.
 | `numeric` | input | Money-masked text field (see below) |
 | `options`, `placeholder` | select, searchable-select, multi-select | Options as `value => label` |
 | `search-placeholder`, `empty-text` | searchable-select, multi-select | Copy for the search box and empty state |
+| `search-model`, `search-debounce` | searchable-select, multi-select | Livewire property that receives the search term, so the server filters `options` |
 | `clearable`, `taggable`, `create-text` | searchable-select, multi-select | Reset button; accept free-typed values (`:term` in `create-text` is replaced) |
 | `max` | multi-select | Cap how many values can be picked |
 | `inline` | checkbox, radio | Lay several out on one line |
@@ -447,6 +448,44 @@ public function userOptions(): array
 
 ```blade
 <x-avian::multi-select wire:model.live="userIds" :value="$userIds" :options="$this->userOptions" />
+```
+
+For lists too long to render whole, pass `search-model` (and optionally
+`search-debounce`, `250ms` by default) to hand filtering to the server, just
+like `searchable-select` (Livewire only). Chip labels are cached on the client
+from every option the dropdown renders, so a chip keeps its label after a search
+filters its option out. Each pick only has to be in `options` once, so prepend
+the missing ones while the search term is blank:
+
+```php
+public array $userIds = [];
+public string $userSearch = '';
+
+#[Computed]
+public function userOptions(): array
+{
+    $options = User::query()
+        ->when($this->userSearch, fn ($query, $term) => $query->where('name', 'like', "%{$term}%"))
+        ->orderBy('name')
+        ->limit(20)
+        ->pluck('name', 'id')
+        ->all();
+
+    $missing = blank($this->userSearch) ? array_diff($this->userIds, array_keys($options)) : [];
+
+    return $missing === []
+        ? $options
+        : User::whereKey($missing)->pluck('name', 'id')->all() + $options;
+}
+```
+
+```blade
+<x-avian::multi-select
+    wire:model.live="userIds"
+    :value="$userIds"
+    :options="$this->userOptions"
+    search-model="userSearch"
+/>
 ```
 
 All extra attributes land on the control itself, so `wire:model`, `x-on:*`,

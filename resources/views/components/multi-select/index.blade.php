@@ -25,6 +25,25 @@
     value. When `options` is a limited query, merge the current picks in
     (with `+`, not `array_merge()`) — see the README.
 
+    By default filtering happens client-side, against the rendered option
+    labels. Pass `search-model` to hand filtering to the server instead
+    (Livewire only): the search box writes to that property (debounced by
+    `search-debounce`) and the parent hands back an already filtered
+    `options` list:
+
+        <x-avian::multi-select
+            wire:model.live="userIds"
+            :value="$userIds"
+            :options="$this->userOptions"
+            search-model="userSearch"
+        />
+
+    Chips keep their labels once a search filters their option out: every
+    option row the dropdown renders registers its label in a client-side
+    cache (see multi-select/option.blade.php), so each pick only has to be
+    in `options` once — prepend the missing picks while the search term is
+    blank.
+
     Custom option markup: drop `options` and pass children instead —
 
         <x-avian::multi-select name="users" :value="$userIds">
@@ -57,6 +76,8 @@
     'placeholder' => 'Select options',
     'searchPlaceholder' => 'Search...',
     'emptyText' => 'No results found.',
+    'searchModel' => null,
+    'searchDebounce' => '250ms',
     'max' => null,
     'clearable' => false,
     'taggable' => false,
@@ -111,6 +132,7 @@
          Livewire morphs and Alpine never re-initialises the component. --}}
     <div x-data="auiMultiSelect({
         max: @js($max === null ? null : (int) $max),
+        searchProperty: @js($searchModel),
         taggable: @js((bool) $taggable),
         createText: @js($createText),
     })"
@@ -176,9 +198,17 @@
                 role="listbox" aria-multiselectable="true">
                 <div class="aui-combobox-search">
                     <i class="fas fa-search" aria-hidden="true"></i>
-                    <input type="text" x-ref="search" class="aui-combobox-search-input"
-                        placeholder="{{ $searchPlaceholder }}" x-model="search" x-on:input="filter()"
-                        x-on:keydown.backspace="if (search === '' && values.length) { $event.preventDefault(); removeLast(); }">
+                    @if ($searchModel)
+                        <input type="text" x-ref="search" class="aui-combobox-search-input"
+                            placeholder="{{ $searchPlaceholder }}"
+                            wire:model.live.debounce.{{ $searchDebounce }}="{{ $searchModel }}"
+                            x-on:input="search = $event.target.value"
+                            x-on:keydown.backspace="if ($event.target.value === '' && values.length) { $event.preventDefault(); removeLast(); }">
+                    @else
+                        <input type="text" x-ref="search" class="aui-combobox-search-input"
+                            placeholder="{{ $searchPlaceholder }}" x-model="search" x-on:input="filter()"
+                            x-on:keydown.backspace="if (search === '' && values.length) { $event.preventDefault(); removeLast(); }">
+                    @endif
                     <button type="button" class="aui-multiselect-clear" x-show="values.length" x-on:click="clear()">Clear</button>
                 </div>
 
@@ -200,8 +230,14 @@
                         </button>
                     @endif
 
-                    <p class="aui-combobox-empty" x-ref="empty" @if (filled($optionList) || $slot->isNotEmpty()) hidden @endif>
-                        {{ $emptyText }}</p>
+                    @if ($searchModel)
+                        @if (! $optionList && $slot->isEmpty())
+                            <p class="aui-combobox-empty" @if ($taggable) x-show="!canCreate" @endif>{{ $emptyText }}</p>
+                        @endif
+                    @else
+                        <p class="aui-combobox-empty" x-ref="empty" @if (filled($optionList) || $slot->isNotEmpty()) hidden @endif>
+                            {{ $emptyText }}</p>
+                    @endif
                 </div>
             </div>
         </template>

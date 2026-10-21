@@ -86,6 +86,10 @@ binds the whole array with `wire:model` through `x-modelable`. Chip labels come
 from `options`, and a pick missing from them shows its raw value. When `options`
 comes from a limited query, merge the missing picks in, again with `+`:
 `User::whereKey(array_diff($this->userIds, array_keys($options)))->pluck('name', 'id')->all() + $options`.
+It also accepts `search-model` / `search-debounce` for server-side filtering
+(Livewire only), same as `searchable-select`. Chip labels are cached client-side
+from every rendered option, so only prepend the missing picks while the search
+term is blank.
 
 Pass `numeric` to `input` for a money-masked amount field
 (`<x-avian::input name="budget" numeric />`) — it renders as a text field

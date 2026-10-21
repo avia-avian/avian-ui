@@ -10,6 +10,8 @@
         ['placeholder', 'string', "'Select options'", 'Trigger text when nothing is selected.'],
         ['search-placeholder', 'string', "'Search...'", 'Placeholder of the search box inside the dropdown.'],
         ['empty-text', 'string', "'No results found.'", 'Shown when the search matches nothing.'],
+        ['search-model', 'string|null', 'null', 'Livewire only: property that receives the search term, so the server filters `options`.'],
+        ['search-debounce', 'string', "'250ms'", 'Debounce for the search-model request.'],
         ['label', 'string|null', 'null', 'Label shown above the control.'],
         ['hint', 'string|null', 'null', 'Helper text under the control.'],
         ['error', 'string|null', 'null', 'Force an error message; otherwise the first error for `name` or `name.*` is used.'],
@@ -125,6 +127,41 @@
                 BLADE,
         ],
         [
+            'title' => 'Server-side search (Livewire, large tables)',
+            'text' => 'For thousands of rows, don\'t render them all. Give `search-model` a property; the search box writes to it (debounced) and your component returns only the matching options. Chips keep their labels when the search filters their option out, because every option the dropdown renders is cached in the browser. So the picks only need to be in `options` once: prepend the missing ones while the search term is blank. Merge with `+`, not array_merge(), which renumbers integer ids.',
+            'code' => <<<'BLADE'
+                {{-- Blade --}}
+                <x-avian::multi-select
+                    wire:model.live="userIds"
+                    :value="$userIds"
+                    :options="$this->userOptions"
+                    search-model="userSearch"
+                    label="Members"
+                />
+
+                // Livewire component
+                public array $userIds = [];
+                public string $userSearch = '';
+
+                #[Computed]
+                public function userOptions(): array
+                {
+                    $options = User::query()
+                        ->when($this->userSearch, fn ($query, $term) => $query->where('name', 'like', "%{$term}%"))
+                        ->orderBy('name')
+                        ->limit(20)
+                        ->pluck('name', 'id')
+                        ->all();
+
+                    $missing = blank($this->userSearch) ? array_diff($this->userIds, array_keys($options)) : [];
+
+                    return $missing === []
+                        ? $options
+                        : User::whereKey($missing)->pluck('name', 'id')->all() + $options;
+                }
+                BLADE,
+        ],
+        [
             'title' => 'Picks outside the list in slot mode (custom rows)',
             'text' => 'With custom row markup, render the current picks first, then the query results without them. Each row\'s wire:key is derived from its value, so no value may appear twice. Without `options`, the server cannot name the picks, so on a full page load the first-paint chips show raw values until Alpine starts and the rows register their labels.',
             'code' => <<<'BLADE'
@@ -216,6 +253,7 @@
         <li>Click an option to toggle it; the dropdown stays open so you can keep picking. Click outside or press Esc to close.</li>
         <li>Remove a value with the × on its chip, with Backspace in an empty search box, or with <em>Clear</em> in the dropdown.</li>
         <li>With <code>taggable</code>, a term that matches no label shows an <em>Add "…"</em> row; Enter adds it too. Backspace in an empty search box takes a typed tag back for editing.</li>
+        <li>Filtering runs in the browser by default. With <code>search-model</code> (Livewire), the search term goes to the server and your component returns the matching <code>options</code>.</li>
         <li>One hidden <code>&lt;input name="skills[]"&gt;</code> is rendered per value. When nothing is picked, nothing is sent — use <code>$request-&gt;input('skills', [])</code>.</li>
         <li>Requires Alpine and the package script (<code>&lt;x-avian::scripts /&gt;</code>) loaded before Alpine.</li>
     </ul>

@@ -382,6 +382,37 @@ it('binds the multi select to livewire through x-modelable', function () {
         ->toContain('data-aui-values="[]"');
 });
 
+it('hands multi select filtering to the server when a search model is given', function () {
+    $html = Blade::render(
+        '<x-avian::multi-select wire:model.live="userIds" :value="[1]" :options="$options" search-model="userSearch" search-debounce="300ms" />',
+        ['options' => [1 => 'Jane Doe', 2 => 'John Roe']],
+    );
+
+    expect($html)->toContain('wire:model.live.debounce.300ms="userSearch"')
+        ->toContain('searchProperty: \'userSearch\'')
+        ->toContain('x-on:input="search = $event.target.value"')
+        ->not->toContain('x-model="search"')
+        ->not->toContain('x-ref="empty"')
+        ->toContain('<span class="aui-multiselect-chip">Jane Doe</span>');
+
+    expect(Blade::render('<x-avian::multi-select name="tags" :options="[\'a\' => \'A\']" />'))
+        ->toContain('searchProperty: null')
+        ->toContain('x-model="search"')
+        ->toContain('x-ref="empty"');
+});
+
+it('shows the multi select empty state for a search model list with no results', function () {
+    $plain = Blade::render('<x-avian::multi-select search-model="userSearch" :options="[]" empty-text="Nothing matched" />');
+    $taggable = Blade::render('<x-avian::multi-select search-model="tagSearch" :options="[]" taggable />');
+
+    expect($plain)->toContain('Nothing matched')
+        ->not->toContain('x-show="!canCreate"')
+        ->and($taggable)->toContain('x-show="!canCreate"');
+
+    expect(Blade::render('<x-avian::multi-select search-model="userSearch" :options="[\'a\' => \'A\']" empty-text="Nothing matched" />'))
+        ->not->toContain('Nothing matched');
+});
+
 it('shows item level validation messages on the multi select', function () {
     bindErrors(['tags.1' => ['The selected tag is invalid.']]);
 

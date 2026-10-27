@@ -253,7 +253,7 @@ bound property for its id and its error lookup.
 | `search-placeholder`, `empty-text` | searchable-select, multi-select | Copy for the search box and empty state |
 | `search-model`, `search-debounce` | searchable-select, multi-select | Livewire property that receives the search term, so the server filters `options` |
 | `clearable`, `taggable`, `create-text` | searchable-select, multi-select | Reset button; accept free-typed values (`:term` in `create-text` is replaced) |
-| `max` | multi-select | Cap how many values can be picked |
+| `max` | multi-select | Cap how many values can be picked  |
 | `inline` | checkbox, radio | Lay several out on one line |
 | `mode` (incl. `time`), `enable-time`, `time-24hr`, `date-format`, `min-date`, `max-date`, `min-time`, `max-time` | datepicker | Flatpickr config, read from `data-fp-*` attributes |
 | `value-format`, `presets`, `clearable` | date-range | Submitted format of `name[from]` / `name[to]`; quick ranges; a Clear button |

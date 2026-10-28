@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [v1.2.0](https://github.com/avia-avian/avian-ui/compare/v1.1.0...v1.2.0) - 2026-10-28
+
 ### Added
 
 - `table` freezes rows and columns: `sticky-header` and `sticky-footer` pin the head and foot while the rows scroll inside `max-height` (70vh by default), and `sticky-columns` / `sticky-columns-end` pin the first or last columns while the table scrolls sideways. Grouped headings with `colspan` / `rowspan` freeze with their columns.

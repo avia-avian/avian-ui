@@ -57,10 +57,10 @@
     "semantic_hash": "63d1b669af7a6996cfc87a01941d0382"
   },
   "config/avian-ui.php": {
-    "mtime": 1790927408.8698802,
-    "seen": 1793073891.3274944,
-    "ast_hash": "d572999b3453959585efe00b1dbef72c",
-    "semantic_hash": "d572999b3453959585efe00b1dbef72c"
+    "mtime": 1793174136.9762998,
+    "seen": 1793174663.2315974,
+    "ast_hash": "a55a3719ab63920a3f532c1a9f95716a",
+    "semantic_hash": ""
   },
   "lang/en/messages.php": {
     "mtime": 1792383239.6523998,
@@ -100,10 +100,10 @@
     "semantic_hash": "c0dedc8f661c0bbfba342044fc9bfcea"
   },
   "public/js/avian-ui.js": {
-    "mtime": 1792564061.7418437,
-    "seen": 1793073891.3279765,
-    "ast_hash": "433b05f4d23638a50fc5aa925a8ab239",
-    "semantic_hash": "433b05f4d23638a50fc5aa925a8ab239"
+    "mtime": 1793174560.7814312,
+    "seen": 1793174663.231605,
+    "ast_hash": "58b8f2ee3cfc8c4383f6aca3098855ca",
+    "semantic_hash": ""
   },
   "resources/js/build-editor.mjs": {
     "mtime": 1792383012.623901,
@@ -220,10 +220,10 @@
     "semantic_hash": "691c849c6bc7596e9f2ee0cd4549341b"
   },
   "resources/views/components/confirm.blade.php": {
-    "mtime": 1791343867.3930387,
-    "seen": 1793073891.3295944,
-    "ast_hash": "a7154850404ba9aae58d9c3433552948",
-    "semantic_hash": "a7154850404ba9aae58d9c3433552948"
+    "mtime": 1793174012.1701725,
+    "seen": 1793174663.2316248,
+    "ast_hash": "1bb11167588e0146323a3dd93279b40f",
+    "semantic_hash": ""
   },
   "resources/views/components/copy-button.blade.php": {
     "mtime": 1791441979.571275,
@@ -274,10 +274,10 @@
     "semantic_hash": "827797f5e0da67aea6f54cae1984763c"
   },
   "resources/views/components/drawer.blade.php": {
-    "mtime": 1790236334.0052512,
-    "seen": 1793073891.3303175,
-    "ast_hash": "09702e174f5fa592ea49f8b517e8d2c9",
-    "semantic_hash": "09702e174f5fa592ea49f8b517e8d2c9"
+    "mtime": 1793174001.9133692,
+    "seen": 1793174663.2316334,
+    "ast_hash": "326b8cf4fad8e84dc389202b93b8801f",
+    "semantic_hash": ""
   },
   "resources/views/components/dropdown/index.blade.php": {
     "mtime": 1791181427.9918473,
@@ -364,10 +364,10 @@
     "semantic_hash": "6bf7504f469a34bf235e4047ef5f10d1"
   },
   "resources/views/components/modal.blade.php": {
-    "mtime": 1790060599.4989743,
-    "seen": 1793073891.3314838,
-    "ast_hash": "8f7af3ed232314f2a93879067f060eb4",
-    "semantic_hash": "8f7af3ed232314f2a93879067f060eb4"
+    "mtime": 1793174001.9133692,
+    "seen": 1793174663.231648,
+    "ast_hash": "158b3ebab7170664013464cadf06c6e9",
+    "semantic_hash": ""
   },
   "resources/views/components/multi-select/index.blade.php": {
     "mtime": 1792564044.7664807,
@@ -496,10 +496,10 @@
     "semantic_hash": "4dc8cb420789bf0d1f31181027c63300"
   },
   "resources/views/components/table/index.blade.php": {
-    "mtime": 1790662604.5877278,
-    "seen": 1793073891.3332264,
-    "ast_hash": "3ff8cc1ee5a5646359e4814bea44f9e4",
-    "semantic_hash": "3ff8cc1ee5a5646359e4814bea44f9e4"
+    "mtime": 1793173921.6915421,
+    "seen": 1793174663.2316697,
+    "ast_hash": "19b3714ef9cdf960dbe7b114580e39bb",
+    "semantic_hash": ""
   },
   "resources/views/components/table/row.blade.php": {
     "mtime": 1791338803.8186412,
@@ -664,10 +664,10 @@
     "semantic_hash": "a2ba0256ed454bf8372c7a6a465760bc"
   },
   "resources/views/docs/components/drawer.blade.php": {
-    "mtime": 1791339233.8130138,
-    "seen": 1793073891.335456,
-    "ast_hash": "065b974e2cc9bf5dc9a8f6b01031c561",
-    "semantic_hash": "065b974e2cc9bf5dc9a8f6b01031c561"
+    "mtime": 1793174235.837667,
+    "seen": 1793174663.2316968,
+    "ast_hash": "06e549c6244a921abf4ac0db3604fd24",
+    "semantic_hash": ""
   },
   "resources/views/docs/components/dropdown.blade.php": {
     "mtime": 1791339233.8130138,
@@ -688,10 +688,10 @@
     "semantic_hash": "e493fbc3c0e5152c553257c9e80e3846"
   },
   "resources/views/docs/components/modal.blade.php": {
-    "mtime": 1791339233.8130138,
-    "seen": 1793073891.3358002,
-    "ast_hash": "f74ad160b0716c538650223e0f013975",
-    "semantic_hash": "f74ad160b0716c538650223e0f013975"
+    "mtime": 1793174235.837667,
+    "seen": 1793174663.2317007,
+    "ast_hash": "9dbebb3d4b66106322750624ccb2504f",
+    "semantic_hash": ""
   },
   "resources/views/docs/components/page-header.blade.php": {
     "mtime": 1791339233.8130138,
@@ -742,10 +742,10 @@
     "semantic_hash": "4aa0ce1621eab3a0a7fffc2bde2ff610"
   },
   "resources/views/docs/components/table.blade.php": {
-    "mtime": 1791339233.8140082,
-    "seen": 1793073891.336525,
-    "ast_hash": "e02627c5daec7fc13c311cedc292e5bc",
-    "semantic_hash": "e02627c5daec7fc13c311cedc292e5bc"
+    "mtime": 1793174630.0318584,
+    "seen": 1793174663.2317095,
+    "ast_hash": "d4b7328bdf7f2b0f7a21d1308d78e28b",
+    "semantic_hash": ""
   },
   "resources/views/docs/components/tabs.blade.php": {
     "mtime": 1791339233.8140082,
@@ -928,10 +928,10 @@
     "semantic_hash": "c4e9cb6fd63501d86604d418d231af9c"
   },
   "src/AvianUiServiceProvider.php": {
-    "mtime": 1790927408.8801603,
-    "seen": 1793073891.3391197,
-    "ast_hash": "6eff5994762230898ed931ce75f08c8b",
-    "semantic_hash": "6eff5994762230898ed931ce75f08c8b"
+    "mtime": 1793174136.9773004,
+    "seen": 1793174663.2317386,
+    "ast_hash": "8c8d863611354e59a84771e5e6301173",
+    "semantic_hash": ""
   },
   "src/Facades/AvianUi.php": {
     "mtime": 1790059532.6873305,
@@ -988,10 +988,10 @@
     "semantic_hash": "7d84e5f7b47ab3721c729addd29e6279"
   },
   "tests/Feature/DocsTest.php": {
-    "mtime": 1792138879.968658,
-    "seen": 1793073891.3398952,
-    "ast_hash": "b6332b8bae0adb44fa2de872701aa761",
-    "semantic_hash": "b6332b8bae0adb44fa2de872701aa761"
+    "mtime": 1793174136.9773004,
+    "seen": 1793174663.2317488,
+    "ast_hash": "46cdc3c440c455e0db316d444c392c60",
+    "semantic_hash": ""
   },
   "tests/Feature/EditorComponentTest.php": {
     "mtime": 1792383328.8467722,
@@ -1018,10 +1018,10 @@
     "semantic_hash": "a8141454f471191616bc48bc05d01b68"
   },
   "tests/Feature/GeneralComponentsTest.php": {
-    "mtime": 1792383319.9546115,
-    "seen": 1793073891.340288,
-    "ast_hash": "4b19f73710c9ee16cf2e1bec59471cc5",
-    "semantic_hash": "4b19f73710c9ee16cf2e1bec59471cc5"
+    "mtime": 1793174083.2731762,
+    "seen": 1793174663.2317538,
+    "ast_hash": "77e02c996dd5e671557766e374fa6a31",
+    "semantic_hash": ""
   },
   "tests/Feature/OverlayHintComponentsTest.php": {
     "mtime": 1791426207.4626253,
@@ -1048,10 +1048,10 @@
     "semantic_hash": "41dd76a9c14f709a711e6c34b6737670"
   },
   "tests/Feature/TableRowComponentTest.php": {
-    "mtime": 1791338810.9136956,
-    "seen": 1793073891.3406863,
-    "ast_hash": "0a739ab225887b46bbd72dd5e67917f0",
-    "semantic_hash": "0a739ab225887b46bbd72dd5e67917f0"
+    "mtime": 1793174166.1985593,
+    "seen": 1793174663.2317586,
+    "ast_hash": "cd97019f8a78184430b6baa48bc8f784",
+    "semantic_hash": ""
   },
   "tests/Feature/TimelineComponentTest.php": {
     "mtime": 1791425180.8689632,
@@ -1136,5 +1136,119 @@
     "seen": 1793073891.3417876,
     "ast_hash": "2ab07456d4c30a49ac3325e459db6887",
     "semantic_hash": "2ab07456d4c30a49ac3325e459db6887"
+  },
+  ".agents/skills/package-compatibility/SKILL.md": {
+    "mtime": 1790059502.417171,
+    "seen": 1793174663.2317736,
+    "ast_hash": "adccb755480ce6572c8af8db94137591",
+    "semantic_hash": ""
+  },
+  ".agents/skills/package-generate-skill/SKILL.md": {
+    "mtime": 1790059502.4181814,
+    "seen": 1793174663.2317748,
+    "ast_hash": "d25b1ad5dda02a8ec1a181712ce00860",
+    "semantic_hash": ""
+  },
+  ".agents/skills/package-release/SKILL.md": {
+    "mtime": 1790059502.4181814,
+    "seen": 1793174663.2317755,
+    "ast_hash": "bc0874ac213f200d6ad60d5d016c3e85",
+    "semantic_hash": ""
+  },
+  ".agents/skills/package-scaffold/SKILL.md": {
+    "mtime": 1790059532.6835935,
+    "seen": 1793174663.2317765,
+    "ast_hash": "7dd24648e90c85e70c22668e172217b6",
+    "semantic_hash": ""
+  },
+  ".agents/skills/package-testing/SKILL.md": {
+    "mtime": 1790059502.4181814,
+    "seen": 1793174663.2317772,
+    "ast_hash": "d7d0a95d8107dd7327e3bcf3dced9b0d",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1793073860.8408754,
+    "seen": 1793174663.231778,
+    "ast_hash": "9b31786b637be3c13978bec4c2330752",
+    "semantic_hash": ""
+  },
+  ".claude/skills/package-compatibility/SKILL.md": {
+    "mtime": 1790059532.725317,
+    "seen": 1793174663.2317789,
+    "ast_hash": "adccb755480ce6572c8af8db94137591",
+    "semantic_hash": ""
+  },
+  ".claude/skills/package-generate-skill/SKILL.md": {
+    "mtime": 1790059532.7265935,
+    "seen": 1793174663.2317796,
+    "ast_hash": "d25b1ad5dda02a8ec1a181712ce00860",
+    "semantic_hash": ""
+  },
+  ".claude/skills/package-release/SKILL.md": {
+    "mtime": 1790059532.7265935,
+    "seen": 1793174663.23178,
+    "ast_hash": "bc0874ac213f200d6ad60d5d016c3e85",
+    "semantic_hash": ""
+  },
+  ".claude/skills/package-scaffold/SKILL.md": {
+    "mtime": 1790059532.7286115,
+    "seen": 1793174663.2317808,
+    "ast_hash": "7dd24648e90c85e70c22668e172217b6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/package-testing/SKILL.md": {
+    "mtime": 1790059532.7286115,
+    "seen": 1793174663.2317817,
+    "ast_hash": "d7d0a95d8107dd7327e3bcf3dced9b0d",
+    "semantic_hash": ""
+  },
+  ".github/CONTRIBUTING.md": {
+    "mtime": 1790059532.6835935,
+    "seen": 1793174663.2317824,
+    "ast_hash": "3d87002a67e361684455264e35920daa",
+    "semantic_hash": ""
+  },
+  ".github/SECURITY.md": {
+    "mtime": 1790059532.6851096,
+    "seen": 1793174663.2317834,
+    "ast_hash": "7aa26265ba4e2a79ba39644badf1d302",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1790926513.1161208,
+    "seen": 1793174663.231784,
+    "ast_hash": "aa2c2913f3bc366ba412feb9bb74aa1b",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1793174235.8447006,
+    "seen": 1793174663.2317848,
+    "ast_hash": "b8a886929d55e0f9b245fb6049a3e92f",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1793073860.8434677,
+    "seen": 1793174663.2317855,
+    "ast_hash": "f45d9fcf68e2e2da7402f13c586ec681",
+    "semantic_hash": ""
+  },
+  "LICENSE.md": {
+    "mtime": 1790059532.6866243,
+    "seen": 1793174663.2317863,
+    "ast_hash": "d1251d92fb2706b93170da2b1286e140",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1793174630.0318584,
+    "seen": 1793174663.231787,
+    "ast_hash": "f112307da013ed3dc316910cb85cce9f",
+    "semantic_hash": ""
+  },
+  "resources/boost/skills/avian-ui-development/SKILL.md": {
+    "mtime": 1793174630.0346272,
+    "seen": 1793174663.2317877,
+    "ast_hash": "3a349a4ba8329e526aa1920839e8fad0",
+    "semantic_hash": ""
   }
 }

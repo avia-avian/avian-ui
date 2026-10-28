@@ -47,15 +47,15 @@ return [
     |--------------------------------------------------------------------------
     |
     | The package serves its component documentation, with live demos, props
-    | and copy-ready examples, at "path" (so /avian-ui by default). Set "enabled"
-    | to false to turn it off, for example in production, or add
-    | middleware such as "auth" to limit who can open it.
+    | and copy-ready examples, at "path" (so /avian-ui by default). Left at
+    | null, it is on everywhere except production; true or false forces it.
+    | Add middleware such as "auth" to limit who can open it.
     |
     */
 
     'docs' => [
 
-        'enabled' => true,
+        'enabled' => null,
 
         'path' => 'avian-ui',
 

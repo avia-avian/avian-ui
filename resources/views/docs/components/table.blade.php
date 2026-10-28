@@ -24,6 +24,16 @@
         ['INV-1044', 'Alan Turing', 'danger', 'Overdue', 'Rp 2.900.000', [['Primer 2.5L', 6], ['Masking tape', 10], ['Drop cloth', 2]]],
     ];
 
+    $stickyProducts = collect([
+        'Wall paint 5L', 'Wood varnish 1L', 'Primer 2.5L', 'Roof coating 4L', 'Anti-rust enamel 1L',
+        'Exterior emulsion 20L', 'Waterproofing 4kg', 'Thinner 1L', 'Wood filler 500g', 'Floor coating 5L',
+        'Masking tape 24mm', 'Roller set 9in',
+    ])->map(fn (string $product, int $index): array => [
+        'AV-'.(1001 + $index),
+        $product,
+        array_map(fn (int $month): int => (($index + 3) * 137 + $month * 89) % 900 + 100, range(1, 6)),
+    ])->all();
+
     $rowProps = [
         ['details (slot)', 'slot', '—', 'Content of the hidden detail row. Without it the row is a plain row (with an empty toggle cell).'],
         ['expanded', 'bool', 'false', 'Starts the row open.'],
@@ -48,6 +58,11 @@
         ['empty-text', 'string|null', 'null', 'Extra line under the empty-state title.'],
         ['empty-icon', 'string', "'fas fa-inbox'", 'Icon of the empty state.'],
         ['columns', 'int|null', 'null', 'colspan of the empty row. Defaults to the number of headers — set it when you use the head slot.'],
+        ['sticky-header', 'bool', 'false', 'Freezes the header row(s) at the top while the rows scroll under them.'],
+        ['sticky-footer', 'bool', 'false', 'Freezes the foot slot at the bottom, e.g. a totals row.'],
+        ['sticky-columns', 'int', '0', 'Freezes this many columns on the left while the table scrolls sideways.'],
+        ['sticky-columns-end', 'int', '0', 'Freezes this many columns on the right, e.g. row actions.'],
+        ['max-height', 'string|int|null', 'null', "Height the table scrolls in. An int is pixels; any CSS length works. Defaults to '70vh' with a sticky header or footer."],
         ['head (slot)', 'slot', '—', 'Replaces the generated header row with your own <tr>(s).'],
         ['foot (slot)', 'slot', '—', 'Rows for a <tfoot>, e.g. totals.'],
     ];
@@ -277,6 +292,44 @@
                 BLADE,
         ],
         [
+            'title' => 'Frozen header, footer and columns',
+            'text' => 'sticky-header and sticky-footer pin the head and foot while the rows scroll inside max-height (70vh unless you set one). sticky-columns pins the first columns, and sticky-columns-end the last ones, while the table scrolls sideways. Grouped headings with colspan / rowspan freeze along with their columns.',
+            'code' => <<<'BLADE'
+                <x-avian::table
+                    :headers="['Code', 'Product', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Total', '']"
+                    sticky-header
+                    sticky-footer
+                    sticky-columns="2"
+                    sticky-columns-end="1"
+                    max-height="420px"
+                >
+                    @foreach ($products as $product)
+                        <tr>...</tr>
+                    @endforeach
+
+                    <x-slot:foot>
+                        <tr>...</tr>
+                    </x-slot:foot>
+                </x-avian::table>
+
+                {{-- Two header rows: the first two columns span both rows --}}
+                <x-avian::table :columns="6" sticky-header sticky-columns="2">
+                    <x-slot:head>
+                        <tr>
+                            <th rowspan="2">Code</th>
+                            <th rowspan="2">Product</th>
+                            <th colspan="2" class="aui-table-align-center">Q1</th>
+                            <th colspan="2" class="aui-table-align-center">Q2</th>
+                        </tr>
+                        <tr>
+                            <th>Jan</th><th>Feb</th><th>Apr</th><th>May</th>
+                        </tr>
+                    </x-slot:head>
+                    ...
+                </x-avian::table>
+                BLADE,
+        ],
+        [
             'title' => 'Inside a card',
             'code' => <<<'BLADE'
                 <x-avian::card title="Users" :padded="false">
@@ -369,6 +422,53 @@
         <x-avian::card :padded="false">
             <x-avian::table :headers="['Name', 'Email']" empty="No users found" empty-text="Try a different search." empty-icon="fas fa-user-slash" />
         </x-avian::card>
+
+        <x-avian::card :padded="false">
+            <x-avian::table :columns="10" sticky-header sticky-footer sticky-columns="2" sticky-columns-end="1" max-height="320px" size="sm" striped>
+                <x-slot:head>
+                    <tr>
+                        <th rowspan="2">Code</th>
+                        <th rowspan="2">Product</th>
+                        <th colspan="3" class="aui-table-align-center">Q1</th>
+                        <th colspan="3" class="aui-table-align-center">Q2</th>
+                        <th rowspan="2" class="aui-table-align-right">Total</th>
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr>
+                        @foreach (['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] as $month)
+                            <th class="aui-table-align-right">{{ $month }}</th>
+                        @endforeach
+                    </tr>
+                </x-slot:head>
+
+                @foreach ($stickyProducts as [$code, $product, $months])
+                    <tr>
+                        <td style="white-space: nowrap"><strong>{{ $code }}</strong></td>
+                        <td style="white-space: nowrap">{{ $product }}</td>
+                        @foreach ($months as $qty)
+                            <td class="aui-table-align-right">{{ number_format($qty, 0, ',', '.') }}</td>
+                        @endforeach
+                        <td class="aui-table-align-right"><strong>{{ number_format(array_sum($months), 0, ',', '.') }}</strong></td>
+                        <td class="aui-table-align-right">
+                            <x-avian::dropdown align="right" size="sm" label="Actions">
+                                <x-avian::dropdown.item icon="fas fa-pen">Edit</x-avian::dropdown.item>
+                            </x-avian::dropdown>
+                        </td>
+                    </tr>
+                @endforeach
+
+                <x-slot:foot>
+                    <tr>
+                        <th colspan="2">Total</th>
+                        @foreach (range(0, 5) as $month)
+                            <th class="aui-table-align-right">{{ number_format(array_sum(array_column(array_column($stickyProducts, 2), $month)), 0, ',', '.') }}</th>
+                        @endforeach
+                        <th class="aui-table-align-right">{{ number_format(array_sum(array_map('array_sum', array_column($stickyProducts, 2))), 0, ',', '.') }}</th>
+                        <th></th>
+                    </tr>
+                </x-slot:foot>
+            </x-avian::table>
+        </x-avian::card>
     </div>
 </div>
 
@@ -380,6 +480,7 @@
         <li>With <code>:paginator</code>, pagination links and a "Showing X to Y of Z" summary appear under the table. They keep the current page URL, so add <code>-&gt;withQueryString()</code> to keep filters.</li>
         <li>Headers with a <code>sort</code> key become links that set <code>?sort=</code> and <code>?direction=</code>. The table only draws the state; your query does the ordering.</li>
         <li>Dropdowns inside rows are positioned so the scroll wrapper doesn't clip them.</li>
+        <li><code>sticky-header</code>, <code>sticky-footer</code>, <code>sticky-columns</code> and <code>sticky-columns-end</code> freeze rows and columns with <code>position: sticky</code>. Frozen columns are measured in the browser, so they keep lining up as content changes, including after a Livewire update. On a screen too narrow to show anything next to them they let go, the right-hand ones first.</li>
         <li><code>&lt;x-avian::table.row&gt;</code> makes a row expandable: its <code>details</code> slot sits in a hidden row underneath that spans every column. Stripes and hover treat the pair as one row.</li>
     </ul>
 </div>

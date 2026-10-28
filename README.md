@@ -109,6 +109,16 @@ Alpine, so it has to run before Alpine starts:
 <script defer src="/js/alpine.min.js"></script>
 ```
 
+Icons are [Font Awesome](https://fontawesome.com) 6 classes (`fas fa-*`), and
+the package does not ship the icon font either. Load it once in your layout, or
+the icons render as empty space:
+
+```blade
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+```
+
+A Font Awesome kit or a self-hosted copy works just as well.
+
 By default the CSS and JS are served straight from the package at
 `/avian-ui/...`, so there is nothing to publish or build. To serve them from
 `public/` instead, publish them and turn the route off:
@@ -909,6 +919,25 @@ public function sortBy(string $column): void
 <x-avian::table :headers="$headers" :sort-by="$sort" :sort-direction="$direction" :paginator="$users">
 ```
 
+To freeze rows or columns, pass `sticky-header` and `sticky-footer` (the
+`foot` slot) to pin them while the rows scroll inside `max-height` (`70vh`
+unless you set one; an int is pixels), and `sticky-columns` /
+`sticky-columns-end` to pin that many columns on the left / right while the
+table scrolls sideways. Grouped headings with `colspan` and `rowspan` freeze
+with their columns. Frozen columns are measured in the browser, so they keep
+lining up after a Livewire update, and they let go on a screen too narrow to
+show anything next to them:
+
+```blade
+<x-avian::table
+    :headers="['Code', 'Product', 'Jan', 'Feb', 'Mar', 'Total', '']"
+    sticky-header
+    sticky-columns="2"
+    sticky-columns-end="1"
+    max-height="420px"
+>
+```
+
 Swap a `<tr>` for `<x-avian::table.row>` to make it expandable: the
 `details` slot renders in a hidden row underneath that spans every column, and
 a chevron button toggles it. The row adds its own toggle cell, so give the
@@ -1282,7 +1311,7 @@ return [
     ],
 
     'docs' => [
-        'enabled' => true,          // serve the documentation page
+        'enabled' => null,          // the documentation page; null = everywhere but production
         'path' => 'avian-ui',       // at /avian-ui
         'middleware' => ['web'],    // add 'auth' to keep it private
     ],
@@ -1296,12 +1325,13 @@ Once installed, the package serves its documentation at `/avian-ui` (route name
 examples. The page loads fonts, Font Awesome, Alpine and flatpickr from a CDN
 for itself only.
 
-Publish the config to move it, protect it or switch it off, for example in
-production:
+The page is off in production. Publish the config and set `enabled` to `true`
+to serve it there anyway (or `false` to hide it everywhere), or to move it or
+protect it:
 
 ```php
 'docs' => [
-    'enabled' => env('AVIAN_UI_DOCS', true),
+    'enabled' => env('AVIAN_UI_DOCS'), // null: everywhere but production
     'path' => 'avian-ui',
     'middleware' => ['web', 'auth'],
 ],

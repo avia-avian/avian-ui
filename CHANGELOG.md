@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- `table` freezes rows and columns: `sticky-header` and `sticky-footer` pin the head and foot while the rows scroll inside `max-height` (70vh by default), and `sticky-columns` / `sticky-columns-end` pin the first or last columns while the table scrolls sideways. Grouped headings with `colspan` / `rowspan` freeze with their columns.
+- `modal` and `drawer` take a `label` to name a dialog whose header slot replaces the title.
+
+### Changed
+
+- The documentation page is off in production by default. `docs.enabled` now defaults to `null` (on everywhere but production); set it to `true` to keep serving it there.
+
+### Fixed
+
+- `modal`, `drawer` and `confirm` move focus into the dialog when it opens, keep Tab inside it, and hand focus back to what opened it when it closes. Modals and drawers are named by their title through `aria-labelledby`, and a drawer is described by its subtitle.
+- The README now says Font Awesome 6 has to be loaded for the icons.
+
 ## [v1.1.0](https://github.com/avia-avian/avian-ui/compare/v1.0.0...v1.1.0) - 2026-10-21
 
 ### Added

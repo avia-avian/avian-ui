@@ -509,6 +509,22 @@ it('renders a modal wired to its alpine component', function () {
         ->toContain('aria-modal="true"');
 });
 
+it('names a modal by its title and keeps tab inside it', function () {
+    $html = Blade::render('<x-avian::modal name="edit-user" title="Edit user">Body</x-avian::modal>');
+
+    expect($html)->toContain('x-on:keydown.tab.window="trap($event)"')
+        ->toContain('aria-labelledby="aui-modal-edit-user-title"')
+        ->toContain('id="aui-modal-edit-user-title"')
+        ->toContain('x-ref="panel" tabindex="-1"');
+});
+
+it('names a modal with a custom header by its label', function () {
+    $html = Blade::render('<x-avian::modal name="x" label="Pick a plan"><x-slot:header><h2>Plans</h2></x-slot:header>Body</x-avian::modal>');
+
+    expect($html)->toContain('aria-label="Pick a plan"')
+        ->not->toContain('aria-labelledby');
+});
+
 it('renders a dropdown with a default trigger and items', function () {
     $html = Blade::render(<<<'BLADE'
         <x-avian::dropdown label="Actions" align="right">
@@ -683,6 +699,7 @@ it('renders the shared confirm dialog with translated defaults', function () {
         ->toContain('Confirm')
         ->toContain('Cancel')
         ->toContain('role="alertdialog"')
+        ->toContain('x-on:keydown.tab.window="trap($event)"')
         ->toContain('x-ref="cancel"');
 
     expect(Blade::render('<x-avian::confirm title="Really?" confirm-text="Yes, delete" variant="warning" />'))
@@ -778,6 +795,22 @@ it('renders a drawer driven by the modal alpine component', function () {
 
     expect(Blade::render('<x-avian::drawer name="x">Body</x-avian::drawer>'))
         ->toContain('aui-drawer aui-drawer-right aui-drawer-md');
+});
+
+it('names a drawer by its title, describes it by its subtitle and keeps tab inside it', function () {
+    $html = Blade::render('<x-avian::drawer name="filters" title="Filters" subtitle="Narrow the list">Body</x-avian::drawer>');
+
+    expect($html)->toContain('x-on:keydown.tab.window="trap($event)"')
+        ->toContain('aria-labelledby="aui-drawer-filters-title"')
+        ->toContain('aria-describedby="aui-drawer-filters-subtitle"')
+        ->toContain('id="aui-drawer-filters-title"')
+        ->toContain('id="aui-drawer-filters-subtitle"')
+        ->toContain('x-ref="panel"');
+
+    expect(Blade::render('<x-avian::drawer name="x" label="Filters"><x-slot:header>Custom</x-slot:header>Body</x-avian::drawer>'))
+        ->toContain('aria-label="Filters"')
+        ->not->toContain('aria-labelledby')
+        ->not->toContain('aria-describedby');
 });
 
 it('renders a stat with its trend read from the sign of the change', function () {

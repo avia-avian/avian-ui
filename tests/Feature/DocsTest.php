@@ -71,6 +71,19 @@ it('serves the documentation from the configured path', function () {
     $this->get('/avian-ui')->assertNotFound();
 });
 
+it('turns the documentation off in production unless it is switched on', function (string $env, ?bool $enabled, bool $registered) {
+    app()->detectEnvironment(fn (): string => $env);
+    config()->set('avian-ui.docs.enabled', $enabled);
+    reloadAvianUiRoutes();
+
+    expect(Route::has('avian-ui.docs'))->toBe($registered);
+})->with([
+    'local' => ['local', null, true],
+    'production' => ['production', null, false],
+    'production, switched on' => ['production', true, true],
+    'local, switched off' => ['local', false, false],
+]);
+
 it('does not register the documentation when it is disabled', function () {
     config()->set('avian-ui.docs.enabled', false);
     reloadAvianUiRoutes();

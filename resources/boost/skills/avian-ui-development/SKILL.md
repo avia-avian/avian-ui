@@ -28,7 +28,7 @@ Use this skill when a Laravel application needs to build or restyle UI with the
 - confirm Alpine is available and that `<x-avian::scripts />` runs before it: Livewire loads Alpine at the end of the page, otherwise the app's own Alpine tag must sit below the package script
 - check `config/avian-ui.php` for a custom component `prefix` and for the `assets` strategy
 - check whether the app already defines `--color-primary` and friends before adding theme CSS
-- the package serves its own component documentation at `/avian-ui` (route `avian-ui.docs`, configured under `docs`); don't add an app route on that path
+- the package serves its own component documentation at `/avian-ui` (route `avian-ui.docs`, configured under `docs`) everywhere but production; don't add an app route on that path
 
 ### 2. Apply the package's public API
 
@@ -212,6 +212,12 @@ For rows that reveal more on demand, use `<x-avian::table.row>` instead of
 `<tr>` and put the hidden content in its `details` slot; it adds a toggle
 cell (give the table an empty heading for it), `expanded` starts it open and
 `clickable` toggles on a row click. Give it a `wire:key` under Livewire.
+
+For wide or long tables, freeze rows and columns instead of hand-writing
+`position: sticky` CSS: `sticky-header` / `sticky-footer` pin the head and
+`foot` slot inside `max-height` (70vh by default), and `sticky-columns` /
+`sticky-columns-end` pin that many columns at either side. Grouped headings
+in a `head` slot (`colspan` / `rowspan`) freeze with their columns.
 
 **Paginated lists and grids.** For records that read better as cards
 (products, files, people), use `datalist`: same `paginator` and empty-state

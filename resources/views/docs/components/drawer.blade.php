@@ -9,6 +9,7 @@
         ['close-on-escape', 'bool', 'true', 'Close on Esc.'],
         ['close-on-overlay', 'bool', 'true', 'Close when the backdrop is clicked.'],
         ['closeable', 'bool', 'true', 'Show the × button in the header.'],
+        ['label', 'string|null', 'null', 'Accessible name for a drawer whose header slot replaces the title. With a title, the title names it and the subtitle describes it.'],
         ['header / footer (slots)', 'slot', '—', 'Replace the header; add a sticky footer for actions.'],
     ];
 

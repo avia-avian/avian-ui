@@ -63,6 +63,67 @@
     var overlays = [];
     var overlayIds = 0;
 
+    /* Controls Tab can land on, in document order, leaving out hidden ones. */
+    var FOCUSABLE = 'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), '
+        + 'select:not([disabled]), textarea:not([disabled]), iframe, [contenteditable]:not([contenteditable="false"]), '
+        + '[tabindex]:not([tabindex="-1"])';
+
+    function focusables(root) {
+        return Array.prototype.filter.call(root.querySelectorAll(FOCUSABLE), function (element) {
+            return element.tabIndex >= 0 && element.getClientRects().length > 0 && ! element.closest('[inert]');
+        });
+    }
+
+    /* Keeps Tab inside an open dialog, wrapping from its last control to the
+       first and back, and pulls focus back in when it has wandered off. */
+    function trapTab(event, root) {
+        var items = focusables(root);
+        var index = items.indexOf(document.activeElement);
+
+        if (! items.length) {
+            event.preventDefault();
+            root.focus();
+
+            return;
+        }
+
+        if (event.shiftKey && index <= 0) {
+            event.preventDefault();
+            items[items.length - 1].focus();
+        } else if (! event.shiftKey && (index === -1 || index === items.length - 1)) {
+            event.preventDefault();
+            items[0].focus();
+        }
+    }
+
+    /* Hands focus back to what had it before a dialog opened, unless the user
+       has since moved it somewhere else on purpose. */
+    function restoreFocus(target, root) {
+        var active = document.activeElement;
+
+        if (! target || ! document.contains(target) || typeof target.focus !== 'function') {
+            return;
+        }
+
+        if (! active || active === document.body || root.contains(active)) {
+            target.focus({ preventScroll: true });
+        }
+    }
+
+    /* Write a class or an inline style only when it changes, so a
+       MutationObserver watching the element does not see its own writes. */
+    function setClass(element, name, on) {
+        if (element.classList.contains(name) !== on) {
+            element.classList.toggle(name, on);
+        }
+    }
+
+    function setStyle(element, property, value) {
+        if (element.style[property] !== value) {
+            element.style[property] = value;
+        }
+    }
+
     /* The mounted <x-avian::confirm>, if the layout has one. */
     var confirmHost = null;
 
@@ -1698,12 +1759,20 @@
                 closeOnOverlay: config.closeOnOverlay !== false,
                 locked: false,
                 overlayId: ++overlayIds,
+                returnFocus: null,
 
                 init: function () {
                     var self = this;
 
                     this.$watch('open', function (value) {
-                        value ? self.lock() : self.unlock();
+                        if (value) {
+                            self.lock();
+                            self.focusIn();
+                        } else {
+                            self.unlock();
+                            restoreFocus(self.returnFocus, self.$el);
+                            self.returnFocus = null;
+                        }
                     });
 
                     this.onOpen = function (event) {
@@ -1725,6 +1794,7 @@
 
                     if (this.open) {
                         this.lock();
+                        this.focusIn();
                     }
                 },
 
@@ -1733,6 +1803,45 @@
                     window.removeEventListener('aui-modal-close', this.onClose);
 
                     this.unlock();
+                },
+
+                /* Moves focus into the panel: onto an [autofocus] control when
+                   there is one, otherwise the panel itself, so a screen reader
+                   reads the dialog's name and Tab starts at its first control. */
+                focusIn: function () {
+                    var self = this;
+                    var active = document.activeElement;
+
+                    if (! this.$el.contains(active)) {
+                        this.returnFocus = active;
+                    }
+
+                    /* A frame later, once x-show (and any transition) has
+                       made the panel visible: hidden elements can't take focus. */
+                    window.requestAnimationFrame(function () {
+                        var panel = self.$refs.panel || self.$el;
+                        var target = panel.querySelector('[autofocus]');
+
+                        if (! self.open || panel.contains(document.activeElement)) {
+                            return;
+                        }
+
+                        (target && focusables(panel).indexOf(target) !== -1 ? target : panel).focus({ preventScroll: true });
+                    });
+                },
+
+                /* Only the dialog on top keeps Tab in; a confirm above it
+                   handles its own. */
+                trap: function (event) {
+                    if (! this.open || (confirmHost && confirmHost.open)) {
+                        return;
+                    }
+
+                    if (overlays.length && overlays[overlays.length - 1] !== this.overlayId) {
+                        return;
+                    }
+
+                    trapTab(event, this.$refs.panel || this.$el);
                 },
 
                 lock: function () {
@@ -1828,6 +1937,7 @@
                 loading: config.loading === true,
                 action: null,
                 turn: 0,
+                returnFocus: null,
 
                 init: function () {
                     var self = this;
@@ -1915,6 +2025,10 @@
                             ? config.loading === true
                             : options.loading !== false && options.loading !== 'false'
                     );
+                    if (! this.$el.contains(document.activeElement)) {
+                        this.returnFocus = document.activeElement;
+                    }
+
                     this.open = true;
                     lockScroll();
 
@@ -1941,8 +2055,7 @@
                     this.resolve = null;
 
                     if (ok !== true || ! this.loading) {
-                        this.open = false;
-                        unlockScroll();
+                        this.close();
                         resolve(ok === true);
 
                         return;
@@ -1979,8 +2092,20 @@
                     this.turn++;
                     this.busy = false;
                     this.leaving = false;
+                    this.close();
+                },
+
+                close: function () {
                     this.open = false;
                     unlockScroll();
+                    restoreFocus(this.returnFocus, this.$el);
+                    this.returnFocus = null;
+                },
+
+                trap: function (event) {
+                    if (this.open) {
+                        trapTab(event, this.$el);
+                    }
                 },
             };
         },
@@ -2242,6 +2367,188 @@
                     }
 
                     this.toggle();
+                },
+            };
+        },
+
+        /**
+         * Frozen columns (<x-avian::table sticky-columns="2">). The cells of
+         * the first `start` and last `end` columns stick to the edges of the
+         * scroll box, each offset by the widths of the frozen columns before
+         * it. Colspans and rowspans are laid out on a grid first, so a grouped
+         * heading freezes with the columns under it.
+         *
+         * Runs again whenever the table resizes or its rows change, which also
+         * puts the offsets back after a Livewire update strips them.
+         */
+        auiTable: function (config) {
+            config = config || {};
+
+            return {
+                start: Math.max(0, parseInt(config.start, 10) || 0),
+                end: Math.max(0, parseInt(config.end, 10) || 0),
+
+                init: function () {
+                    var self = this;
+                    var queued = false;
+
+                    this.schedule = function () {
+                        if (queued) {
+                            return;
+                        }
+
+                        queued = true;
+
+                        window.requestAnimationFrame(function () {
+                            queued = false;
+                            self.freeze();
+                        });
+                    };
+
+                    this.table = this.$el.querySelector('table');
+
+                    if (! this.table) {
+                        return;
+                    }
+
+                    /* freeze() only writes what changed, so its own writes
+                       settle after one more pass instead of looping. */
+                    this.watcher = new MutationObserver(this.schedule);
+                    this.watcher.observe(this.table, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['class', 'style', 'colspan', 'rowspan', 'hidden'],
+                    });
+
+                    if (window.ResizeObserver) {
+                        this.resizer = new ResizeObserver(this.schedule);
+                        this.resizer.observe(this.table);
+                        this.resizer.observe(this.$el);
+                    }
+
+                    this.freeze();
+                },
+
+                destroy: function () {
+                    if (this.watcher) {
+                        this.watcher.disconnect();
+                    }
+
+                    if (this.resizer) {
+                        this.resizer.disconnect();
+                    }
+                },
+
+                /* Every cell with the first and last grid column it covers. */
+                layout: function () {
+                    var rows = this.table.rows;
+                    var taken = [];
+                    var cells = [];
+                    var count = 0;
+                    var reach = 0;
+
+                    for (var r = 0; r < rows.length; r++) {
+                        var column = 0;
+
+                        taken[r] = taken[r] || [];
+
+                        for (var c = 0; c < rows[r].cells.length; c++) {
+                            var cell = rows[r].cells[c];
+                            var span = Math.max(1, cell.colSpan || 1);
+                            var down = cell.rowSpan > 0 ? cell.rowSpan : rows.length - r;
+
+                            while (taken[r][column]) {
+                                column++;
+                            }
+
+                            for (var y = r; y < r + down; y++) {
+                                taken[y] = taken[y] || [];
+
+                                for (var x = column; x < column + span; x++) {
+                                    taken[y][x] = true;
+                                }
+                            }
+
+                            cells.push({ cell: cell, first: column, last: column + span - 1 });
+
+                            /* Only single cells count the columns: a catch-all
+                               colspan (an empty state, a detail row) can be
+                               far wider than the table. */
+                            if (span === 1) {
+                                count = Math.max(count, column + 1);
+                            }
+
+                            reach = Math.max(reach, column + span);
+                            column += span;
+                        }
+                    }
+
+                    return { cells: cells, count: count || reach };
+                },
+
+                freeze: function () {
+                    if (! this.table) {
+                        return;
+                    }
+
+                    var grid = this.layout();
+                    var count = grid.count;
+                    var widths = [];
+
+                    grid.cells.forEach(function (item) {
+                        if (item.first === item.last && widths[item.first] === undefined) {
+                            var width = item.cell.getBoundingClientRect().width;
+
+                            if (width > 0) {
+                                widths[item.first] = width;
+                            }
+                        }
+                    });
+
+                    var left = [];
+                    var right = [];
+                    var sum = 0;
+
+                    /* left[count] is the whole table, which the room check reads. */
+                    for (var i = 0; i <= count; i++) {
+                        left[i] = sum;
+                        sum += widths[i] || 0;
+                    }
+
+                    sum = 0;
+
+                    for (var j = count - 1; j >= 0; j--) {
+                        right[j] = sum;
+                        sum += widths[j] || 0;
+                    }
+
+                    var start = Math.min(this.start, count);
+                    var end = Math.min(this.end, count - start);
+                    var room = this.$el.clientWidth * 0.6;
+
+                    /* On a screen too narrow to show anything next to them,
+                       frozen columns let go: the end ones first. */
+                    if (end > 0 && left[start] + left[count] - left[count - end] > room) {
+                        end = 0;
+                    }
+
+                    if (start > 0 && left[start] > room) {
+                        start = 0;
+                    }
+
+                    grid.cells.forEach(function (item) {
+                        var cell = item.cell;
+                        var last = Math.min(item.last, count - 1);
+                        var atStart = start > 0 && last < start;
+                        var atEnd = ! atStart && end > 0 && item.first >= count - end;
+
+                        setClass(cell, 'aui-table-sticky-col', atStart || atEnd);
+                        setClass(cell, 'aui-table-sticky-edge-start', atStart && last === start - 1);
+                        setClass(cell, 'aui-table-sticky-edge-end', atEnd && item.first === count - end);
+                        setStyle(cell, 'left', atStart ? left[item.first] + 'px' : '');
+                        setStyle(cell, 'right', atEnd ? right[last] + 'px' : '');
+                    });
                 },
             };
         },

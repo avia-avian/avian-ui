@@ -62,6 +62,7 @@
 <div
     x-data="auiConfirm({{ Illuminate\Support\Js::from($config) }})"
     x-on:keydown.escape.window="if (open) { $event.stopImmediatePropagation(); answer(false) }"
+    x-on:keydown.tab.window="trap($event)"
     x-cloak
     x-show="open"
     class="aui-modal-overlay aui-confirm-overlay"

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Js;
 
 it('renders an expandable row with a toggle and a hidden detail row', function () {
     $html = Blade::render(<<<'BLADE'
@@ -92,4 +93,41 @@ it('registers the row behaviour and ships its styles', function () {
     expect(file_get_contents(__DIR__.'/../../public/js/avian-ui.js'))->toContain('auiTableRow: function')
         ->and(file_get_contents(__DIR__.'/../../public/css/avian-ui.css'))->toContain('.aui-table-toggle {')
         ->toContain('nth-child(even of :not(.aui-table-details))');
+});
+
+it('freezes the header and footer inside a scroll box capped at 70% of the screen', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-avian::table :headers="['Name', 'Total']" sticky-header sticky-footer>
+            <tr><td>Ada</td><td>100</td></tr>
+            <x-slot:foot><tr><th>Total</th><th>100</th></tr></x-slot:foot>
+        </x-avian::table>
+        BLADE);
+
+    expect($html)->toContain('style="max-height: 70vh"')
+        ->toContain('aui-table-sticky aui-table-sticky-header aui-table-sticky-footer')
+        ->not->toContain('auiTable(');
+});
+
+it('takes a max height in pixels or any css length', function () {
+    expect(Blade::render('<x-avian::table :headers="[\'Name\']" sticky-header :max-height="320" />'))
+        ->toContain('style="max-height: 320px"')
+        ->and(Blade::render('<x-avian::table :headers="[\'Name\']" max-height="24rem" />'))
+        ->toContain('style="max-height: 24rem"')
+        ->not->toContain('aui-table-sticky');
+});
+
+it('hands frozen columns at either end to the alpine table component', function () {
+    $html = Blade::render('<x-avian::table :headers="[\'Name\', \'Email\', \'\']" sticky-columns="1" :sticky-columns-end="1"><tr><td>Ada</td></tr></x-avian::table>');
+
+    expect($html)->toContain('x-data="auiTable(JSON.parse(')
+        ->toContain('aui-table aui-table-hover aui-table-sticky"')
+        ->toContain((string) Js::from(['start' => 1, 'end' => 1]))
+        ->not->toContain('max-height');
+});
+
+it('renders a plain table without any sticky behaviour', function () {
+    expect(Blade::render('<x-avian::table :headers="[\'Name\']"><tr><td>Ada</td></tr></x-avian::table>'))
+        ->not->toContain('aui-table-sticky')
+        ->not->toContain('auiTable(')
+        ->not->toContain('max-height');
 });

@@ -30,6 +30,7 @@
     'closeOnEscape' => true,
     'closeOnOverlay' => true,
     'closeable' => true,
+    'label' => null,
 ])
 
 @php
@@ -41,11 +42,18 @@
     ];
 
     $side = $position === 'left' ? 'left' : 'right';
+
+    // The dialog is named by its title (and described by its subtitle);
+    // `label` names one whose header slot replaces them.
+    $idBase = isset($header) ? null : 'aui-drawer-'.\Illuminate\Support\Str::slug($name ?? \Illuminate\Support\Str::random(8));
+    $titleId = $idBase !== null && filled($title) ? $idBase.'-title' : null;
+    $subtitleId = $idBase !== null && filled($subtitle) ? $idBase.'-subtitle' : null;
 @endphp
 
 <div
     x-data="auiModal({{ Illuminate\Support\Js::from($config) }})"
     x-on:keydown.escape.window="escape()"
+    x-on:keydown.tab.window="trap($event)"
     x-cloak
     x-show="open"
     {{-- One x-show drives both the backdrop fade and the panel slide (in CSS,
@@ -59,9 +67,13 @@
     x-on:click="overlay($event)"
     role="dialog"
     aria-modal="true"
+    @if ($titleId) aria-labelledby="{{ $titleId }}" @elseif (filled($label)) aria-label="{{ $label }}" @endif
+    @if ($subtitleId) aria-describedby="{{ $subtitleId }}" @endif
     @if (filled($name)) data-modal="{{ $name }}" @endif
 >
     <div
+        x-ref="panel"
+        tabindex="-1"
         {{ $attributes->class(['aui-drawer', 'aui-drawer-'.$side, 'aui-drawer-'.$size => filled($size)]) }}
     >
         @if (filled($title) || filled($subtitle) || isset($header) || $closeable)
@@ -71,11 +83,11 @@
                 @else
                     <div>
                         @if (filled($title))
-                            <h2 class="aui-modal-title">{{ $title }}</h2>
+                            <h2 class="aui-modal-title" @if ($titleId) id="{{ $titleId }}" @endif>{{ $title }}</h2>
                         @endif
 
                         @if (filled($subtitle))
-                            <p class="aui-drawer-subtitle">{{ $subtitle }}</p>
+                            <p class="aui-drawer-subtitle" @if ($subtitleId) id="{{ $subtitleId }}" @endif>{{ $subtitle }}</p>
                         @endif
                     </div>
                 @endisset

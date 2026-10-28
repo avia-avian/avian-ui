@@ -28,7 +28,7 @@ class AvianUiServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/avian-ui.php');
         }
 
-        if (config('avian-ui.docs.enabled', true)) {
+        if (config('avian-ui.docs.enabled') ?? ! $this->app->isProduction()) {
             $this->loadRoutesFrom(__DIR__.'/../routes/avian-ui-docs.php');
         }
 

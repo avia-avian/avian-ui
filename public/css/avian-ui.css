@@ -1957,6 +1957,53 @@
     padding: 9px 14px;
 }
 
+/* Frozen rows and columns. Sticky cells lose their borders when borders
+   collapse, and every cell here only draws a bottom border anyway. */
+.aui-table-sticky {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.aui-table-sticky-header thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.aui-table-sticky-footer tfoot {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+}
+
+.aui-table-sticky-footer tfoot tr:first-child > * {
+    border-top: 1px solid var(--aui-border-soft);
+}
+
+/* Frozen cells take their row's background, so rows need an opaque one for
+   the cells scrolling underneath to stay hidden. Hover and stripes still win. */
+.aui-table-sticky tbody tr,
+.aui-table-sticky tfoot tr {
+    background-color: var(--aui-surface);
+}
+
+.aui-table .aui-table-sticky-col {
+    position: sticky;
+    z-index: 1;
+}
+
+.aui-table td.aui-table-sticky-col {
+    background-color: inherit;
+}
+
+.aui-table .aui-table-sticky-edge-start {
+    box-shadow: inset -1px 0 0 var(--aui-border-soft), 6px 0 8px -6px rgba(15, 23, 42, 0.14);
+}
+
+.aui-table .aui-table-sticky-edge-end {
+    box-shadow: inset 1px 0 0 var(--aui-border-soft), -6px 0 8px -6px rgba(15, 23, 42, 0.14);
+}
+
 .aui-table-align-right,
 .aui-table th.aui-table-align-right {
     text-align: right;
@@ -2533,6 +2580,12 @@
     background: var(--aui-surface);
     border-radius: var(--aui-radius-lg);
     box-shadow: var(--aui-shadow-overlay);
+}
+
+/* The panel takes focus when it opens, only so screen readers announce it. */
+.aui-modal:focus,
+.aui-drawer:focus {
+    outline: none;
 }
 
 .aui-modal-sm {

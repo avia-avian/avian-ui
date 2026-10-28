@@ -13,19 +13,40 @@
     'sortParam' => 'sort',
     'directionParam' => 'direction',
     'livewire' => null,
+    'stickyHeader' => false,
+    'stickyFooter' => false,
+    'stickyColumns' => 0,
+    'stickyColumnsEnd' => 0,
+    'maxHeight' => null,
 ])
 
 @php
     $showEmpty = $empty !== false && ! $slot->hasActualContent();
     $emptyColumns = $columns ?? max(count($headers), 1);
+
+    $stickyColumns = max(0, (int) $stickyColumns);
+    $stickyColumnsEnd = max(0, (int) $stickyColumnsEnd);
+    $sticky = $stickyHeader || $stickyFooter || $stickyColumns > 0 || $stickyColumnsEnd > 0;
+
+    // A frozen header or footer sticks to the edge of the scroll box, so the
+    // box needs a height to scroll in: without one, cap it at 70% of the screen.
+    $maxHeight ??= $stickyHeader || $stickyFooter ? '70vh' : null;
+    $maxHeight = is_int($maxHeight) || (is_string($maxHeight) && is_numeric($maxHeight)) ? $maxHeight.'px' : $maxHeight;
 @endphp
 
-<div class="aui-table-wrap">
+<div
+    class="aui-table-wrap"
+    @if (filled($maxHeight)) style="max-height: {{ $maxHeight }}" @endif
+    @if ($stickyColumns > 0 || $stickyColumnsEnd > 0) x-data="auiTable({{ Illuminate\Support\Js::from(['start' => $stickyColumns, 'end' => $stickyColumnsEnd]) }})" @endif
+>
     <table {{ $attributes->class([
         'aui-table',
         'aui-table-hover' => $hover,
         'aui-table-striped' => $striped,
         'aui-table-'.$size => filled($size),
+        'aui-table-sticky' => $sticky,
+        'aui-table-sticky-header' => $stickyHeader,
+        'aui-table-sticky-footer' => $stickyFooter,
     ]) }}>
         @if (filled($headers) || isset($head))
             <thead>

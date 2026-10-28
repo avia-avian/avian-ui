@@ -5,6 +5,7 @@
         ['size', "'sm'|'lg'|'xl'|null", 'null', 'Modal width. Omit for the default (medium) width.'],
         ['open', 'bool', 'false', 'Render it already open — e.g. to reopen a form after a failed validation.'],
         ['closeable', 'bool', 'true', 'Show the × button in the header.'],
+        ['label', 'string|null', 'null', 'Accessible name for a modal whose header slot replaces the title. With a title, the title names it.'],
         ['close-on-escape', 'bool', 'true', 'Close when the user presses Esc.'],
         ['close-on-overlay', 'bool', 'true', 'Close when the user clicks the dark backdrop.'],
         ['header (slot)', 'slot', '—', 'Replace the title with your own header markup.'],

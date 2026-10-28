@@ -1,17 +1,17 @@
 # Graph Report - avian-ui  (2026-10-28)
 
 ## Corpus Check
-- 208 files · ~113,681 words
+- 208 files · ~113,685 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 14 file(s) not represented in the graph (top: (none) 9, .dist 2, .css 2)
 
 ## Summary
-- 2574 nodes · 4455 edges · 272 communities (167 shown, 105 thin omitted)
+- 2575 nodes · 4456 edges · 269 communities (165 shown, 104 thin omitted)
 - Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 409 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `09fa9586`
+- Built from commit: `91b9c427`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -27,7 +27,7 @@
 - with
 - node
 - addProseMirrorPlugins
-- r
+- n
 - EditorComponentTest.php
 - .session
 - SliderComponentTest.php
@@ -45,36 +45,37 @@
 - workbench
 - with
 - u
-- updateStateInner
+- 5. Modals, dropdowns and tabs
 - AvianUi
 - step
 - kc
 - OverlayHintComponentsTest.php
 - l
 - g
-- DescriptionListComponentTest.php
+- TimelineComponentTest.php
+- s
 - bug.yml
-- tc
-- Rt
+- addAttributes
+- Ii
 - TreeComponentTest.php
 - src/AvianUi.php
 - gs
-- Jt
-- Wn
+- An
+- tc
 - j
 - README.md
 - ne
 - DateRangeComponentTest.php
-- ta
+- e
 - by
 - require-dev
 - scripts
-- on
+- r
 - cn
 - R
 - flush
 - Illuminate\Support\Facades\Blade
-- me
+- nr
 - AvatarGroupComponentTest.php
 - CommandComponentTest.php
 - composer.json
@@ -82,7 +83,7 @@
 - toString
 - nt
 - updates
-- Ii
+- Pe
 - eq
 - go
 - zc
@@ -92,7 +93,7 @@
 - Fr
 - app.php
 - changelog
-- it
+- Vi
 - Ja
 - im
 - psr-4
@@ -108,20 +109,20 @@
 - docs/components/confirm.blade.php
 - dropdown.blade.php
 - hn
-- n
+- db
 - Release Notes
 - tw
 - sn
-- updateChildren
+- update
 - docs/components/popover.blade.php
 - docs/components/drawer.blade.php
 - forms/switch.blade.php
 - AvianUi
 - ensureMarks
 - appendMap
-- handleResize
+- Br
 - canReplace
-- hy
+- vt
 - uc
 - tokenize
 - accordion.blade.php
@@ -172,9 +173,9 @@
 - autoload
 - require
 - Package Generate Skill
-- remapping
+- cut
 - Package Generate Skill
-- da
+- Rh
 - jf
 - findCell
 - Avian Ui
@@ -193,16 +194,13 @@
 - tree/index.blade.php
 - node.blade.php
 - 3. Form components
-- markDirty
+- Wd
 - Package Release
-- toJSON
 - Package Testing
-- replace
 - Avian Ui
 - Avian Ui
 - md
 - from
-- zm
 - .claude/CLAUDE.md
 
 ## God Nodes (most connected - your core abstractions)
@@ -232,15 +230,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (272 total, 105 thin omitted)
+## Communities (269 total, 104 thin omitted)
 
 ### Community 0 - "avian-ui-editor.js"
 Cohesion: 0.01
-Nodes (42): Ab(), Ad(), addHackNode(), addTextblockHacks(), bi(), Br(), child(), computeWrapping() (+34 more)
+Nodes (41): Ab(), Ad(), addHackNode(), addTextblockHacks(), applyInner(), applyTransaction(), compress(), computeWrapping() (+33 more)
 
 ### Community 1 - "avian-ui-editor-emoji.js"
-Cohesion: 0.07
-Nodes (75): a(), Aa(), addProseMirrorPlugins(), addStorage(), ao(), Ba(), be(), bo() (+67 more)
+Cohesion: 0.06
+Nodes (78): apply(), a(), Aa(), addProseMirrorPlugins(), addStorage(), Ae(), ao(), Ba() (+70 more)
 
 ### Community 3 - "avian-ui-editor-code.js"
 Cohesion: 0.05
@@ -251,8 +249,8 @@ Cohesion: 0.04
 Nodes (8): bindErrors(), {closure#37}(), {closure#45}(), {closure#5}(), {closure#56}(), {closure#6}(), {closure#60}(), {closure#7}()
 
 ### Community 5 - "ye"
-Cohesion: 0.06
-Nodes (33): h(), addInputRules(), done(), ed(), er(), Gg(), gu(), ir() (+25 more)
+Cohesion: 0.12
+Nodes (15): done(), er(), Gg(), ir(), ye, move(), qg(), qk() (+7 more)
 
 ### Community 6 - "package.json"
 Cohesion: 0.06
@@ -263,8 +261,8 @@ Cohesion: 0.04
 Nodes (12): copyText(), copyWithTextarea(), pos(), focusables(), formatDateValue(), pad(), placeFloating(), tiptapFlush() (+4 more)
 
 ### Community 8 - "v"
-Cohesion: 0.05
-Nodes (52): Anti-Patterns, Examples, Package Scaffold, Primary Goal, Provider Wiring, References, Workflow, Anti-Patterns (+44 more)
+Cohesion: 0.06
+Nodes (50): Anti-Patterns, Examples, Package Scaffold, Primary Goal, Provider Wiring, References, Workflow, Anti-Patterns (+42 more)
 
 ### Community 9 - "with"
 Cohesion: 0.06
@@ -275,12 +273,12 @@ Cohesion: 0.13
 Nodes (19): after(), before(), blockRange(), connectSelection(), doc(), end(), index(), indexAfter() (+11 more)
 
 ### Community 11 - "addProseMirrorPlugins"
-Cohesion: 0.07
-Nodes (34): $0(), addProseMirrorPlugins(), al(), Bh(), Bw(), c1(), dd(), dr() (+26 more)
+Cohesion: 0.06
+Nodes (38): $0(), addProseMirrorPlugins(), al(), Bh(), Bw(), c1(), dd(), F0() (+30 more)
 
-### Community 12 - "r"
+### Community 12 - "n"
 Cohesion: 0.09
-Nodes (29): descendants(), dw(), fillBefore(), s(), r(), get(), getObj(), handleDrop() (+21 more)
+Nodes (29): bg(), dw(), endOfTextblock(), $g(), get(), handlePaste(), Jh(), Kh() (+21 more)
 
 ### Community 13 - "EditorComponentTest.php"
 Cohesion: 0.11
@@ -291,8 +289,8 @@ Cohesion: 0.07
 Nodes (21): {closure#4}(), {closure#10}(), {closure#21}(), {closure#32}(), {closure#34}(), {closure#46}(), {closure#47}(), {closure#57}() (+13 more)
 
 ### Community 16 - "e"
-Cohesion: 0.16
-Nodes (23): addCommands(), bp(), Cp(), e(), En(), forEach(), forEachCell(), forEachSet() (+15 more)
+Cohesion: 0.17
+Nodes (24): addCommands(), bp(), Cp(), gw(), jw(), kp(), Kw(), me() (+16 more)
 
 ### Community 17 - "FilterChipComponentTest.php"
 Cohesion: 0.07
@@ -307,16 +305,16 @@ Cohesion: 0.10
 Nodes (26): applyChangedRangesRecompute(), buildFullSet(), buildMergedSet(), ck(), createPlugin(), Eb(), ff(), getHTML() (+18 more)
 
 ### Community 20 - "ts"
-Cohesion: 0.15
-Nodes (27): as(), Be(), cs(), de(), ds(), g(), Er(), es() (+19 more)
+Cohesion: 0.17
+Nodes (23): Ar(), as(), cs(), de(), ds(), g(), o(), Er() (+15 more)
 
 ### Community 21 - "constructor"
 Cohesion: 0.06
-Nodes (46): An(), applyInitialSize(), configure(), constructor(), createCommandManager(), createContainer(), createDoc(), createExtensionManager() (+38 more)
+Nodes (45): applyAspectRatio(), applyConstraints(), applyInitialSize(), calculateNewDimensions(), configure(), constructor(), createCommandManager(), createContainer() (+37 more)
 
 ### Community 22 - "update"
-Cohesion: 0.06
-Nodes (44): add(), addInner(), Ai(), bm(), Bu(), Ht(), computeAttrs(), computeTarget() (+36 more)
+Cohesion: 0.12
+Nodes (24): add(), addInner(), bm(), Ht(), computeAttrs(), content(), create(), createAndFill() (+16 more)
 
 ### Community 23 - "fS"
 Cohesion: 0.15
@@ -331,8 +329,8 @@ Cohesion: 0.13
 Nodes (3): User, UserFactory, DatabaseSeeder
 
 ### Community 26 - "E"
-Cohesion: 0.30
-Nodes (13): E(), ae(), ce(), D(), ge(), H(), Me(), P() (+5 more)
+Cohesion: 0.17
+Nodes (21): C(), E(), ae(), ce(), D(), ge(), H(), Me() (+13 more)
 
 ### Community 27 - "workbench"
 Cohesion: 0.09
@@ -343,12 +341,12 @@ Cohesion: 0.10
 Nodes (20): jobs, update, name, permissions, contents, types, name, uses (+12 more)
 
 ### Community 29 - "u"
-Cohesion: 0.19
-Nodes (14): a1(), b1(), Ca(), dp(), Ae(), fp(), gf(), L0() (+6 more)
+Cohesion: 0.27
+Nodes (10): a1(), b1(), Ca(), dp(), fp(), gf(), l1(), c() (+2 more)
 
-### Community 30 - "updateStateInner"
-Cohesion: 0.11
-Nodes (20): ag(), mn(), cu(), destroyPluginViews(), domSelection(), domSelectionRange(), focus(), Fu() (+12 more)
+### Community 30 - "5. Modals, dropdowns and tabs"
+Cohesion: 0.18
+Nodes (11): ag(), mn(), focus(), gn(), lg(), Ru(), size(), toast() (+3 more)
 
 ### Community 32 - "step"
 Cohesion: 0.29
@@ -363,64 +361,68 @@ Cohesion: 0.13
 Nodes (4): {closure#10}(), {closure#11}(), {closure#12}(), renderPopover()
 
 ### Community 35 - "l"
-Cohesion: 0.17
-Nodes (18): addNodeView(), ap(), ay(), l(), e1(), ip(), lp(), lr() (+10 more)
+Cohesion: 0.18
+Nodes (17): addNodeView(), ap(), ay(), l(), e1(), ip(), lp(), lr() (+9 more)
 
 ### Community 36 - "g"
-Cohesion: 0.16
-Nodes (14): Ce(), hr(), Ir(), g(), o(), t(), kr(), pt() (+6 more)
+Cohesion: 0.10
+Nodes (26): Ce(), he(), hr(), Ir(), g(), o(), t(), Jt() (+18 more)
 
-### Community 39 - "DescriptionListComponentTest.php"
-Cohesion: 0.12
+### Community 37 - "TimelineComponentTest.php"
+Cohesion: 0.06
 Nodes (3): OrderStatus, Pending, Shipped
+
+### Community 39 - "s"
+Cohesion: 0.11
+Nodes (17): h(), chain(), createChain(), ed(), fillBefore(), s(), iy(), ji() (+9 more)
 
 ### Community 40 - "bug.yml"
 Cohesion: 0.13
 Nodes (14): description, label, placeholder, value, body, attributes, id, type (+6 more)
 
-### Community 41 - "tc"
-Cohesion: 0.18
-Nodes (17): addAttributes(), addGlobalAttributes(), ec(), h1(), jr(), m1(), $n(), Ot() (+9 more)
+### Community 41 - "addAttributes"
+Cohesion: 0.25
+Nodes (8): addAttributes(), addGlobalAttributes(), h1(), m1(), $p(), ve(), vh(), Zp()
 
-### Community 42 - "Rt"
-Cohesion: 0.12
-Nodes (19): o(), he(), I(), qt(), Rn(), Rt(), i(), n() (+11 more)
+### Community 42 - "Ii"
+Cohesion: 0.22
+Nodes (10): I(), Ii(), q(), Rn(), n(), Ta(), j(), ui() (+2 more)
 
 ### Community 43 - "TreeComponentTest.php"
 Cohesion: 0.29
 Nodes (12): {closure#1}(), {closure#10}(), {closure#11}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#6}(), {closure#7}() (+4 more)
 
 ### Community 45 - "gs"
-Cohesion: 0.10
-Nodes (24): addInputRules(), addPasteRules(), apply(), applyInner(), applyTransaction(), bS(), ch(), fh() (+16 more)
+Cohesion: 0.20
+Nodes (14): addInputRules(), addPasteRules(), bS(), ch(), fh(), gs(), hh(), ke() (+6 more)
 
-### Community 46 - "Jt"
-Cohesion: 0.40
-Nodes (5): Ar(), Jt(), o(), Or(), Yt()
+### Community 46 - "An"
+Cohesion: 0.23
+Nodes (14): An(), Or(), Do(), Gb(), hf(), jb(), mf(), ol() (+6 more)
 
-### Community 47 - "Wn"
-Cohesion: 0.24
-Nodes (14): Cc(), close(), closeFrontierNode(), dropNode(), fc(), findCloseLevel(), findFittable(), fit() (+6 more)
+### Community 47 - "tc"
+Cohesion: 0.08
+Nodes (37): Cc(), close(), closeFrontierNode(), delete(), dropNode(), ec(), fc(), findCloseLevel() (+29 more)
 
 ### Community 48 - "j"
-Cohesion: 0.20
-Nodes (10): _a(), Cr(), en(), j(), jn(), le(), M(), c() (+2 more)
+Cohesion: 0.14
+Nodes (14): _a(), Cr(), en(), j(), jn(), k(), le(), M() (+6 more)
 
 ### Community 49 - "README.md"
 Cohesion: 0.09
 Nodes (19): Contribution Guide, Guidelines, Lint, Process, Setup, Tests, Reporting a Vulnerability, Security Policy (+11 more)
 
 ### Community 50 - "ne"
-Cohesion: 0.19
-Nodes (17): eg(), fe(), fi(), Gc(), gi(), ju(), Lu(), mg() (+9 more)
+Cohesion: 0.22
+Nodes (15): eg(), fe(), Gc(), ju(), Mc(), ne(), ng(), og() (+7 more)
 
-### Community 52 - "ta"
-Cohesion: 0.25
-Nodes (11): AS(), Ep(), ES(), hp(), Nh(), nS(), Pl(), ta() (+3 more)
+### Community 52 - "e"
+Cohesion: 0.13
+Nodes (20): AS(), e(), En(), Ep(), ES(), forEach(), forEachCell(), forEachSet() (+12 more)
 
 ### Community 53 - "by"
-Cohesion: 0.14
-Nodes (14): by(), coordsAtPos(), getDesc(), jt(), ky(), localPosFromDOM(), my(), nearestDesc() (+6 more)
+Cohesion: 0.10
+Nodes (21): bi(), by(), coordsAtPos(), domSelection(), domSelectionRange(), fy(), getDesc(), jt() (+13 more)
 
 ### Community 54 - "require-dev"
 Cohesion: 0.17
@@ -430,9 +432,9 @@ Nodes (12): require-dev, larastan/larastan, laravel/agent-detector, laravel/chis
 Cohesion: 0.17
 Nodes (12): scripts, analyse, build, clear, lint, lint:check, post-autoload-dump, prepare (+4 more)
 
-### Community 57 - "on"
-Cohesion: 0.22
-Nodes (11): am(), n(), cm(), Fa(), r(), oc(), on(), OS() (+3 more)
+### Community 57 - "r"
+Cohesion: 0.11
+Nodes (22): am(), n(), dc(), descendants(), dn(), Fa(), r(), r() (+14 more)
 
 ### Community 58 - "cn"
 Cohesion: 0.25
@@ -446,9 +448,9 @@ Nodes (8): deselectNode(), domAfterPos(), domFromPos(), ey(), parseRule(), R(), 
 Cohesion: 0.16
 Nodes (14): disconnectSelection(), dy(), flush(), flushSoon(), forceFlush(), ignoreSelectionChange(), onSelectionChange(), pendingRecords() (+6 more)
 
-### Community 62 - "me"
-Cohesion: 0.24
-Nodes (9): gw(), me(), qw(), schemaRules(), Wa(), wp(), Ww(), Xa() (+1 more)
+### Community 62 - "nr"
+Cohesion: 0.25
+Nodes (8): addInputRules(), gu(), nr(), oy(), pasteHTML(), pasteText(), ry(), Wi()
 
 ### Community 63 - "AvatarGroupComponentTest.php"
 Cohesion: 0.27
@@ -467,8 +469,8 @@ Cohesion: 0.27
 Nodes (10): destroyBetween(), destroyRest(), eo(), findNodeMatch(), isLocked(), matchesNode(), recreateWrapper(), syncToMarks() (+2 more)
 
 ### Community 69 - "toString"
-Cohesion: 0.15
-Nodes (16): Ba(), check(), endIndex(), hasProtocol(), nc(), render(), startIndex(), toFormattedHref() (+8 more)
+Cohesion: 0.21
+Nodes (11): Ba(), check(), endIndex(), hasProtocol(), render(), startIndex(), toFormattedHref(), toFormattedObject() (+3 more)
 
 ### Community 70 - "nt"
 Cohesion: 0.38
@@ -478,9 +480,9 @@ Nodes (7): au(), Du(), Hu(), Ni(), nt(), vg(), wt()
 Cohesion: 0.25
 Nodes (7): interval, updates, directory, labels, package-ecosystem, schedule, version
 
-### Community 73 - "Ii"
-Cohesion: 0.21
-Nodes (13): C(), t(), V(), f(), h(), Ii(), k(), q() (+5 more)
+### Community 73 - "Pe"
+Cohesion: 0.25
+Nodes (8): dr(), Jk(), Nn(), pd(), Pe(), Us(), wo(), xo()
 
 ### Community 74 - "eq"
 Cohesion: 0.29
@@ -491,40 +493,40 @@ Cohesion: 0.25
 Nodes (8): bf(), cd(), go(), has(), ik(), lk(), ok(), sk()
 
 ### Community 76 - "zc"
-Cohesion: 0.29
-Nodes (7): cg(), Ci(), og(), Qe(), sg(), St(), zc()
+Cohesion: 0.18
+Nodes (11): cg(), Ci(), gi(), Lu(), mg(), mi(), Pu(), Qe() (+3 more)
 
 ### Community 77 - "5. Modals, dropdowns and tabs"
-Cohesion: 0.18
-Nodes (11): size(), toast(), 1. Include the assets, 2. Theming, 5. Modals, dropdowns and tabs, 6. Configuration, 7. Previewing the library, Colors (+3 more)
+Cohesion: 0.33
+Nodes (6): 1. Include the assets, 2. Theming, 6. Configuration, 7. Previewing the library, Colors, Usage
 
 ### Community 78 - "dn"
-Cohesion: 0.29
-Nodes (8): dc(), dn(), Jc(), Jm(), si(), Te(), um(), vm()
+Cohesion: 0.40
+Nodes (5): Jm(), si(), Te(), um(), vm()
 
 ### Community 79 - "hg"
 Cohesion: 0.29
 Nodes (8): dg(), fg(), hg(), Hi(), Iu(), mu(), posAtCoords(), ug()
 
 ### Community 80 - "Fr"
-Cohesion: 0.48
-Nodes (7): Fr(), Hr(), renderSpec(), serializeFragment(), serializeMark(), serializeNode(), serializeNodeInner()
+Cohesion: 0.39
+Nodes (8): Fr(), gm(), Hr(), renderSpec(), serializeFragment(), serializeMark(), serializeNode(), serializeNodeInner()
 
 ### Community 82 - "changelog"
 Cohesion: 0.29
 Nodes (6): labels, title, changelog, categories, exclude, labels
 
-### Community 83 - "it"
-Cohesion: 0.29
-Nodes (7): F0(), fk(), it(), j0(), U0(), Ud(), V0()
+### Community 83 - "Vi"
+Cohesion: 0.40
+Nodes (5): fi(), Ku(), Vi(), Wu(), zg()
 
 ### Community 84 - "Ja"
-Cohesion: 0.40
-Nodes (5): findDiffEnd(), findDiffStart(), Ga(), Ja(), qa()
+Cohesion: 0.33
+Nodes (7): findDiffEnd(), findDiffStart(), Ga(), Ja(), qa(), qw(), Xa()
 
 ### Community 85 - "im"
-Cohesion: 0.33
-Nodes (7): Ha(), im(), nm(), om(), rc(), rm(), sm()
+Cohesion: 0.25
+Nodes (9): cm(), Ha(), im(), nm(), om(), parse(), rc(), rm() (+1 more)
 
 ### Community 86 - "psr-4"
 Cohesion: 0.33
@@ -574,13 +576,13 @@ Nodes (4): duplicate({{ $record->id }}), avian-ui::docs.partials.example, avian-
 Cohesion: 0.40
 Nodes (5): atEnd(), atStart(), findFrom(), hn(), near()
 
-### Community 99 - "n"
-Cohesion: 0.11
-Nodes (23): bg(), cb(), db(), endOfTextblock(), $g(), gm(), handlePaste(), hc() (+15 more)
+### Community 99 - "db"
+Cohesion: 0.60
+Nodes (5): cb(), db(), kl(), qd(), ub()
 
 ### Community 100 - "Release Notes"
-Cohesion: 0.20
-Nodes (9): Added, Added, Changed, Fixed, Fixed, Release Notes, Unreleased, [v0.1.0](https://github.com/avia-avian/avian-ui/releases/tag/v0.1.0) - 2026-09-24 (+1 more)
+Cohesion: 0.18
+Nodes (10): Added, Added, Changed, Fixed, Fixed, Release Notes, Unreleased, [v0.1.0](https://github.com/avia-avian/avian-ui/releases/tag/v0.1.0) - 2026-09-24 (+2 more)
 
 ### Community 101 - "tw"
 Cohesion: 0.50
@@ -590,9 +592,9 @@ Nodes (5): ew(), $h(), Nw(), tw(), valid()
 Cohesion: 0.22
 Nodes (9): fromSchema(), gp(), Ka(), marksFromSchema(), nodesFromSchema(), sn(), updateState(), Vw() (+1 more)
 
-### Community 103 - "updateChildren"
-Cohesion: 0.40
-Nodes (5): localCompositionInfo(), protectLocalComposition(), su(), updateChildren(), zu()
+### Community 103 - "update"
+Cohesion: 0.11
+Nodes (23): Ai(), Bu(), computeTarget(), dragend(), dragleave(), dragover(), drop(), ig() (+15 more)
 
 ### Community 104 - "docs/components/popover.blade.php"
 Cohesion: 0.40
@@ -614,17 +616,17 @@ Nodes (4): addStoredMark(), ensureMarks(), removeStoredMark(), setStoredMarks()
 Cohesion: 0.50
 Nodes (4): appendMap(), appendMapping(), appendMappingInverted(), setMirror()
 
-### Community 110 - "handleResize"
-Cohesion: 0.50
-Nodes (4): applyAspectRatio(), applyConstraints(), calculateNewDimensions(), handleResize()
+### Community 110 - "Br"
+Cohesion: 0.67
+Nodes (3): Br(), child(), findIndex()
 
 ### Community 111 - "canReplace"
 Cohesion: 0.50
 Nodes (4): canAppend(), canReplace(), canReplaceWith(), contentMatchAt()
 
-### Community 112 - "hy"
-Cohesion: 0.50
-Nodes (4): fo(), hy(), ld(), $y()
+### Community 112 - "vt"
+Cohesion: 0.18
+Nodes (12): Be(), t(), Ja(), ki(), Ma(), os(), Tt(), vt() (+4 more)
 
 ### Community 113 - "uc"
 Cohesion: 0.50
@@ -826,17 +828,13 @@ Nodes (3): require, illuminate/support, php
 Cohesion: 0.25
 Nodes (7): Anti-Patterns, Examples, Package Generate Skill, Primary Goal, References, Workflow, Writing Rules
 
-### Community 163 - "remapping"
+### Community 163 - "cut"
 Cohesion: 0.67
-Nodes (3): compress(), popEvent(), remapping()
+Nodes (3): copy(), cut(), withText()
 
 ### Community 164 - "Package Generate Skill"
 Cohesion: 0.25
 Nodes (7): Anti-Patterns, Examples, Package Generate Skill, Primary Goal, References, Workflow, Writing Rules
-
-### Community 165 - "da"
-Cohesion: 0.67
-Nodes (3): da(), gr(), mw()
 
 ### Community 166 - "jf"
 Cohesion: 1.00
@@ -878,10 +876,6 @@ Nodes (6): Anti-Patterns, Examples, Package Release, Primary Goal, References, W
 Cohesion: 0.29
 Nodes (6): Anti-Patterns, Examples, Package Testing, Primary Goal, References, Workflow
 
-### Community 265 - "replace"
-Cohesion: 0.29
-Nodes (7): delete(), insert(), Qp(), replace(), replaceWith(), resolve(), slice()
-
 ### Community 266 - "Avian Ui"
 Cohesion: 0.33
 Nodes (5): Avian Ui, graphify, Local Skills, Package Conventions, Quick Commands
@@ -898,29 +892,25 @@ Nodes (4): D0(), gd(), I0(), md()
 Cohesion: 0.67
 Nodes (3): from(), fromArray(), Date ranges and wizards
 
-### Community 270 - "zm"
-Cohesion: 0.67
-Nodes (3): Mc(), replaceRange(), zm()
-
 ## Knowledge Gaps
 - **167 isolated node(s):** `delete({{ $id }})`, `delete({{ $id }})`, `applyFilters`, `sortBy(@js($sort))`, `orders.partials.lines` (+162 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1119 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **105 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1120 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **104 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ma()` connect `gs` to `avian-ui-editor.js`, `avian-ui-editor-emoji.js`, `update`?**
+- **Why does `ma()` connect `avian-ui-editor-emoji.js` to `avian-ui-editor.js`, `update`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Are the 54 inferred relationships involving `e()` (e.g. with `$0()` and `addKeyboardShortcuts()`) actually correct?**
   _`e()` has 54 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `delete({{ $id }})`, `delete({{ $id }})`, `applyFilters` to the rest of the system?**
   _167 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `avian-ui-editor.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.009147962982661418 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.009189730386898376 - nodes in this community are weakly interconnected._
 - **Why does `d()` connect `cn` to `avian-ui-editor.js`, `avian-ui-editor-emoji.js`, `avian-ui-editor-code.js`, `g`, `ts`, `E`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Are the 37 inferred relationships involving `n()` (e.g. with `avian-ui-editor.js` and `bg()`) actually correct?**
   _`n()` has 37 INFERRED edges - model-reasoned connections that need verification._
 - **Should `avian-ui-editor-emoji.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.06611813106082869 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06320109439124487 - nodes in this community are weakly interconnected._
